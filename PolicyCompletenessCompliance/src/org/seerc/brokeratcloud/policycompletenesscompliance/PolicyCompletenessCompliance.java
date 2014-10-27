@@ -195,7 +195,14 @@ public class PolicyCompletenessCompliance {
 		}
 		writeMessageToBrokerPolicyReport("Service Model instance was found in the Broker Policy: " + smInstance.toString());
 		
-		// check that instance of usdl-core:EntityInvolvement class exists.
+		// check that single instance of usdl-core:EntityInvolvement class exists.
+		Integer eiInstanceCount = countQuery("{?var a usdl-core:EntityInvolvement}");
+		if(eiInstanceCount > 1)
+		{	// more than one instances of entity involvement, throw exception
+			writeMessageToBrokerPolicyReport("Error - More than one instances of Entity Involvement was found in the Broker Policy.");
+			throw new BrokerPolicyException("More than one instances of Entity Involvement was found in the Broker Policy.");
+		}
+
 		RDFNode eiInstance = oneVarOneSolutionQuery("{?var a usdl-core:EntityInvolvement}");
 		if(eiInstance == null)
 		{
@@ -204,7 +211,7 @@ public class PolicyCompletenessCompliance {
 		}
 		writeMessageToBrokerPolicyReport("Entity Involvement instance was found in the Broker Policy: " + eiInstance.toString());
 
-		// check that Service Model instance hasEntityInvolvement association with Entity Involvement instance.
+		// check that single Service Model instance hasEntityInvolvement association with single Entity Involvement instance.
 		Integer heiAssociationsCount = countQuery("{<"+ smInstance.toString() + "> usdl-core:hasEntityInvolvement <" + eiInstance.toString() + ">}");
 		if(heiAssociationsCount == 0)
 		{
@@ -213,7 +220,7 @@ public class PolicyCompletenessCompliance {
 		}
 		writeMessageToBrokerPolicyReport("Service Model instance correctly has hasEntityInvolvement association with Entity Involvement instance.");
 
-		// check that Entity Involvement instance is associated with the Intermediary instance of the class BusinessRole via the object property withBusinessRole
+		// check that single Entity Involvement instance is associated with the Intermediary instance of the class BusinessRole via the object property withBusinessRole
 		Integer wbrAssociationsCount = countQuery("{<"+ eiInstance.toString() + "> usdl-core:withBusinessRole <" + USDL_BUSINESS_ROLES + "Intermediary>}");
 		if(wbrAssociationsCount == 0)
 		{
@@ -222,7 +229,14 @@ public class PolicyCompletenessCompliance {
 		}
 		writeMessageToBrokerPolicyReport("Entity Involvement instance is associated with the Intermediary instance of the class BusinessRole via the object property withBusinessRole.");
 
-		// check that Business Entity instance exists for the Cloud Platform
+		// check that single Business Entity instance exists for the Cloud Platform
+		Integer beInstanceCount = countQuery("{?var a gr:BusinessEntity}");
+		if(beInstanceCount > 1)
+		{	// more than one instances of business entity, throw exception
+			writeMessageToBrokerPolicyReport("Error - More than one instances of Business Entity was found in the Broker Policy.");
+			throw new BrokerPolicyException("More than one instances of Business Entity was found in the Broker Policy.");
+		}
+
 		RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
 		if(beInstance == null)
 		{
@@ -231,7 +245,7 @@ public class PolicyCompletenessCompliance {
 		}
 		writeMessageToBrokerPolicyReport("Business Entity instance for the Cloud Platform found in the Broker Policy: " + beInstance.toString());
 
-		// check that Entity Involvement instance is associated with the Business Entity instance via the ofBusinessEntity relation.
+		// check that single Entity Involvement instance is associated with the single Business Entity instance via the ofBusinessEntity relation.
 		Integer obeAssociationsCount = countQuery("{<"+ eiInstance.toString() + "> usdl-core:ofBusinessEntity <"+ beInstance.toString() + ">}");
 		if(obeAssociationsCount == 0)
 		{
