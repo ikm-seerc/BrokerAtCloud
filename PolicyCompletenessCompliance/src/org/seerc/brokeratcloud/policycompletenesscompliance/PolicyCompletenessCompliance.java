@@ -172,9 +172,21 @@ public class PolicyCompletenessCompliance {
 			writeMessageToBrokerPolicyReport("Error - No subClass of usdl-core:ServiceModel was found in the Broker Policy.");
 			throw new BrokerPolicyException("No subClass of usdl-core:ServiceModel was found in the Broker Policy.");
 		}
+		else if(bp.getServiceModelMap().size() > 1)
+		{	// more than one subclass, throw exception
+			writeMessageToBrokerPolicyReport("Error - More than one subclasses of usdl-core:ServiceModel was found in the Broker Policy.");
+			throw new BrokerPolicyException("More than one subclasses of usdl-core:ServiceModel was found in the Broker Policy.");
+		} 
 		writeMessageToBrokerPolicyReport("SubClass of usdl-core:ServiceModel was found in the Broker Policy: " + bp.getServiceModelMap().keySet().iterator().next());
 		
-		// check that instance of Service Model class exists. Will take the first one, could there be more than one? TODO
+		// check that single instance of Service Model class exists. Will take the first class from iterator, already checked that there is only one subclass.
+		Integer smInstanceCount = countQuery("{?var a <" + bp.getServiceModelMap().keySet().iterator().next() + ">}");
+		if(smInstanceCount > 1)
+		{	// more than one instances of service model, throw exception
+			writeMessageToBrokerPolicyReport("Error - More than one instances of Service Model was found in the Broker Policy.");
+			throw new BrokerPolicyException("More than one instances of Service Model was found in the Broker Policy.");
+		}
+
 		RDFNode smInstance = oneVarOneSolutionQuery("{?var a <" + bp.getServiceModelMap().keySet().iterator().next() + ">}");
 		if(smInstance == null)
 		{
