@@ -10,16 +10,11 @@ This is an Eclipse project that contains the code for the Service Description va
 
 The path to the Broker Policy file is declared here,
 
-https://github.com/chrispetsos-seerc/BrokerAtCloud/blob/master/PolicyCompletenessCompliance/src/org/seerc/brokeratcloud/policycompletenesscompliance/PolicyCompletenessCompliance.java#L91
+https://github.com/chrispetsos-seerc/BrokerAtCloud/blob/master/PolicyCompletenessCompliance/src/org/seerc/brokeratcloud/policycompletenesscompliance/PolicyCompletenessCompliance.java#L39
 
 and the path to the Service Description file is declared here,
 
-https://github.com/chrispetsos-seerc/BrokerAtCloud/blob/master/PolicyCompletenessCompliance/src/org/seerc/brokeratcloud/policycompletenesscompliance/PolicyCompletenessCompliance.java#L97
-
-and here,
-
-https://github.com/chrispetsos-seerc/BrokerAtCloud/blob/master/PolicyCompletenessCompliance/src/org/seerc/brokeratcloud/policycompletenesscompliance/PolicyCompletenessCompliance.java#L107
-
+https://github.com/chrispetsos-seerc/BrokerAtCloud/blob/master/PolicyCompletenessCompliance/src/org/seerc/brokeratcloud/policycompletenesscompliance/PolicyCompletenessCompliance.java#L40
 
 You are free to change those paths to point to your own Broker Policy and Service Description files in order to demonstrate the mechanism.
 
