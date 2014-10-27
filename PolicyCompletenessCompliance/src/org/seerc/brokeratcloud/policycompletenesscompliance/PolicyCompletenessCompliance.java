@@ -36,6 +36,9 @@ import com.hp.hpl.jena.util.FileManager;
 
 public class PolicyCompletenessCompliance {
 
+	private final static String brokerPolicyPath = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
+	private static final String serviceDescriptionPath = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
+	
 	protected OntModel modelMem = null;
 	private BrokerPolicy bp = new BrokerPolicy();
 	private BrokerPolicyReportObject brokerPolicyReport; // this is where the broker policy report will be stored
@@ -88,13 +91,13 @@ public class PolicyCompletenessCompliance {
 			PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 
 			// Get broker policy in Java object structure
-			pc.getBrokerPolicy("Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl");
+			pc.getBrokerPolicy(brokerPolicyPath);
 
 			// Perform completeness check
 			List<ClassInstancePair> qvPairList = null;
 			try {
 				qvPairList = pc
-						.completenessCheck("Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl");
+						.completenessCheck(serviceDescriptionPath);
 			} catch (CompletenessException e) {
 				System.err
 						.println("Error - The Service Description is incomplete");
@@ -104,7 +107,7 @@ public class PolicyCompletenessCompliance {
 			if (qvPairList != null) {
 				try {
 					pc.complianceCheck(
-							"Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl",
+							serviceDescriptionPath,
 							qvPairList);
 				} catch (ComplianceException e) {
 					System.err
