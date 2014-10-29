@@ -36,7 +36,7 @@ import com.hp.hpl.jena.util.FileManager;
 
 public class PolicyCompletenessCompliance {
 
-	private final static String brokerPolicyPath = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
+	private static final String brokerPolicyPath = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
 	private static final String serviceDescriptionPath = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
 	
 	protected OntModel modelMem = null;
