@@ -130,8 +130,6 @@ public class SDEvaluationListener implements MessageListener {
 
 			// set the broker policy of the PCC
 			gregEvaluator.getPcc().getBrokerPolicy(bpInputStream);
-			// if we are here BP is valid
-			ep.getBrokerPolicyReport().setStatus("OK");
 					
 			// perform evaluation
 			this.evaluateCompletenessCompliance(sdis);
@@ -176,13 +174,6 @@ public class SDEvaluationListener implements MessageListener {
 			e.printStackTrace();
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
-		} catch (BrokerPolicyException e) {
-			System.err
-			.println("Error - The Broker Policy is invalid");
-			ep.getBrokerPolicyReport().setStatus("Error");
-			ep.getBrokerPolicyReport().setEvaluationDescription("The Broker Policy is invalid - " + e.getMessage());
-			// broker policy had problems, publish problem
-			mbsp.publishStringToTopic(gson.toJson(ep));
 		}
 	}
 
