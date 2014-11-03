@@ -18,3 +18,20 @@ https://github.com/chrispetsos-seerc/BrokerAtCloud/blob/master/PolicyCompletenes
 
 You are free to change those paths to point to your own Broker Policy and Service Description files in order to demonstrate the mechanism.
 
+
+MessageBroker
+----------------------------
+
+This is an Eclipse project that contains the code for various components that orchestrate the procedure of interacting with the WSO2 Message Broker (MB) and the WSO2 Governance Registry (GReg). Specifically,
+
+Class https://github.com/chrispetsos-seerc/BrokerAtCloud/blob/master/MessageBroker/src/org/seerc/brokeratcloud/messagebroker/EvaluationComponentSDSubscriber.java 
+is responsible for receiving new published Service Descriptions, sending them to GReg and publishing evaluation reports back to MB.
+
+Class https://github.com/chrispetsos-seerc/BrokerAtCloud/blob/master/MessageBroker/src/org/seerc/brokeratcloud/messagebroker/RegistryRepositoryTopicSubscriber.java 
+is responsible for listening for SD reports published at the MB and assigning those reports to SDs' properties inside GReg.
+
+Some hepler classes are,
+https://github.com/chrispetsos-seerc/BrokerAtCloud/blob/master/MessageBroker/src/org/seerc/brokeratcloud/messagebroker/MessageBrokerDemo.java that runs a demo of publishing a new SD in order to see the whole procedure in action.
+https://github.com/chrispetsos-seerc/BrokerAtCloud/blob/master/MessageBroker/src/org/seerc/brokeratcloud/messagebroker/MessageBrokerStressTest.java contains some stress tests that bring WSO2 MB and GReg to their limits.
+
+Folder https://github.com/chrispetsos-seerc/BrokerAtCloud/tree/master/MessageBroker/resources/properties has some configuration files used for connecting to the WSO2 MB and GReg.
