@@ -38,7 +38,7 @@ public class GovernanceRegistry {
 		Resource resource = this.greg.getRemote_registry().newResource();
 		resource.setMediaType("text/plain");
 		resource.setContent(content);
-		this.greg.getRemote_registry().put("/" + resourcePath, resource);
+		this.greg.putWithRetryHack("/" + resourcePath, resource);
 	}
 	
 	@DELETE
