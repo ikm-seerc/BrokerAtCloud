@@ -5,6 +5,9 @@
         <dependent-module archiveName="MessageBroker.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/MessageBroker/MessageBroker">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="PolicyCompletenessCompliance.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PolicyCompletenessCompliance/PolicyCompletenessCompliance">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="java-output-path" value="/org.seerc.brokeratcloud.webservice/build/classes"/>
         <property name="context-root" value="org.seerc.brokeratcloud.webservice"/>
     </wb-module>

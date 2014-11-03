@@ -13,7 +13,7 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
-	<classpathentry kind="src" path="/PolicyCompletenessCompliance"/>
+	<classpathentry exported="true" kind="src" path="/PolicyCompletenessCompliance"/>
 	<classpathentry kind="src" path="/MessageBroker"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
