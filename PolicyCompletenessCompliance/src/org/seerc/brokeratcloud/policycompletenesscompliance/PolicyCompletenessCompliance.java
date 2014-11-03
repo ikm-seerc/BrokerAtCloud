@@ -90,6 +90,9 @@ public class PolicyCompletenessCompliance {
 		try {
 			PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 
+			// validate broker policy first
+			pc.validateBrokerPolicy(brokerPolicyPath);
+			
 			// Get broker policy in Java object structure
 			pc.getBrokerPolicy(brokerPolicyPath);
 
@@ -154,9 +157,65 @@ public class PolicyCompletenessCompliance {
 	public void getBrokerPolicy(Object bpFileData) throws SecurityException,
 			IllegalArgumentException, NoSuchMethodException,
 			ClassNotFoundException, InstantiationException,
-			IllegalAccessException, InvocationTargetException, IOException,
-			BrokerPolicyException {
+			IllegalAccessException, InvocationTargetException, IOException {
 
+		// Initial Creation
+		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+
+		// Add the BP into the Jena model
+		addDataToJenaModel(bpFileData);
+
+		// First, construct the objects corresponding to broker policy classes
+		bp.setServiceModelMap(getBrokerPolicyClassMap(USDL_CORE, "ServiceModel"));
+
+		//validateBrokerPolicy(bpFileData);
+
+		bp.setServiceLevelProfileMap(getBrokerPolicyClassMap(USDL_SLA,
+				"ServiceLevelProfile"));
+		bp.setServiceLevelMap(getBrokerPolicyClassMap(USDL_SLA, "ServiceLevel"));
+		bp.setServiceLevelExpressionMap(getBrokerPolicyClassMap(USDL_SLA,
+				"ServiceLevelExpression"));
+		bp.setExpressionVariableMap(getBrokerPolicyClassMap(USDL_SLA,
+				"Variable"));
+		bp.setQuantitativeValueIntegerMap(getBrokerPolicyClassMap(GR,
+				"QuantitativeValueInteger"));
+		bp.setQuantitativeValueFloatMap(getBrokerPolicyClassMap(GR,
+				"QuantitativeValueFloat"));
+
+		// Next, construct the objects corresponding to broker policy
+		// (QuantitativeValue) instances
+		List<String> qvSubclassList = new ArrayList<String>(); // this list
+																// contains the
+																// URIs of all
+																// QuantitativeValue
+																// (Integer and
+																// Float)
+																// subclasses
+
+		// Add QuantitativeValueInteger subclasses into the list
+		Iterator<BrokerPolicyClass> iterInt = bp
+				.getQuantitativeValueIntegerMap().values().iterator();
+		while (iterInt.hasNext()) {
+			qvSubclassList.add((iterInt.next()).getUri());
+		}
+
+		// Add QuantitativeValueFloat subclasses into the list
+		Iterator<BrokerPolicyClass> iterFl = bp.getQuantitativeValueFloatMap()
+				.values().iterator();
+		while (iterFl.hasNext()) {
+			qvSubclassList.add((iterFl.next()).getUri());
+		}
+
+		bp.setQuantitativeValueMap(getQuantitativeValueMap(qvSubclassList));
+
+		writeMessageToBrokerPolicyReport("");
+	}
+
+	public void validateBrokerPolicy(Object bpFileData) throws IOException,
+			NoSuchMethodException, ClassNotFoundException,
+			InstantiationException, IllegalAccessException,
+			InvocationTargetException, BrokerPolicyException {
+		
 		// Initial Creation
 		acquireMemoryForData(OntModelSpec.RDFS_MEM);
 
@@ -256,46 +315,6 @@ public class PolicyCompletenessCompliance {
 			throw new BrokerPolicyException("Entity Involvement instance is not associated with the Business Entity instance via the ofBusinessEntity relation.");
 		}
 		writeMessageToBrokerPolicyReport("Entity Involvement instance is associated with the Business Entity instance via the ofBusinessEntity relation.");
-
-		bp.setServiceLevelProfileMap(getBrokerPolicyClassMap(USDL_SLA,
-				"ServiceLevelProfile"));
-		bp.setServiceLevelMap(getBrokerPolicyClassMap(USDL_SLA, "ServiceLevel"));
-		bp.setServiceLevelExpressionMap(getBrokerPolicyClassMap(USDL_SLA,
-				"ServiceLevelExpression"));
-		bp.setExpressionVariableMap(getBrokerPolicyClassMap(USDL_SLA,
-				"Variable"));
-		bp.setQuantitativeValueIntegerMap(getBrokerPolicyClassMap(GR,
-				"QuantitativeValueInteger"));
-		bp.setQuantitativeValueFloatMap(getBrokerPolicyClassMap(GR,
-				"QuantitativeValueFloat"));
-
-		// Next, construct the objects corresponding to broker policy
-		// (QuantitativeValue) instances
-		List<String> qvSubclassList = new ArrayList<String>(); // this list
-																// contains the
-																// URIs of all
-																// QuantitativeValue
-																// (Integer and
-																// Float)
-																// subclasses
-
-		// Add QuantitativeValueInteger subclasses into the list
-		Iterator<BrokerPolicyClass> iterInt = bp
-				.getQuantitativeValueIntegerMap().values().iterator();
-		while (iterInt.hasNext()) {
-			qvSubclassList.add((iterInt.next()).getUri());
-		}
-
-		// Add QuantitativeValueFloat subclasses into the list
-		Iterator<BrokerPolicyClass> iterFl = bp.getQuantitativeValueFloatMap()
-				.values().iterator();
-		while (iterFl.hasNext()) {
-			qvSubclassList.add((iterFl.next()).getUri());
-		}
-
-		bp.setQuantitativeValueMap(getQuantitativeValueMap(qvSubclassList));
-
-		writeMessageToBrokerPolicyReport("");
 	}
 
 	private Map<String, BrokerPolicyClass> getBrokerPolicyClassMap(
