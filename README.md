@@ -35,3 +35,8 @@ https://github.com/chrispetsos-seerc/BrokerAtCloud/blob/master/MessageBroker/src
 https://github.com/chrispetsos-seerc/BrokerAtCloud/blob/master/MessageBroker/src/org/seerc/brokeratcloud/messagebroker/MessageBrokerStressTest.java contains some stress tests that bring WSO2 MB and GReg to their limits.
 
 Folder https://github.com/chrispetsos-seerc/BrokerAtCloud/tree/master/MessageBroker/resources/properties has some configuration files used for connecting to the WSO2 MB and GReg.
+
+org.seerc.brokeratcloud.webservice
+----------------------------
+
+This is an Eclipse project that contains a web application which publishes all REST services provided by SEERC.
