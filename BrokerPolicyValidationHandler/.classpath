@@ -19,5 +19,6 @@
 	<classpathentry exported="true" kind="var" path="ECLIPSE_WORKSPACE/.metadata/.plugins/org.wso2.developerstudio.eclipse.libraries/lib/woden_1.0.0.M8-wso2v1.jar"/>
 	<classpathentry exported="true" kind="var" path="ECLIPSE_WORKSPACE/.metadata/.plugins/org.wso2.developerstudio.eclipse.libraries/lib/wsdl4j_1.6.2.wso2v4.jar"/>
 	<classpathentry exported="true" kind="var" path="ECLIPSE_WORKSPACE/.metadata/.plugins/org.wso2.developerstudio.eclipse.libraries/lib/XmlSchema_1.4.7.wso2v2.jar"/>
+	<classpathentry kind="src" path="/PolicyCompletenessCompliance"/>
 	<classpathentry kind="output" path="target"/>
 </classpath>
