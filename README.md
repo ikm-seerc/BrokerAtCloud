@@ -40,3 +40,7 @@ org.seerc.brokeratcloud.webservice
 ----------------------------
 
 This is an Eclipse project that contains a web application which publishes all REST services provided by SEERC.
+
+BrokerPolicyValidationHandler
+----------------------------
+This is a WSO2 Developer Studio Registry Handler project. It implements the Handler functionality for validating Broker Policies when they are PUT inside GReg at their specified path.
