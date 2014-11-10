@@ -207,8 +207,6 @@ public class PolicyCompletenessCompliance {
 		}
 
 		bp.setQuantitativeValueMap(getQuantitativeValueMap(qvSubclassList));
-
-		writeMessageToBrokerPolicyReport("");
 	}
 
 	public void validateBrokerPolicy(Object bpFileData) throws IOException,
@@ -315,6 +313,88 @@ public class PolicyCompletenessCompliance {
 			throw new BrokerPolicyException("Entity Involvement instance is not associated with the Business Entity instance via the ofBusinessEntity relation.");
 		}
 		writeMessageToBrokerPolicyReport("Entity Involvement instance is associated with the Business Entity instance via the ofBusinessEntity relation.");
+		
+		// if BP data are in InputStream, reset it to reuse it
+		if(bpFileData instanceof InputStream)
+		{
+			((InputStream) bpFileData).reset();
+		}
+		
+		// read the broker policy classes
+		this.getBrokerPolicy(bpFileData);
+		
+		// At least one SLP should exist
+		if(bp.getServiceLevelProfileMap() == null || bp.getServiceLevelProfileMap().size() <1)
+		{
+			writeMessageToBrokerPolicyReport("Error - No Service Level Profile exists in Broker Policy.");
+			throw new BrokerPolicyException("No Service Level Profile exists in Broker Policy.");
+		}
+		writeMessageToBrokerPolicyReport(bp.getServiceLevelProfileMap().size() + " Service Level Profile(s) were found in Broker Policy.");
+
+		// At least one SL should exist
+		if(bp.getServiceLevelMap() == null || bp.getServiceLevelMap().size() <1)
+		{
+			writeMessageToBrokerPolicyReport("Error - No Service Level exists in Broker Policy.");
+			throw new BrokerPolicyException("No Service Level exists in Broker Policy.");
+		}
+		writeMessageToBrokerPolicyReport(bp.getServiceLevelMap().size() + " Service Level(s) were found in Broker Policy.");
+
+		// for the single SM, at least one SLP should exist
+		for(BrokerPolicyClass bpc : bp.getServiceModelMap().values())
+		{
+			if(bpc.getPropertyMap().values().size() < 1)
+			{
+				writeMessageToBrokerPolicyReport("Error - Service Model " + bpc.getUri() + " is not connected to at least one Service Level Profile.");
+				throw new BrokerPolicyException("Service Model " + bpc.getUri() + " is not connected to at least one Service Level Profile.");
+			}
+			writeMessageToBrokerPolicyReport("Service Model " + bpc.getUri() + " is connected to some Service Level Profile(s).");
+		}
+
+		// for each SLP, at least one SL should exist
+		for(BrokerPolicyClass bpc : bp.getServiceLevelProfileMap().values())
+		{
+			if(bpc.getPropertyMap().values().size() < 1)
+			{
+				writeMessageToBrokerPolicyReport("Error - Service Level Profile " + bpc.getUri() + " is not connected to at least one Service Level.");
+				throw new BrokerPolicyException("Service Level Profile " + bpc.getUri() + " is not connected to at least one Service Level.");
+			}
+			writeMessageToBrokerPolicyReport("Service Level Profile " + bpc.getUri() + " is connected to some Service Level(s).");
+		}
+
+		// for each SL, exactly one SLE should exist
+		for(BrokerPolicyClass bpc : bp.getServiceLevelMap().values())
+		{
+			if(bpc.getPropertyMap().values().size() != 1)
+			{
+				writeMessageToBrokerPolicyReport("Error - Service Level " + bpc.getUri() + " is not connected to exactly one Service Level Expression.");
+				throw new BrokerPolicyException("Service Level " + bpc.getUri() + " is not connected to exactly one Service Level Expression.");
+			}
+			writeMessageToBrokerPolicyReport("Service Level " + bpc.getUri() + " is connected to exactly one Service Level Expression: " + bpc.getPropertyMap().values().iterator().next().getRangeUri());
+		}
+		
+		// for each SLE, exactly one Variable should exist
+		for(BrokerPolicyClass bpc : bp.getServiceLevelExpressionMap().values())
+		{
+			if(bpc.getPropertyMap().values().size() < 1)
+			{
+				writeMessageToBrokerPolicyReport("Error - Service Level Expression " + bpc.getUri() + " is not connected to at least one Variable.");
+				throw new BrokerPolicyException("Service Level Expression " + bpc.getUri() + " is not connected to at least one Variable.");
+			}
+			writeMessageToBrokerPolicyReport("Service Level Expression " + bpc.getUri() + " is connected to at least one Variable");
+		}
+		
+		// for each Variable, exactly one QV should exist
+		for(BrokerPolicyClass bpc : bp.getExpressionVariableMap().values())
+		{
+			if(bpc.getPropertyMap().values().size() != 1)
+			{
+				writeMessageToBrokerPolicyReport("Error - Variable " + bpc.getUri() + " is not connected to exactly one QV.");
+				throw new BrokerPolicyException("Variable " + bpc.getUri() + " is not connected to exactly one QV.");
+			}
+			writeMessageToBrokerPolicyReport("Variable " + bpc.getUri() + " is connected to exactly one QV: " + bpc.getPropertyMap().values().iterator().next().getRangeUri());
+		}
+		
+		writeMessageToBrokerPolicyReport("");
 	}
 
 	private Map<String, BrokerPolicyClass> getBrokerPolicyClassMap(

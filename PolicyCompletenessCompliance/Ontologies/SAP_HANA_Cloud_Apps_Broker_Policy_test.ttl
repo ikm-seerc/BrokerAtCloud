@@ -58,23 +58,23 @@ brokerpolicy:ServiceLevelProfileUserBasedApps a rdfs:Class, owl:Class;
    rdfs:comment """<p> This profile applies to apps that scale based on the number of app users.</p> """;
    rdfs:subClassOf usdl-sla:ServiceLevelProfile .
 
-brokerpolicy:ServiceLevelProfileTransactionBasedApps a rdfs:Class, owl:Class;
-   rdfs:label "Service Level Profile for Transaction-based Apps";
-   rdfs:comment """<p> This profile applies to apps that scale based on the number of transactions.</p> """;
-   rdfs:subClassOf usdl-sla:ServiceLevelProfile .
+#brokerpolicy:ServiceLevelProfileTransactionBasedApps a rdfs:Class, owl:Class;
+#   rdfs:label "Service Level Profile for Transaction-based Apps";
+#   rdfs:comment """<p> This profile applies to apps that scale based on the number of transactions.</p> """;
+#   rdfs:subClassOf usdl-sla:ServiceLevelProfile .
 
-brokerpolicy:ServiceLevelProfileMessageBasedApps a rdfs:Class, owl:Class;
-   rdfs:label "Service Level Profile for Message-based Apps";
-   rdfs:comment """<p> This profile applies to apps that scale based on the number of messages.</p> """;
-   rdfs:subClassOf usdl-sla:ServiceLevelProfile .
+#brokerpolicy:ServiceLevelProfileMessageBasedApps a rdfs:Class, owl:Class;
+#   rdfs:label "Service Level Profile for Message-based Apps";
+#   rdfs:comment """<p> This profile applies to apps that scale based on the number of messages.</p> """;
+#   rdfs:subClassOf usdl-sla:ServiceLevelProfile .
 
 
 ### Service Level subclassification
 
-brokerpolicy:ServiceLevelForAppConfiguration a rdfs:Class, owl:Class;
-   rdfs:label "Service Level for Configuration of User-based Apps";
-   rdfs:comment """<p> This service level applies to configuration of apps that scale based on the number of app users.</p> """;
-   rdfs:subClassOf usdl-sla:ServiceLevel .
+#brokerpolicy:ServiceLevelForAppConfiguration a rdfs:Class, owl:Class;
+#   rdfs:label "Service Level for Configuration of User-based Apps";
+#   rdfs:comment """<p> This service level applies to configuration of apps that scale based on the number of app users.</p> """;
+#   rdfs:subClassOf usdl-sla:ServiceLevel .
 
 brokerpolicy:ServiceLevelForAppSizing a rdfs:Class, owl:Class;
    rdfs:label "Service Level for Sizing of User-based Apps";
@@ -88,10 +88,10 @@ brokerpolicy:SLExpressionForAppSizing a rdfs:Class, owl:Class;
    rdfs:comment """<p> This service level expression applies to sizing of apps that scale based on the number of app users.</p> """;
    rdfs:subClassOf usdl-sla:ServiceLevelExpression .
 
-brokerpolicy:SLExpressionForAppConfiguration a rdfs:Class, owl:Class;
-   rdfs:label "Service Level Expression for Configuration of User-based Apps";
-   rdfs:comment """<p> This service level expression applies to configuration of apps that scale based on the number of app users.</p> """;
-   rdfs:subClassOf usdl-sla:ServiceLevelExpression .
+#brokerpolicy:SLExpressionForAppConfiguration a rdfs:Class, owl:Class;
+#   rdfs:label "Service Level Expression for Configuration of User-based Apps";
+#   rdfs:comment """<p> This service level expression applies to configuration of apps that scale based on the number of app users.</p> """;
+#   rdfs:subClassOf usdl-sla:ServiceLevelExpression .
 
 ### Variable subclassification
 
@@ -100,15 +100,15 @@ brokerpolicy:VarNumberOfUsers a rdfs:Class, owl:Class;
    rdfs:comment """<p> This variable applies to sizing of apps that scale based on the number of app users.</p> """;
    rdfs:subClassOf usdl-sla:Variable .
    
-brokerpolicy:VarNumberOfConnections a rdfs:Class, owl:Class;
-   rdfs:label "Variable for declaring number of connections to SAP connectivity service in User-based Apps";
-   rdfs:comment """<p> This variable applies to sizing of apps that scale based on the number of app users.</p> """;
-   rdfs:subClassOf usdl-sla:Variable .
+#brokerpolicy:VarNumberOfConnections a rdfs:Class, owl:Class;
+#   rdfs:label "Variable for declaring number of connections to SAP connectivity service in User-based Apps";
+#   rdfs:comment """<p> This variable applies to sizing of apps that scale based on the number of app users.</p> """;
+#   rdfs:subClassOf usdl-sla:Variable .
    
-brokerpolicy:VarNumberOfComputeUnits a rdfs:Class, owl:Class;
-   rdfs:label "Variable for declaring number of compute units in User-based Apps";
-   rdfs:comment """<p> This variable applies to sizing of apps that scale based on the number of app users.</p> """;
-   rdfs:subClassOf usdl-sla:Variable .
+#brokerpolicy:VarNumberOfComputeUnits a rdfs:Class, owl:Class;
+#   rdfs:label "Variable for declaring number of compute units in User-based Apps";
+#   rdfs:comment """<p> This variable applies to sizing of apps that scale based on the number of app users.</p> """;
+#   rdfs:subClassOf usdl-sla:Variable .
    
 brokerpolicy:VarDocumentStorage a rdfs:Class, owl:Class;
    rdfs:label "Variable for declaring the document storage measured in GBs in User-based Apps";
@@ -120,10 +120,10 @@ brokerpolicy:VarAvailability a rdfs:Class, owl:Class;
    rdfs:comment """<p> This variable applies to sizing of apps that scale based on the number of app users.</p> """;
    rdfs:subClassOf usdl-sla:Variable .
 
-brokerpolicy:VarEgressBandwidth a rdfs:Class, owl:Class;
-   rdfs:label "Variable for declaring egress bandwidth in User-based Apps";
-   rdfs:comment """<p> This variable applies to sizing of apps that scale based on the number of app users.</p> """;
-   rdfs:subClassOf usdl-sla:Variable .
+#brokerpolicy:VarEgressBandwidth a rdfs:Class, owl:Class;
+#   rdfs:label "Variable for declaring egress bandwidth in User-based Apps";
+#   rdfs:comment """<p> This variable applies to sizing of apps that scale based on the number of app users.</p> """;
+#   rdfs:subClassOf usdl-sla:Variable .
    
 ### gr:QuantitativeValue subclassification
 
