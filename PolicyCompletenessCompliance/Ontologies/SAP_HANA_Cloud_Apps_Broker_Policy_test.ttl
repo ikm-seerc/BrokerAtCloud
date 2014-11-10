@@ -44,7 +44,7 @@ brokerpolicy:BrokerPolicySAPHANAApp a brokerpolicy:ServiceModelSAPHANAApp;
 ### Entity Involvement instantiation
 
 brokerpolicy:EntityInvolvementSAPHANAApp a usdl-core:EntityInvolvement;
-	usdl-core:withBusinessRole usdl-business-roles:Intermediary;
+	usdl-core:withBusinessRole usdl-business-roles:intermediary;
 	usdl-core:ofBusinessEntity brokerpolicy:SAPHANAApp .
 
 ### Business Entity instantiation
