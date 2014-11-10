@@ -153,14 +153,14 @@ cas:AllowedAvailabilityValueRange a cas:AllowedAvailabilityValue;
 cas:AvailabilityHigh a cas:AllowedAvailabilityValue;
 	rdfs:label "High Availability for apps is between 99,98 and 100%";
 	gr:hasUnitOfMeasurement "P1"^^xsd:string; #Percent
-	gr:hasMinValueFloat "99,98"^^xsd:float;
+	gr:hasMinValueFloat "99.98"^^xsd:float;
 	gr:hasMaxValueFloat "100"^^xsd:float;
 	gr:valueReference cas:AllowedAvailabilityValueRange. 
 
 cas:AvailabilityMedium a cas:AllowedAvailabilityValue;
 	rdfs:label "Medium Availability for apps is between 99,5 and 100%";
 	gr:hasUnitOfMeasurement "P1"^^xsd:string; #Percent
-	gr:hasMinValueFloat "99,5"^^xsd:float;
+	gr:hasMinValueFloat "99.5"^^xsd:float;
 	gr:hasMaxValueFloat "100"^^xsd:float;
 	gr:valueReference cas:AllowedAvailabilityValueRange.	
 
@@ -271,19 +271,19 @@ cas:hasServiceLevelProfileCAS rdfs:subPropertyOf usdl-sla:hasServiceLevelProfile
 ## for service levels  
 cas:hasServiceLevelAvailability rdfs:subPropertyOf usdl-sla:hasServiceLevel;
 	rdfs:domain cas:CASServiceLevelProfile;
-	rdfs:range cas:CASServiceLevelAvailability.
+	rdfs:range cas:ServiceLevelAvailability.
 
 cas:hasServiceLevelSecurity rdfs:subPropertyOf usdl-sla:hasServiceLevel;
 	rdfs:domain cas:CASServiceLevelProfile;
-	rdfs:range cas:CASServiceLevelSecurity.
+	rdfs:range cas:ServiceLevelSecurity.
 
 ## for service level expressions 
 cas:hasSLE-Availability rdfs:subPropertyOf usdl-sla:hasServiceLevelExpression;
-	rdfs:domain cas:CASServiceLevelAvailability;
+	rdfs:domain cas:ServiceLevelAvailability;
 	rdfs:range cas:SLE-Availability.
 
 cas:hasSLE-Security rdfs:subPropertyOf usdl-sla:hasServiceLevelExpression;
-	rdfs:domain cas:CASServiceLevelSecurity;
+	rdfs:domain cas:ServiceLevelSecurity;
 	rdfs:range cas:SLE-Security.
 
 ## for variables 
