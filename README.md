@@ -84,5 +84,3 @@ It should be also noted that whenever the PolicyCompletenessCompliance changes, 
 2) Copy the built jar in the CARBON_HOME/repository/components/lib folder.
 
 3) Restart GReg
-
-4) Re-deploy "BrokerAtCloud" CApp.
