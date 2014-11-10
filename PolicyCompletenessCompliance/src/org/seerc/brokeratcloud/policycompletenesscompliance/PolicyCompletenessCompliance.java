@@ -291,11 +291,12 @@ public class PolicyCompletenessCompliance {
 
 		// check that single Business Entity instance exists for the Cloud Platform
 		Integer beInstanceCount = countQuery("{?var a gr:BusinessEntity}");
-		if(beInstanceCount > 1)
+		if(beInstanceCount == 0 || beInstanceCount > 1)
 		{	// more than one instances of business entity, throw exception
-			writeMessageToBrokerPolicyReport("Error - More than one instances of Business Entity was found in the Broker Policy.");
-			throw new BrokerPolicyException("More than one instances of Business Entity was found in the Broker Policy.");
+			writeMessageToBrokerPolicyReport("Error - Not exactly one instance of Business Entity was found in the Broker Policy.");
+			throw new BrokerPolicyException("Not exactly one instance of Business Entity was found in the Broker Policy.");
 		}
+		writeMessageToBrokerPolicyReport("Exactly one instance of Business Entity was found in the Broker Policy.");
 
 		RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
 		if(beInstance == null)
