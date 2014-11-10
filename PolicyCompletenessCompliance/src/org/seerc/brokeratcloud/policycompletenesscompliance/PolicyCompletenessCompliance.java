@@ -36,6 +36,7 @@ import com.hp.hpl.jena.util.FileManager;
 
 public class PolicyCompletenessCompliance {
 
+	//private static final String brokerPolicyPath = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
 	private static final String brokerPolicyPath = "Ontologies/CAS-broker-policies-minimal-final_AF.ttl";
 	private static final String serviceDescriptionPath = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
 	
@@ -1596,7 +1597,8 @@ public class PolicyCompletenessCompliance {
 		queryStr.append("PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>");
 		queryStr.append("PREFIX usdl-core: <http://www.linked-usdl.org/ns/usdl-core#>");
 		queryStr.append("PREFIX usdl-sla: <http://www.linked-usdl.org/ns/usdl-sla#>");
-		queryStr.append("PREFIX brokerpolicy: <http://www.broker-cloud.eu/d043567/linked-usdl-ontologies/SAP-HANA-Cloud-Apps-Broker/2014/01/brokerpolicy#>");
+		//queryStr.append("PREFIX brokerpolicy: <http://www.broker-cloud.eu/d043567/linked-usdl-ontologies/SAP-HANA-Cloud-Apps-Broker/2014/01/brokerpolicy#>");
+		//queryStr.append("PREFIX cas: <http://www.broker-cloud.eu/service-descriptions/CAS/broker#>");
 		queryStr.append("PREFIX gr: <http://purl.org/goodrelations/v1#>");
 
 		queryStr.append(coreQuery);
