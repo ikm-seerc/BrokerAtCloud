@@ -36,7 +36,7 @@ import com.hp.hpl.jena.util.FileManager;
 
 public class PolicyCompletenessCompliance {
 
-	private static final String brokerPolicyPath = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
+	private static final String brokerPolicyPath = "Ontologies/CAS-broker-policies-minimal-final_AF.ttl";
 	private static final String serviceDescriptionPath = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
 	
 	protected OntModel modelMem = null;
@@ -280,14 +280,14 @@ public class PolicyCompletenessCompliance {
 		}
 		writeMessageToBrokerPolicyReport("Service Model instance correctly has hasEntityInvolvement association with Entity Involvement instance.");
 
-		// check that single Entity Involvement instance is associated with the Intermediary instance of the class BusinessRole via the object property withBusinessRole
-		Integer wbrAssociationsCount = countQuery("{<"+ eiInstance.toString() + "> usdl-core:withBusinessRole <" + USDL_BUSINESS_ROLES + "Intermediary>}");
+		// check that single Entity Involvement instance is associated with the intermediary instance of the class BusinessRole via the object property withBusinessRole
+		Integer wbrAssociationsCount = countQuery("{<"+ eiInstance.toString() + "> usdl-core:withBusinessRole <" + USDL_BUSINESS_ROLES + "intermediary>}");
 		if(wbrAssociationsCount == 0)
 		{
-			writeMessageToBrokerPolicyReport("Error - Entity Involvement instance is not associated with the Intermediary instance of the class BusinessRole via the object property withBusinessRole.");
-			throw new BrokerPolicyException("Entity Involvement instance is not associated with the Intermediary instance of the class BusinessRole via the object property withBusinessRole.");
+			writeMessageToBrokerPolicyReport("Error - Entity Involvement instance is not associated with the intermediary instance of the class BusinessRole via the object property withBusinessRole.");
+			throw new BrokerPolicyException("Entity Involvement instance is not associated with the intermediary instance of the class BusinessRole via the object property withBusinessRole.");
 		}
-		writeMessageToBrokerPolicyReport("Entity Involvement instance is associated with the Intermediary instance of the class BusinessRole via the object property withBusinessRole.");
+		writeMessageToBrokerPolicyReport("Entity Involvement instance is associated with the intermediary instance of the class BusinessRole via the object property withBusinessRole.");
 
 		// check that single Business Entity instance exists for the Cloud Platform
 		Integer beInstanceCount = countQuery("{?var a gr:BusinessEntity}");
