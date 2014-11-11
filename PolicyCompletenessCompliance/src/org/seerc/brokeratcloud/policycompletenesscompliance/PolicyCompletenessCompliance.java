@@ -372,6 +372,12 @@ public class PolicyCompletenessCompliance {
 				writeMessageToBrokerPolicyReport("Error - Service Level " + bpc.getUri() + " is not connected to exactly one Service Level Expression.");
 				throw new BrokerPolicyException("Service Level " + bpc.getUri() + " is not connected to exactly one Service Level Expression.");
 			}
+			
+			if(!bp.getServiceLevelExpressionMap().containsKey(bpc.getPropertyMap().values().iterator().next().getRangeUri()))
+			{
+				writeMessageToBrokerPolicyReport("Error - Service Level Expression " + bpc.getPropertyMap().values().iterator().next().getRangeUri() + " does not exist.");
+				throw new BrokerPolicyException("Service Level Expression " + bpc.getPropertyMap().values().iterator().next().getRangeUri() + " does not exist.");				
+			}
 			writeMessageToBrokerPolicyReport("Service Level " + bpc.getUri() + " is connected to exactly one Service Level Expression: " + bpc.getPropertyMap().values().iterator().next().getRangeUri());
 		}
 		
