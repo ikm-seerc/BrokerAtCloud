@@ -389,6 +389,11 @@ public class PolicyCompletenessCompliance {
 				writeMessageToBrokerPolicyReport("Error - Service Level Expression " + bpc.getUri() + " is not connected to at least one Variable.");
 				throw new BrokerPolicyException("Service Level Expression " + bpc.getUri() + " is not connected to at least one Variable.");
 			}
+			if(!bp.getExpressionVariableMap().containsKey(bpc.getPropertyMap().values().iterator().next().getRangeUri()))
+			{
+				writeMessageToBrokerPolicyReport("Error - Variable " + bpc.getPropertyMap().values().iterator().next().getRangeUri() + " does not exist.");
+				throw new BrokerPolicyException("Variable " + bpc.getPropertyMap().values().iterator().next().getRangeUri() + " does not exist.");				
+			}
 			writeMessageToBrokerPolicyReport("Service Level Expression " + bpc.getUri() + " is connected to at least one Variable");
 		}
 		
