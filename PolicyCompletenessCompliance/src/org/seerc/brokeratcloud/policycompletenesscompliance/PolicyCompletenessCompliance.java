@@ -431,6 +431,72 @@ public class PolicyCompletenessCompliance {
 		}
 		
 		/*
+		 * All gr:QuantitativeValueFloat sub-classes should declare:
+		 * 1) gr:hasMinValueFloat
+		 * 2) gr:hasMaxValueFloat
+		 */
+		for(String qvf:bp.getQuantitativeValueFloatMap().keySet())
+		{
+			// gr:hasMinValueFloat
+			RDFNode minFloatValueNode = oneVarOneSolutionQuery("{<"
+					+ qvf + "> gr:hasMinValueFloat ?var}");
+			if(minFloatValueNode == null)
+			{
+				writeMessageToBrokerPolicyReport("Error - For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasMinValueFloat is not declared");
+				throw new BrokerPolicyException("For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasMinValueFloat is not declared");				
+			}
+			
+			if (minFloatValueNode.isResource()) {
+				writeMessageToBrokerPolicyReport("Error - For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasMinValueFloat must be associated with a literal");
+				throw new BrokerPolicyException("For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasMinValueFloat must be associated with a literal");
+			} else if (minFloatValueNode.isLiteral()) {
+				if (!minFloatValueNode.asLiteral().getDatatype()
+						.equals(XSDDatatype.XSDfloat)) {
+					writeMessageToComplianceReport("Error - For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasValueFloat must be associated with xsd:float type");
+					throw new BrokerPolicyException("For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasValueFloat must be associated with xsd:float type");
+				} else {
+					float floatValue;
+					try {
+						floatValue = minFloatValueNode.asLiteral()
+								.getFloat();
+					} catch (DatatypeFormatException e) {
+						writeMessageToComplianceReport("For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasValueFloat must be associated with xsd:float value");
+						throw new BrokerPolicyException("For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasValueFloat must be associated with xsd:float value");
+					}
+				}
+			}
+			
+			// gr:hasMaxValueFloat
+			RDFNode maxFloatValueNode = oneVarOneSolutionQuery("{<"
+					+ qvf + "> gr:hasMaxValueFloat ?var}");
+			if(maxFloatValueNode == null)
+			{
+				writeMessageToBrokerPolicyReport("Error - For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasMaxValueFloat is not declared");
+				throw new BrokerPolicyException("For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasMaxValueFloat is not declared");				
+			}
+
+			if (maxFloatValueNode.isResource()) {
+				writeMessageToBrokerPolicyReport("Error - For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasMaxValueFloat must be associated with a literal");
+				throw new BrokerPolicyException("For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasMaxValueFloat must be associated with a literal");
+			} else if (maxFloatValueNode.isLiteral()) {
+				if (!maxFloatValueNode.asLiteral().getDatatype()
+						.equals(XSDDatatype.XSDfloat)) {
+					writeMessageToComplianceReport("Error - For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasMaxValueFloat must be associated with xsd:float type");
+					throw new BrokerPolicyException("For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasMaxValueFloat must be associated with xsd:float type");
+				} else {
+					float floatValue;
+					try {
+						floatValue = maxFloatValueNode.asLiteral()
+								.getFloat();
+					} catch (DatatypeFormatException e) {
+						writeMessageToComplianceReport("For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasMaxValueFloat must be associated with xsd:float value");
+						throw new BrokerPolicyException("For gr:QuantitativeValueFloat URI: " + qvf + " property gr:hasMaxValueFloat must be associated with xsd:float value");
+					}
+				}
+			}
+		}
+		
+		/*
 		 * Check that Variables used in Broker Policy are declared in the "framework" part.
 		 * This goes somewhat like this:
 		 * for each used Variable (V):
