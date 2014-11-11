@@ -367,7 +367,7 @@ public class PolicyCompletenessCompliance {
 		// for each SL, exactly one SLE should exist
 		for(BrokerPolicyClass bpc : bp.getServiceLevelMap().values())
 		{
-			if(bpc.getPropertyMap().values().size() != 1)
+			if(bpc.getPropertyMap().values().size() != 1 || allSubpropertyRangesAreNull(bpc.getPropertyMap().values()))
 			{
 				writeMessageToBrokerPolicyReport("Error - Service Level " + bpc.getUri() + " is not connected to exactly one Service Level Expression.");
 				throw new BrokerPolicyException("Service Level " + bpc.getUri() + " is not connected to exactly one Service Level Expression.");
