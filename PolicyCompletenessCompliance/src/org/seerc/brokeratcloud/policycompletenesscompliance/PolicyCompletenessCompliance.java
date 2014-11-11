@@ -356,7 +356,7 @@ public class PolicyCompletenessCompliance {
 		// for each SLP, at least one SL should exist
 		for(BrokerPolicyClass bpc : bp.getServiceLevelProfileMap().values())
 		{
-			if(bpc.getPropertyMap().values().size() < 1)
+			if(bpc.getPropertyMap().values().size() < 1 || allSubpropertyRangesAreNull(bpc.getPropertyMap().values()))
 			{
 				writeMessageToBrokerPolicyReport("Error - Service Level Profile " + bpc.getUri() + " is not connected to at least one Service Level.");
 				throw new BrokerPolicyException("Service Level Profile " + bpc.getUri() + " is not connected to at least one Service Level.");
@@ -436,6 +436,18 @@ public class PolicyCompletenessCompliance {
 		}
 		
 		writeMessageToBrokerPolicyReport("");
+	}
+
+	private boolean allSubpropertyRangesAreNull(Collection<Subproperty> values) 
+	{
+		for(Subproperty value: values)
+		{
+			if(value.getRangeUri() != null)
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private Map<String, BrokerPolicyClass> getBrokerPolicyClassMap(
