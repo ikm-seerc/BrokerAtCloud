@@ -17,7 +17,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix gr: <http://purl.org/goodrelations/v1> .
+@prefix gr: <http://purl.org/goodrelations/v1#> .
 @prefix s: <http://schema.org/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#>.
 
@@ -734,19 +734,19 @@ cas:hasServiceLevelProfileCAS rdfs:subPropertyOf usdl-sla:hasServiceLevelProfile
 ## for service levels  
 cas:hasServiceLevelAvailability rdfs:subPropertyOf usdl-sla:hasServiceLevel;
 	rdfs:domain cas:CASServiceLevelProfile;
-	rdfs:range cas:CASServiceLevelAvailability.
+	rdfs:range cas:ServiceLevelAvailability.
 
 cas:hasServiceLevelSecurity rdfs:subPropertyOf usdl-sla:hasServiceLevel;
 	rdfs:domain cas:CASServiceLevelProfile;
-	rdfs:range cas:CASServiceLevelSecurity.
+	rdfs:range cas:ServiceLevelSecurity.
 
 ## for service level expressions 
 cas:hasSLE-Availability rdfs:subPropertyOf usdl-sla:hasServiceLevelExpression;
-	rdfs:domain cas:CASServiceLevelAvailability;
+	rdfs:domain cas:ServiceLevelAvailability;
 	rdfs:range cas:SLE-Availability.
 
 cas:hasSLE-Security rdfs:subPropertyOf usdl-sla:hasServiceLevelExpression;
-	rdfs:domain cas:CASServiceLevelSecurity;
+	rdfs:domain cas:ServiceLevelSecurity;
 	rdfs:range cas:SLE-Security.
 
 ## for variables 
