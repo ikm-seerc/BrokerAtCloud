@@ -397,6 +397,40 @@ public class PolicyCompletenessCompliance {
 			writeMessageToBrokerPolicyReport("Variable " + bpc.getUri() + " is connected to exactly one QV: " + bpc.getPropertyMap().values().iterator().next().getRangeUri());
 		}
 		
+		/*
+		 * Check that Variables used in Broker Policy are declared in the "framework" part.
+		 * This goes somewhat like this:
+		 * for each used Variable (V):
+		 * 1) Find the range (R) of the sub-properties of usdl-sla-cb:hasDefaultQuantitativeValue or usdl-sla-cb:hasDefaultQualitativeValue where (V) is the domain.
+		 * 2) Find the domain (D) of the sub-properties of gr:quantitativeProductOrServiceProperty or gr:qualitativeProductOrServiceProperty where (R) is the range.
+		 * 3) (D) should be the Service Model subclass.
+		 * All these data are already stored in the HashMaps of bp.
+		 */
+		for(BrokerPolicyClass variableV : bp.getExpressionVariableMap().values())
+		{	// this iterates the Variables ClassMap
+			Boolean variableExistsInFramework = false;
+			for(Subproperty spOfVariableV: variableV.getPropertyMap().values())
+			{	// This iterates the subproperties that hold domain/range where variableV is domain
+				String rangeR = spOfVariableV.getRangeUri();
+				// service model is only one
+				for(Subproperty spOfSm: bp.getServiceModelMap().values().iterator().next().getPropertyMap().values())
+				{	// this iterates the subproperties that hold domain/range where the Service Model is domain
+					if(rangeR.equals(spOfSm.getRangeUri()))
+					{	// success!
+						variableExistsInFramework = true;
+						break;
+					}
+				}
+			}
+			
+			if(!variableExistsInFramework)
+			{
+				writeMessageToBrokerPolicyReport("Error - Variable " + variableV.getUri() + " does not exist in framework declaration.");
+				throw new BrokerPolicyException("Variable " + variableV.getUri() + " does not exist in framework declaration.");
+			}
+			writeMessageToBrokerPolicyReport("Variable " + variableV.getUri() + " exists in framework declaration and points to: " + variableV.getPropertyMap().values().iterator().next().getRangeUri() + " shared value class.");
+		}
+		
 		writeMessageToBrokerPolicyReport("");
 	}
 
