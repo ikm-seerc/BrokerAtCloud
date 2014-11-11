@@ -402,7 +402,7 @@ public class PolicyCompletenessCompliance {
 		 * This goes somewhat like this:
 		 * for each used Variable (V):
 		 * 1) Find the range (R) of the sub-properties of usdl-sla-cb:hasDefaultQuantitativeValue or usdl-sla-cb:hasDefaultQualitativeValue where (V) is the domain.
-		 * 2) Find the domain (D) of the sub-properties of gr:quantitativeProductOrServiceProperty or gr:qualitativeProductOrServiceProperty where (R) is the range.
+		 * 2) Find the domain (D) of the sub-property (must be exactly one) of gr:quantitativeProductOrServiceProperty or gr:qualitativeProductOrServiceProperty where (R) is the range.
 		 * 3) (D) should be the Service Model subclass.
 		 * All these data are already stored in the HashMaps of bp.
 		 */
@@ -417,8 +417,12 @@ public class PolicyCompletenessCompliance {
 				{	// this iterates the subproperties that hold domain/range where the Service Model is domain
 					if(rangeR.equals(spOfSm.getRangeUri()))
 					{	// success!
+						if(variableExistsInFramework)
+						{	// we have found the value class second time, throw exception
+							writeMessageToBrokerPolicyReport("Error - Value class " + variableV.getPropertyMap().values().iterator().next().getRangeUri() + " is declared second time in properties of framework declaration.");
+							throw new BrokerPolicyException("Value class " + variableV.getPropertyMap().values().iterator().next().getRangeUri() + " is declared second time in properties of framework declaration.");							
+						}
 						variableExistsInFramework = true;
-						break;
 					}
 				}
 			}
