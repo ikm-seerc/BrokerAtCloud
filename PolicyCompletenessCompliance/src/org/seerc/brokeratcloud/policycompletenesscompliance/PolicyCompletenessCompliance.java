@@ -384,7 +384,7 @@ public class PolicyCompletenessCompliance {
 		// for each SLE, exactly one Variable should exist
 		for(BrokerPolicyClass bpc : bp.getServiceLevelExpressionMap().values())
 		{
-			if(bpc.getPropertyMap().values().size() < 1)
+			if(bpc.getPropertyMap().values().size() < 1 || allSubpropertyRangesAreNull(bpc.getPropertyMap().values()))
 			{
 				writeMessageToBrokerPolicyReport("Error - Service Level Expression " + bpc.getUri() + " is not connected to at least one Variable.");
 				throw new BrokerPolicyException("Service Level Expression " + bpc.getUri() + " is not connected to at least one Variable.");
