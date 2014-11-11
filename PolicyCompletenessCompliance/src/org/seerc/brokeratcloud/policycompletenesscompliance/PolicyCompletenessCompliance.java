@@ -408,6 +408,28 @@ public class PolicyCompletenessCompliance {
 			writeMessageToBrokerPolicyReport("Variable " + bpc.getUri() + " is connected to exactly one QV: " + bpc.getPropertyMap().values().iterator().next().getRangeUri());
 		}
 		
+		// No two different Variables must be connected to the same VC.
+		for(BrokerPolicyClass v1 : bp.getExpressionVariableMap().values())
+		{
+			for(BrokerPolicyClass v2 : bp.getExpressionVariableMap().values())
+			{
+				for(Subproperty sp1:v1.getPropertyMap().values())
+				{
+					for(Subproperty sp2:v2.getPropertyMap().values())
+					{
+						if(!sp1.getDomainUri().equals(sp2.getDomainUri()))
+						{	// different variables
+							if(sp1.getRangeUri().equals(sp2.getRangeUri()))
+							{	// same range, throw exception
+								writeMessageToBrokerPolicyReport("Error - Variables " + sp1.getDomainUri() + " and " + sp2.getDomainUri() + " are connected to the same value class " + sp1.getRangeUri() + ".");
+								throw new BrokerPolicyException("Variables " + sp1.getDomainUri() + " and " + sp2.getDomainUri() + " are connected to the same value class " + sp1.getRangeUri() + ".");
+							}
+						}
+					}
+				}
+			}
+		}
+		
 		/*
 		 * Check that Variables used in Broker Policy are declared in the "framework" part.
 		 * This goes somewhat like this:
