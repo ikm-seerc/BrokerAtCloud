@@ -12,6 +12,8 @@
 
 @prefix usdl-core: <http://www.linked-usdl.org/ns/usdl-core#> .
 
+@prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker>.
+
 @prefix usdl-business-roles: <http://www.linked-usdl.org/ns/usdl-business-roles#> .
 
 @prefix usdl-sla: <http://www.linked-usdl.org/ns/usdl-sla#> .
@@ -20,11 +22,27 @@
 
 @prefix gr: <http://purl.org/goodrelations/v1#> .
 
+@prefix fc: <http://www.broker-cloud.eu/service-descriptions/CAS/categories#>.
+
 @base <http://www.broker-cloud.eu/d043567/linked-usdl-ontologies/SAP-HANA-Cloud-Apps-Broker/2014/01/brokerpolicy/> .
 
 
 <http://www.broker-cloud.eu/d043567/linked-usdl-ontologies/SAP-HANA-Cloud-Apps-Broker/2014/01/brokerpolicy/> rdf:type owl:Ontology .
 
+
+### Framework declaration
+
+brokerpolicy:hasNumberOfUsers rdfs:subPropertyOf gr:quantitativeProductOrServiceProperty; 
+	rdfs:domain brokerpolicy:ServiceModelSAPHANAApp;
+	rdfs:range brokerpolicy:QVNumberOfUsersRange.
+
+brokerpolicy:hasDocumentStorage rdfs:subPropertyOf gr:quantitativeProductOrServiceProperty; 
+	rdfs:domain brokerpolicy:ServiceModelSAPHANAApp;
+	rdfs:range brokerpolicy:QVDocumentStorageRange.
+
+brokerpolicy:hasAvailability rdfs:subPropertyOf gr:quantitativeProductOrServiceProperty; 
+	rdfs:domain brokerpolicy:ServiceModelSAPHANAApp;
+	rdfs:range brokerpolicy:QVAvailabilityRange.
 
 
 
@@ -39,7 +57,8 @@ brokerpolicy:ServiceModelSAPHANAApp a rdfs:Class, owl:Class;
 ### Service Model instantiation and association.
 
 brokerpolicy:BrokerPolicySAPHANAApp a brokerpolicy:ServiceModelSAPHANAApp; 
-	usdl-core:hasEntityInvolvement brokerpolicy:EntityInvolvementSAPHANAApp .
+	usdl-core:hasEntityInvolvement brokerpolicy:EntityInvolvementSAPHANAApp;
+	usdl-core-cb:hasClassificationDimension fc:rootConcept.
 
 ### Entity Involvement instantiation
 
@@ -128,12 +147,21 @@ brokerpolicy:VarAvailability a rdfs:Class, owl:Class;
 ### gr:QuantitativeValue subclassification
 
 brokerpolicy:QVNumberOfUsersRange a rdfs:Class, owl:Class;
+   gr:hasMinValueInteger "1"^^xsd:integer;
+   gr:hasMaxValueInteger "10000"^^xsd:integer;
+   gr:hasUnitOfMeasurement ""^^xsd:string;
    rdfs:subClassOf gr:QuantitativeValueInteger .
 
 brokerpolicy:QVDocumentStorageRange a rdfs:Class, owl:Class;
+   gr:hasMinValueInteger "1"^^xsd:integer;
+   gr:hasMaxValueInteger "10000"^^xsd:integer;
+   gr:hasUnitOfMeasurement ""^^xsd:string;
    rdfs:subClassOf gr:QuantitativeValueInteger .
 
 brokerpolicy:QVAvailabilityRange a rdfs:Class, owl:Class;
+   gr:hasMinValueFloat "1"^^xsd:float;
+   gr:hasMaxValueFloat "10000"^^xsd:float;
+   gr:hasUnitOfMeasurement ""^^xsd:string;
    rdfs:subClassOf gr:QuantitativeValueFloat .
 
 ### Subproperties to connect Service Model to distinguished Service Level Profiles

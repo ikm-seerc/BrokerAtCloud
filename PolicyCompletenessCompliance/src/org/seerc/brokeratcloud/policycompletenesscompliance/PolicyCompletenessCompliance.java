@@ -36,8 +36,8 @@ import com.hp.hpl.jena.util.FileManager;
 
 public class PolicyCompletenessCompliance {
 
-	//private static final String brokerPolicyPath = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
-	private static final String brokerPolicyPath = "Ontologies/ForReview/CAS-broker-policies.ttl";
+	private static final String brokerPolicyPath = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
+	//private static final String brokerPolicyPath = "Ontologies/ForReview/CAS-broker-policies.ttl";
 	private static final String serviceLevelProfilePath = "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl";
 	private static final String serviceDescriptionPath = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
 	//private static final String serviceDescriptionPath = "Ontologies/CAS-AddressAppSM-minimal-final_AF.ttl";
@@ -84,7 +84,10 @@ public class PolicyCompletenessCompliance {
 			completenessReportTos = new TeeOutputStream(System.out, completenessReportFop);		
 
 			// construct the complianceReportTos double stream
-			complianceReportTos = new TeeOutputStream(System.out, complianceReportFop);		
+			complianceReportTos = new TeeOutputStream(System.out, complianceReportFop);	
+			
+			acquireMemoryForData(OntModelSpec.RDFS_MEM);
+
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -95,7 +98,8 @@ public class PolicyCompletenessCompliance {
 			PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 
 			// validate broker policy first
-			pc.validateBrokerPolicy(brokerPolicyPath, serviceLevelProfilePath);
+			//pc.validateBrokerPolicy(brokerPolicyPath, serviceLevelProfilePath);
+			pc.validateBrokerPolicy(brokerPolicyPath);
 			
 			// Get broker policy in Java object structure
 			pc.getBrokerPolicy(brokerPolicyPath);
@@ -171,7 +175,7 @@ public class PolicyCompletenessCompliance {
 			IllegalAccessException, InvocationTargetException, IOException {
 
 		// Initial Creation
-		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+		//acquireMemoryForData(OntModelSpec.RDFS_MEM);
 
 		// Add the BP into the Jena model
 		addDataToJenaModel(bpFileData);
@@ -192,10 +196,12 @@ public class PolicyCompletenessCompliance {
 				"QuantitativeValueInteger"));
 		bp.setQuantitativeValueFloatMap(getBrokerPolicyClassMap(GR,
 				"QuantitativeValueFloat"));
+		bp.setQualitativeValueMap(getBrokerPolicyClassMap(GR,
+		"QualitativeValue"));
 
 		// Next, construct the objects corresponding to broker policy
 		// (QuantitativeValue) instances
-		List<String> qvSubclassList = new ArrayList<String>(); // this list
+		List<String> quantVSubclassList = new ArrayList<String>(); // this list
 																// contains the
 																// URIs of all
 																// QuantitativeValue
@@ -207,17 +213,35 @@ public class PolicyCompletenessCompliance {
 		Iterator<BrokerPolicyClass> iterInt = bp
 				.getQuantitativeValueIntegerMap().values().iterator();
 		while (iterInt.hasNext()) {
-			qvSubclassList.add((iterInt.next()).getUri());
+			quantVSubclassList.add((iterInt.next()).getUri());
 		}
 
 		// Add QuantitativeValueFloat subclasses into the list
 		Iterator<BrokerPolicyClass> iterFl = bp.getQuantitativeValueFloatMap()
 				.values().iterator();
 		while (iterFl.hasNext()) {
-			qvSubclassList.add((iterFl.next()).getUri());
+			quantVSubclassList.add((iterFl.next()).getUri());
 		}
 
-		bp.setQuantitativeValueMap(getQuantitativeValueMap(qvSubclassList));
+		bp.setQuantitativeValueMap(getQuantitativeValueMap(quantVSubclassList));
+		
+		// Next, construct the objects corresponding to broker policy
+		// (QualitativeValue) instances
+		List<String> qualVSubclassList = new ArrayList<String>(); // this list
+																// contains the
+																// URIs of all
+																// QualitativeValue
+
+		// Add QuantitativeValueInteger subclasses into the list
+		Iterator<BrokerPolicyClass> iterQual = bp
+				.getQualitativeValueMap().values().iterator();
+		while (iterQual.hasNext()) {
+			qualVSubclassList.add((iterQual.next()).getUri());
+		}
+
+		bp.setQualitativeValueMapWithInstances(getQualitativeValueMap(qualVSubclassList));
+		
+
 	}
 
 	public void validateBrokerPolicy(Object... bpFileData) throws IOException,
@@ -226,7 +250,7 @@ public class PolicyCompletenessCompliance {
 			InvocationTargetException, BrokerPolicyException {
 		
 		// Initial Creation
-		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+		//acquireMemoryForData(OntModelSpec.RDFS_MEM);
 
 		// Add the BP into the Jena model
 		addDataToJenaModel(bpFileData);
@@ -790,6 +814,64 @@ public class PolicyCompletenessCompliance {
 		return qvMap;
 	}
 
+	// The input to this method is a list containing the URIs of the QV
+	// subclasses and it returns a map with key-value entries where key=URI of
+	// the QV subclass and
+	// value=the corresponding QualitativeValue object
+	private Map<String, QualitativeValue> getQualitativeValueMap(
+			List<String> qvSubclassList) {
+
+		// Construct the Map containing the objects corresponding to subclasses
+		// of QualitativeValue
+		Map<String, QualitativeValue> qvMap = new HashMap<String, QualitativeValue>();
+		Iterator<String> iter = qvSubclassList.iterator();
+
+		// For each subclass of QV find the corresponding instances
+		while (iter.hasNext()) {
+			String qvSubclassUri = (String) iter.next();
+			QualitativeValue qvSubclass = new QualitativeValue(qvSubclassUri);
+
+			// Construct the Map containing the objects corresponding to
+			// instances of the QualitativeValue subclass
+			Map<String, QualitativeValueInstance> instanceMap = new HashMap<String, QualitativeValueInstance>();
+
+			Property typeProperty = ResourceFactory
+					.createProperty(RDF + "type");
+			Resource qvSubclassResource = ResourceFactory
+					.createResource(qvSubclass.getUri());
+
+			// Find the instances
+			ResIterator ri = modelMem.listResourcesWithProperty(typeProperty,
+					qvSubclassResource);
+
+			// For each instance find the corresponding values
+			while (ri.hasNext()) {
+				Resource qvInstanceResource = ri.next();
+				// Create QV instance object
+				QualitativeValueInstance instance = new QualitativeValueInstance(
+						qvInstanceResource.toString());
+
+				// ----------------------------------------------------
+				instanceMap.put(instance.getUri(), instance); // put the
+																// instance
+																// found into
+																// the
+																// corresponding
+																// map
+
+			}
+			qvSubclass.setInstanceMap(instanceMap); // set the instance map of
+													// the corresponding QV
+													// subclass object
+			qvMap.put(qvSubclass.getUri(), qvSubclass); // put the QV subclass
+														// object into the map
+														// that contains all QV
+														// subclass objects
+		}
+
+		return qvMap;
+	}
+	
 	public List<ClassInstancePair> completenessCheck(Object sdFileData)
 			throws IOException, CompletenessException {
 
@@ -798,12 +880,12 @@ public class PolicyCompletenessCompliance {
 		writeMessageToCompletenessReport("##################");
 
 		// Initial Creation
-		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+		//acquireMemoryForData(OntModelSpec.RDFS_MEM);
 
 		// Add the SD into the Jena model
 		addDataToJenaModel(sdFileData);
 
-		writeMessageToCompletenessReport("----------------");
+		/*writeMessageToCompletenessReport("----------------");
 		writeMessageToCompletenessReport("Usdl-core completeness section:");
 		writeMessageToCompletenessReport("----------------");
 
@@ -868,9 +950,9 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 			throw new CompletenessException("Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 		}
-		writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");		
+		writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");*/		
 		
-		writeMessageToCompletenessReport("----------------");
+		/*writeMessageToCompletenessReport("----------------");
 		writeMessageToCompletenessReport("Service Section:");
 		writeMessageToCompletenessReport("----------------");
 		String si_uri = null; // service instance uri
@@ -888,7 +970,7 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport("OK - SD contains exactly 1 service instance of type usdl-core:Service");
 			RDFNode node = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}");
 			si_uri = node.toString();
-		}
+		}*/
 
 		writeMessageToCompletenessReport("-------------------------------");
 		writeMessageToCompletenessReport("Service - ServiceModel Section:");
@@ -905,7 +987,7 @@ public class PolicyCompletenessCompliance {
 		smc_uri = smcIter.next();
 		// -----------------------------------------------
 
-		int countSmi = countQuery("{<" + si_uri
+		/*int countSmi = countQuery("{<" + si_uri
 				+ "> usdl-core:hasServiceModel ?var}"); // how many instances
 														// are associated with
 														// the usdl-core:Service
@@ -930,11 +1012,12 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport("OK - Instance: ");
 			writeMessageToCompletenessReport(si_uri);
 			writeMessageToCompletenessReport("is correctly connected to exactly 1 instance via the appropriate property");
-			writeMessageToCompletenessReport(USDL_CORE + "hasServiceModel");
+			writeMessageToCompletenessReport(USDL_CORE + "hasServiceModel");*/
 
 			// Get the service model instance
-			RDFNode node = oneVarOneSolutionQuery("{<" + si_uri
-					+ "> usdl-core:hasServiceModel ?var}");
+			// TODO: The isVariantOf might be helpful here...
+			RDFNode node = oneVarOneSolutionQuery("{?var rdf:type <" + smc_uri
+					+ ">}");
 			smi_uri = node.toString(); // Service model instance URI
 			int countSmi2 = countQuery("{<" + smi_uri + "> rdf:type <"
 					+ smc_uri + ">}"); // count the occurrences of this triple
@@ -950,8 +1033,8 @@ public class PolicyCompletenessCompliance {
 			} else { // countSmi2 = 1
 				writeMessageToCompletenessReport("OK - SD contains exactly 1  instance of the correct type:");
 				writeMessageToCompletenessReport(smc_uri);
-				writeMessageToCompletenessReport("which is correctly connected to the instance:");
-				writeMessageToCompletenessReport(si_uri);
+				/*writeMessageToCompletenessReport("which is correctly connected to the instance:");
+				writeMessageToCompletenessReport(si_uri);*/
 
 				int countSmi3 = countQuery("{<" + smi_uri
 						+ "> rdf:type ?someType}"); // maybe the service model
@@ -968,13 +1051,13 @@ public class PolicyCompletenessCompliance {
 				} else {
 					writeMessageToCompletenessReport("OK - SD contains exactly 1 instance of the correct type:");
 					writeMessageToCompletenessReport(smc_uri);
-					writeMessageToCompletenessReport("which is correctly connected to the instance:");
-					writeMessageToCompletenessReport(si_uri);
+					/*writeMessageToCompletenessReport("which is correctly connected to the instance:");
+					writeMessageToCompletenessReport(si_uri);*/
 					writeMessageToCompletenessReport("and no other types are associated with this instance");
 					writeMessageToCompletenessReport("");
 				}
 			}
-		}
+		//}
 
 		// smCip: needed input for Service Model - Service Level Profile section
 		// in stepCompletenessCheck method (smc_uri (subclass URI) is needed to
@@ -1139,7 +1222,7 @@ public class PolicyCompletenessCompliance {
 				// present in BP file is drawn from
 				// the BrokerPolicy object
 				int countNli2 = 0;
-				if (startClassIndex == 4) {
+				/*if (startClassIndex == 4) {
 
 					if (bp.getQuantitativeValueMap().get(prop.getRangeUri())
 							.getInstanceMap().containsKey(nli_uri)) {
@@ -1148,10 +1231,10 @@ public class PolicyCompletenessCompliance {
 						countNli2 = countQuery("{<" + nli_uri + "> rdf:type <"
 								+ prop.getRangeUri() + ">}");
 					}
-				} else {
+				} else {*/
 					countNli2 = countQuery("{<" + nli_uri + "> rdf:type <"
 							+ prop.getRangeUri() + ">}");
-				}
+				//}
 				// ----------------------------------------------------------------
 
 				if (countNli2 == 0) {
@@ -1218,7 +1301,7 @@ public class PolicyCompletenessCompliance {
 			IOException {
 
 		// Initial Creation
-		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+		//acquireMemoryForData(OntModelSpec.RDFS_MEM);
 
 		// Add the SD into the Jena model
 		addDataToJenaModel(sdFileData);
@@ -1239,13 +1322,21 @@ public class PolicyCompletenessCompliance {
 			ValueObject vObj = null; // this is the object that holds the values
 										// of the QV instance
 
-			// if instanceUri is inside bp's qv instances
-			if (bp.getQuantitativeValueMap().get(classUri).getInstanceMap()
+			// if instanceUri is inside bp's QuantitativeValue instances
+			if (bp.getQuantitativeValueMap().containsKey(classUri) && bp.getQuantitativeValueMap().get(classUri).getInstanceMap()
 					.containsKey(instanceUri)) {
 				writeMessageToComplianceReport("OK - Instance URI:");
 				writeMessageToComplianceReport(instanceUri);
 				writeMessageToComplianceReport("is compliant since it is directly contained in broker policy's instances");
-			} else {
+			}
+			// else if instanceUri is inside bp's QualitativeValue instances
+			else if (bp.getQualitativeValueMapWithInstances().containsKey(classUri) && bp.getQualitativeValueMapWithInstances().get(classUri).getInstanceMap()
+					.containsKey(instanceUri)) {
+				writeMessageToComplianceReport("OK - Instance URI:");
+				writeMessageToComplianceReport(instanceUri);
+				writeMessageToComplianceReport("is compliant since it is directly contained in broker policy's instances");
+			}
+			else {
 				Collection<QuantitativeValueInstance> bpInstancesCollection = bp
 						.getQuantitativeValueMap().get(classUri)
 						.getInstanceMap().values();
