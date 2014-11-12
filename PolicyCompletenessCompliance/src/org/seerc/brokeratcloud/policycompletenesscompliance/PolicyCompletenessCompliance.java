@@ -38,6 +38,7 @@ public class PolicyCompletenessCompliance {
 
 	//private static final String brokerPolicyPath = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
 	private static final String brokerPolicyPath = "Ontologies/ForReview/CAS-broker-policies.ttl";
+	private static final String serviceLevelProfilePath = "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl";
 	private static final String serviceDescriptionPath = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
 	//private static final String serviceDescriptionPath = "Ontologies/CAS-AddressAppSM-minimal-final_AF.ttl";
 	
@@ -94,7 +95,7 @@ public class PolicyCompletenessCompliance {
 			PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 
 			// validate broker policy first
-			pc.validateBrokerPolicy(brokerPolicyPath);
+			pc.validateBrokerPolicy(brokerPolicyPath, serviceLevelProfilePath);
 			
 			// Get broker policy in Java object structure
 			pc.getBrokerPolicy(brokerPolicyPath);
@@ -141,6 +142,13 @@ public class PolicyCompletenessCompliance {
 		else if(inputData instanceof InputStream)
 		{	// load from stream
 			this.addDataFromInputStream((InputStream)inputData);
+		}
+		else if(inputData instanceof Object[])
+		{	// load each one recursively
+			for(int i=0;i<((Object[])inputData).length;i++)
+			{
+				this.addDataToJenaModel(((Object[])inputData)[i]);
+			}
 		}
 	}
 
@@ -212,7 +220,7 @@ public class PolicyCompletenessCompliance {
 		bp.setQuantitativeValueMap(getQuantitativeValueMap(qvSubclassList));
 	}
 
-	public void validateBrokerPolicy(Object bpFileData) throws IOException,
+	public void validateBrokerPolicy(Object... bpFileData) throws IOException,
 			NoSuchMethodException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, BrokerPolicyException {
@@ -222,7 +230,7 @@ public class PolicyCompletenessCompliance {
 
 		// Add the BP into the Jena model
 		addDataToJenaModel(bpFileData);
-
+		
 		writeMessageToBrokerPolicyReport("##################");
 		writeMessageToBrokerPolicyReport("Broker Policy Check");
 		writeMessageToBrokerPolicyReport("##################");
@@ -328,9 +336,12 @@ public class PolicyCompletenessCompliance {
 		writeMessageToBrokerPolicyReport("Entity Involvement instance is associated with the Business Entity instance via the ofBusinessEntity relation.");
 		
 		// if BP data are in InputStream, reset it to reuse it
-		if(bpFileData instanceof InputStream)
+		for(int i=0;i<bpFileData.length;i++)
 		{
-			((InputStream) bpFileData).reset();
+			if(bpFileData[i] instanceof InputStream)
+			{
+				((InputStream) bpFileData[i]).reset();
+			}
 		}
 		
 		// read the broker policy classes
