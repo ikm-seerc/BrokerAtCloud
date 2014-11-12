@@ -226,6 +226,8 @@ public class SDEvaluationListener implements MessageListener {
 
 	private void evaluateCompletenessCompliance(InputStream sdis) throws IOException, CompletenessException, ComplianceException 
 	{
+		gregEvaluator.getPcc().validateSDForCompletenessCompliance(sdis);
+		/*
 		// Perform completeness check
 		List<ClassInstancePair> qvPairList = null;
 		qvPairList = gregEvaluator.getPcc().completenessCheck(sdis);
@@ -239,6 +241,7 @@ public class SDEvaluationListener implements MessageListener {
 			gregEvaluator.getPcc().complianceCheck(sdis, qvPairList);
 			ep.getComplianceReport().setStatus("OK");
 		}
+		*/
 	}
 
 }

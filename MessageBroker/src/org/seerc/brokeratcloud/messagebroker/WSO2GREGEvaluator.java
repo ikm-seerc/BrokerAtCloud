@@ -22,6 +22,9 @@ public class WSO2GREGEvaluator extends WSO2GREGClient {
 			// Get broker policy in Java object structure
 			gregDemo.getPcc().getBrokerPolicy(brokerPolicyPath);
 
+			gregDemo.getPcc().validateSDForCompletenessCompliance(serviceDescriptionPath);
+			
+			/*
 			// Perform completeness check
 			List<ClassInstancePair> qvPairList = null;
 			try {
@@ -42,7 +45,7 @@ public class WSO2GREGEvaluator extends WSO2GREGClient {
 					System.err
 							.println("Error - The Service Description is uncompliant");
 				}
-			}
+			}*/
 
 		} catch (Exception e) {
 			System.out.println("Failure: " + e.getClass().getName() + " - "
