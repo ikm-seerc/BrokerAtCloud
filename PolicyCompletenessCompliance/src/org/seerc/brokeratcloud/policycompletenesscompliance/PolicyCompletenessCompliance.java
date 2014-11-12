@@ -40,7 +40,7 @@ public class PolicyCompletenessCompliance {
 	//private static final String brokerPolicyPath = "Ontologies/ForReview/CAS-broker-policies.ttl";
 	private static final String serviceLevelProfilePath = "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl";
 	private static final String serviceDescriptionPath = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
-	//private static final String serviceDescriptionPath = "Ontologies/CAS-AddressAppSM-minimal-final_AF.ttl";
+	//private static final String serviceDescriptionPath = "Ontologies/ForReview/CAS-AddressApp.ttl";
 	
 	protected OntModel modelMem = null;
 	private BrokerPolicy bp = new BrokerPolicy();
@@ -105,32 +105,59 @@ public class PolicyCompletenessCompliance {
 			pc.getBrokerPolicy(brokerPolicyPath);
 
 			// Perform completeness check
-			List<ClassInstancePair> qvPairList = null;
-			try {
-				qvPairList = pc
-						.completenessCheck(serviceDescriptionPath);
-			} catch (CompletenessException e) {
-				System.err
-						.println("Error - The Service Description is incomplete");
-			}
-
-			// Perform compliance check
-			if (qvPairList != null) {
-				try {
-					pc.complianceCheck(
-							serviceDescriptionPath,
-							qvPairList);
-				} catch (ComplianceException e) {
-					System.err
-							.println("Error - The Service Description is uncompliant");
-				}
-			}
+			pc.validateSDForCompletenessCompliance(serviceDescriptionPath);
 
 		} catch (Exception e) {
 			System.out.println("Failure: " + e.getClass().getName() + " - "
 					+ e.getMessage());
 			e.printStackTrace();
 			return;
+		}
+	}
+
+	public void validateSDForCompletenessCompliance(Object dataToCheck) throws IOException {
+		if(bpHasSLPInConnection())
+		{	// already loaded BP had SLP info
+			// SD will be checked with the minimal connection checks
+			writeMessageToBrokerPolicyReport("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			writeMessageToBrokerPolicyReport("Loaded BP had SLP information inside! Will run the minimal checks on this SD!");
+			writeMessageToBrokerPolicyReport("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			writeMessageToBrokerPolicyReport("");
+			writeMessageToBrokerPolicyReport("SD minimal checks here..."); // TODO
+			
+		}
+		else
+		{	// normal case, full completeness/compliance check in SD.
+			runCompletenessCompliance(dataToCheck);			
+		}
+	}
+
+	private void runCompletenessCompliance(Object dataToCheck)	throws IOException {
+		List<ClassInstancePair> qvPairList = null;
+		try {
+			qvPairList = this
+					.completenessCheck(dataToCheck);
+		} catch (CompletenessException e) {
+			System.err
+					.println("Error - The Service Description is incomplete");
+		}
+
+		// reset dataToCheck if it's InputStream
+		if(dataToCheck instanceof InputStream)
+		{
+			((InputStream) dataToCheck).reset();
+		}
+		
+		// Perform compliance check
+		if (qvPairList != null) {
+			try {
+				this.complianceCheck(
+						dataToCheck,
+						qvPairList);
+			} catch (ComplianceException e) {
+				System.err
+						.println("Error - The Service Description is uncompliant");
+			}
 		}
 	}
 
@@ -554,7 +581,46 @@ public class PolicyCompletenessCompliance {
 			writeMessageToBrokerPolicyReport("Variable " + variableV.getUri() + " exists in framework declaration and points to: " + variableV.getPropertyMap().values().iterator().next().getRangeUri() + " shared value class.");
 		}
 		
+		/*
+		 * if a Service Level Profile has been created and is bound to the Broker Policy instance,
+		 * then we should check BP for completeness/compliance too
+		 */
+		if(bpHasSLPInConnection())
+		{	// found SLP connection, run completeness/compliance
+			writeMessageToBrokerPolicyReport("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			writeMessageToBrokerPolicyReport("This BP has also SLP information inside! Will run completeness/compliance algorithm on it!");
+			writeMessageToBrokerPolicyReport("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			this.runCompletenessCompliance(bpFileData);			
+		}
+
 		writeMessageToBrokerPolicyReport("");
+	}
+
+	public boolean bpHasSLPInConnection()
+			throws IOException {
+		RDFNode smInstance = oneVarOneSolutionQuery("{?var rdf:type <" + bp.getServiceModelMap().keySet().iterator().next()
+				+ ">}");
+		for(String slpClassUri:bp.getServiceLevelProfileMap().keySet())
+		{
+			for(BrokerPolicyClass smBpc:bp.getServiceModelMap().values())
+			{
+				for(Subproperty smSp:smBpc.getPropertyMap().values())
+				{
+					if(smSp.getRangeUri().equals(slpClassUri))
+					{	// we found the hasSLP property
+						String hasSlpProperty = smSp.getUri();
+						// check if broker policy instance is connected with this
+						// property to something (which denotes an SLP connection).
+						RDFNode slpConnection = oneVarOneSolutionQuery("{<" + smInstance.toString() + "> <" + hasSlpProperty + "> ?var}");
+						if(slpConnection != null)
+						{	// found SLP connection
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	public void checkCorrectStringDeclaration(String stringClassUri, String relationToLookFor) throws BrokerPolicyException {
@@ -872,7 +938,7 @@ public class PolicyCompletenessCompliance {
 		return qvMap;
 	}
 	
-	public List<ClassInstancePair> completenessCheck(Object fileData)
+	private List<ClassInstancePair> completenessCheck(Object fileData)
 			throws IOException, CompletenessException {
 
 		writeMessageToCompletenessReport("##################");
@@ -1296,7 +1362,7 @@ public class PolicyCompletenessCompliance {
 	// URIs correspond to the instances found in the file contents. qvPairList is returned
 	// from the completenessCheck method
 
-	public void complianceCheck(Object fileData,
+	private void complianceCheck(Object fileData,
 			List<ClassInstancePair> qvPairList) throws ComplianceException,
 			IOException {
 
