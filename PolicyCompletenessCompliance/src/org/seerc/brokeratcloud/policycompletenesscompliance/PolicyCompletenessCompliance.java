@@ -459,6 +459,16 @@ public class PolicyCompletenessCompliance {
 		}
 		
 		/*
+		 * All gr:QuantitativeValue sub-classes should declare:
+		 * 1) gr:hasUnitOfMeasurement
+		 */
+		for(String qv:bp.getQuantitativeValueMap().keySet())
+		{
+			// gr:hasUnitOfMeasurement
+			checkCorrectStringDeclaration(qv, "gr:hasUnitOfMeasurement");
+		}
+		
+		/*
 		 * Check that Variables used in Broker Policy are declared in the "framework" part.
 		 * This goes somewhat like this:
 		 * for each used Variable (V):
@@ -499,6 +509,21 @@ public class PolicyCompletenessCompliance {
 		writeMessageToBrokerPolicyReport("");
 	}
 
+	public void checkCorrectStringDeclaration(String stringClassUri, String relationToLookFor) throws BrokerPolicyException {
+		String subClassOf = "gr:QuantitativeValue";
+		XSDDatatype datatypeToLookFor = XSDDatatype.XSDstring;
+		
+		RDFNode valueNode = checkCorrectQvType(stringClassUri,
+				relationToLookFor, subClassOf, datatypeToLookFor);
+		
+		try {
+			valueNode.asLiteral().getString();
+		} catch (DatatypeFormatException e) {
+			writeMessageToComplianceReport("For " + subClassOf + " URI: " + stringClassUri + " property " + relationToLookFor + " must be associated with " + datatypeToLookFor.getURI() + " value");
+			throw new BrokerPolicyException("For " + subClassOf + " URI: " + stringClassUri + " property " + relationToLookFor + " must be associated with " + datatypeToLookFor.getURI() + " value");
+		}
+	}
+	
 	public void checkCorrectIntegerDeclaration(String integerClassUri, String relationToLookFor) throws BrokerPolicyException {
 		String subClassOf = "gr:QuantitativeValueInteger";
 		XSDDatatype datatypeToLookFor = XSDDatatype.XSDinteger;

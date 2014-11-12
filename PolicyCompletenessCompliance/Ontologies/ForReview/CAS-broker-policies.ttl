@@ -351,6 +351,7 @@ rdfs:comment "Anpassbarkeit, Customizing" .
 # Todo: UoM: http://www.heppnetz.de/projects/goodrelations/primer/ http://www.unece.org/cefact/recommendations/rec20/Rec20_Rev6e_2009.xls 
 cas:AllowedScalabilityValue rdfs:subClassOf gr:QuantitativeValueFloat;
 rdfs:label "Allowed values of scalability/number of concurrent users are between 1 and 10.000.";
+gr:hasUnitOfMeasurement ""^^xsd:string; #TODO: Add UoM
 gr:hasMinValueFloat "1"^^xsd:float;
 gr:hasMaxValueFloat "10000"^^xsd:float;
 usdl-core-cb:higherIsBetter "true"^^xsd:boolean;
@@ -388,6 +389,7 @@ usdl-core-cb:isRange "true"^^xsd:boolean .
 #                           gr:validThrough "2014-03-31T23:59:59"^^xsd:dateTime ];
 cas:AllowedCostValue rdfs:subClassOf gr:QuantitativeValueFloat; 
 rdfs:label "Allowed Cost is between 0,10 € and 1000€ ";
+gr:hasUnitOfMeasurement ""^^xsd:string; #TODO: Add UoM
 gr:hasMinValueFloat "1"^^xsd:float;
 gr:hasMaxValueFloat "1000"^^xsd:float;
 usdl-core-cb:higherIsBetter "true"^^xsd:boolean;
