@@ -364,19 +364,22 @@ public class PolicyCompletenessCompliance {
 			writeMessageToBrokerPolicyReport("Service Level Profile " + bpc.getUri() + " is connected to some Service Level(s).");
 		}
 
-		// for each SL, exactly one SLE should exist
+		// for each SL, at least one SLE should exist
 		for(BrokerPolicyClass bpc : bp.getServiceLevelMap().values())
 		{
-			if(bpc.getPropertyMap().values().size() != 1 || allSubpropertyRangesAreNull(bpc.getPropertyMap().values()))
+			if(bpc.getPropertyMap().values().size() < 1 || allSubpropertyRangesAreNull(bpc.getPropertyMap().values()))
 			{
 				writeMessageToBrokerPolicyReport("Error - Service Level " + bpc.getUri() + " is not connected to exactly one Service Level Expression.");
 				throw new BrokerPolicyException("Service Level " + bpc.getUri() + " is not connected to exactly one Service Level Expression.");
 			}
 			
-			if(!bp.getServiceLevelExpressionMap().containsKey(bpc.getPropertyMap().values().iterator().next().getRangeUri()))
+			for(Subproperty sle:bpc.getPropertyMap().values())
 			{
-				writeMessageToBrokerPolicyReport("Error - Service Level Expression " + bpc.getPropertyMap().values().iterator().next().getRangeUri() + " does not exist.");
-				throw new BrokerPolicyException("Service Level Expression " + bpc.getPropertyMap().values().iterator().next().getRangeUri() + " does not exist.");				
+				if(!bp.getServiceLevelExpressionMap().containsKey(sle.getRangeUri()))
+				{
+					writeMessageToBrokerPolicyReport("Error - Service Level Expression " + sle.getRangeUri() + " does not exist.");
+					throw new BrokerPolicyException("Service Level Expression " + sle.getRangeUri() + " does not exist.");				
+				}
 			}
 			writeMessageToBrokerPolicyReport("Service Level " + bpc.getUri() + " is connected to exactly one Service Level Expression: " + bpc.getPropertyMap().values().iterator().next().getRangeUri());
 		}
