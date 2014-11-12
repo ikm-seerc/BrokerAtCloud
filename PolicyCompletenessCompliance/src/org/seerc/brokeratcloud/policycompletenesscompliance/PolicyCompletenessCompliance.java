@@ -872,7 +872,7 @@ public class PolicyCompletenessCompliance {
 		return qvMap;
 	}
 	
-	public List<ClassInstancePair> completenessCheck(Object sdFileData)
+	public List<ClassInstancePair> completenessCheck(Object fileData)
 			throws IOException, CompletenessException {
 
 		writeMessageToCompletenessReport("##################");
@@ -882,8 +882,8 @@ public class PolicyCompletenessCompliance {
 		// Initial Creation
 		//acquireMemoryForData(OntModelSpec.RDFS_MEM);
 
-		// Add the SD into the Jena model
-		addDataToJenaModel(sdFileData);
+		// Add the file contents into the Jena model
+		addDataToJenaModel(fileData);
 
 		/*writeMessageToCompletenessReport("----------------");
 		writeMessageToCompletenessReport("Usdl-core completeness section:");
@@ -1021,9 +1021,9 @@ public class PolicyCompletenessCompliance {
 			smi_uri = node.toString(); // Service model instance URI
 			int countSmi2 = countQuery("{<" + smi_uri + "> rdf:type <"
 					+ smc_uri + ">}"); // count the occurrences of this triple
-										// in the SD, the possible result is
+										// in the file contents, the possible result is
 										// either 0 or 1
-			if (countSmi2 == 0) {// the SD does not contain an instance of the
+			if (countSmi2 == 0) {// couldn't find an instance of the
 									// correct service model subclass or
 				writeMessageToCompletenessReport("Error - Instance");
 				writeMessageToCompletenessReport(smi_uri);
@@ -1031,7 +1031,7 @@ public class PolicyCompletenessCompliance {
 				writeMessageToCompletenessReport(smc_uri);
 				throw new CompletenessException("Instance " + smi_uri + " does not belong to the correct type: " + smc_uri);
 			} else { // countSmi2 = 1
-				writeMessageToCompletenessReport("OK - SD contains exactly 1  instance of the correct type:");
+				writeMessageToCompletenessReport("OK - Found exactly 1  instance of the correct type:");
 				writeMessageToCompletenessReport(smc_uri);
 				/*writeMessageToCompletenessReport("which is correctly connected to the instance:");
 				writeMessageToCompletenessReport(si_uri);*/
@@ -1049,7 +1049,7 @@ public class PolicyCompletenessCompliance {
 					writeMessageToCompletenessReport("is falsely associated with other types");
 					throw new CompletenessException("The instance URI: " + smi_uri + " is falsely associated with other types");
 				} else {
-					writeMessageToCompletenessReport("OK - SD contains exactly 1 instance of the correct type:");
+					writeMessageToCompletenessReport("OK - Found exactly 1 instance of the correct type:");
 					writeMessageToCompletenessReport(smc_uri);
 					/*writeMessageToCompletenessReport("which is correctly connected to the instance:");
 					writeMessageToCompletenessReport(si_uri);*/
@@ -1069,7 +1069,7 @@ public class PolicyCompletenessCompliance {
 		ClassInstancePair smCip = new ClassInstancePair(smc_uri, smi_uri);
 
 		// Perform the same checks as above for all the remaining sections of
-		// the SD
+		// the file contents
 
 		// Service Model - Service Level Profile
 		writeMessageToCompletenessReport("-------------------------------------------");
@@ -1244,7 +1244,7 @@ public class PolicyCompletenessCompliance {
 					writeMessageToCompletenessReport(prop.getRangeUri());
 					throw new CompletenessException("Instance " + nli_uri + " does not belong to the correct type: " + prop.getRangeUri());
 				} else {
-					writeMessageToCompletenessReport("OK - SD contains exactly 1  instance of the correct type:");
+					writeMessageToCompletenessReport("OK - Found exactly 1  instance of the correct type:");
 					writeMessageToCompletenessReport(prop.getRangeUri());
 					writeMessageToCompletenessReport("which is correctly connected to the instance:");
 					writeMessageToCompletenessReport(instanceUri);
@@ -1256,7 +1256,7 @@ public class PolicyCompletenessCompliance {
 						writeMessageToCompletenessReport("is falsely associated with other types");
 						throw new CompletenessException("The instance URI: " + nli_uri + " is falsely associated with other types");
 					} else {
-						writeMessageToCompletenessReport("OK - SD contains exactly 1 instance of the correct type:");
+						writeMessageToCompletenessReport("OK - Found exactly 1 instance of the correct type:");
 						writeMessageToCompletenessReport(prop.getRangeUri());
 						writeMessageToCompletenessReport("which is correctly connected to the instance:");
 						writeMessageToCompletenessReport(instanceUri);
@@ -1293,18 +1293,18 @@ public class PolicyCompletenessCompliance {
 	// qvPairList is a list of QV class-instance pairs (see ClassInstancePair
 	// class) and is the second argument to this method. The class URIs are
 	// needed to find the corresponding instances from the BP while the instance
-	// URIs correspond to the instances found in the SD. qvPairList is returned
+	// URIs correspond to the instances found in the file contents. qvPairList is returned
 	// from the completenessCheck method
 
-	public void complianceCheck(Object sdFileData,
+	public void complianceCheck(Object fileData,
 			List<ClassInstancePair> qvPairList) throws ComplianceException,
 			IOException {
 
 		// Initial Creation
 		//acquireMemoryForData(OntModelSpec.RDFS_MEM);
 
-		// Add the SD into the Jena model
-		addDataToJenaModel(sdFileData);
+		// Add the file contents into the Jena model
+		addDataToJenaModel(fileData);
 
 		writeMessageToComplianceReport("################");
 		writeMessageToComplianceReport("Compliance Check");
