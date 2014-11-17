@@ -137,13 +137,13 @@ public class PolicyCompletenessCompliance {
 		writeMessageToCompletenessReport("Minimal Check");
 		writeMessageToCompletenessReport("##################");
 		
-		// Initialize model in this case in order not to find entities from BP
-		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+		// Initialize model in this case in order not to find entities from BP - not!
+		//acquireMemoryForData(OntModelSpec.RDFS_MEM);
 		
 		// Add the file contents into the Jena model
 		addDataToJenaModel(dataToCheck);
-
-		writeMessageToCompletenessReport("----------------");
+		
+		/*writeMessageToCompletenessReport("----------------");
 		writeMessageToCompletenessReport("Usdl-core completeness section:");
 		writeMessageToCompletenessReport("----------------");
 
@@ -208,9 +208,9 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 			throw new CompletenessException("Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 		}
-		writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");		
+		writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");*/		
 		
-		writeMessageToCompletenessReport("----------------");
+		/*writeMessageToCompletenessReport("----------------");
 		writeMessageToCompletenessReport("Service Section:");
 		writeMessageToCompletenessReport("----------------");
 		String si_uri = null; // service instance uri
@@ -228,6 +228,40 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport("OK - SD contains exactly 1 service instance of type usdl-core:Service");
 			RDFNode node = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}");
 			si_uri = node.toString();
+		}
+		
+		// Exactly one Service Model should be found
+		int countSm = countQuery("{?sm rdf:type <" + bp.getServiceModelMap().keySet().iterator().next() + ">}");
+
+		if (countSm == 0) {
+			writeMessageToCompletenessReport("Error - SD does not contain an instance of Service Model");
+			throw new CompletenessException("SD does not contain an instance of Service Model");
+		} else if (countSm > 1) {
+			writeMessageToCompletenessReport("Error - SD must contain only 1 Service Model instance");
+			throw new CompletenessException("SD must contain only 1 Service Model instance");
+		} else if (countSm == 1) {
+			writeMessageToCompletenessReport("OK - SD contains exactly 1 Service Model instance:");
+			RDFNode node = oneVarOneSolutionQuery("{?var rdf:type <" + bp.getServiceModelMap().keySet().iterator().next() + ">}");
+			smi_uri = node.toString();
+			writeMessageToCompletenessReport(smi_uri);
+		}*/
+
+		// get the SD's service model
+		String smi_uri = null; // service model instance uri
+
+		int countSm = countQuery("{?sm gr:isVariantOf ?someValue;}");
+
+		if (countSm == 0) {
+			writeMessageToCompletenessReport("Error - SD does not contain an instance of Service Model");
+			throw new CompletenessException("SD does not contain an instance of Service Model");
+		} else if (countSm > 1) {
+			writeMessageToCompletenessReport("Error - SD must contain only 1 Service Model instance");
+			throw new CompletenessException("SD must contain only 1 Service Model instance");
+		} else if (countSm == 1) {
+			writeMessageToCompletenessReport("OK - SD contains exactly 1 Service Model instance:");
+			RDFNode node = oneVarOneSolutionQuery("{?var gr:isVariantOf ?someValue;}");
+			smi_uri = node.toString();
+			writeMessageToCompletenessReport(smi_uri);
 		}
 	}
 	
