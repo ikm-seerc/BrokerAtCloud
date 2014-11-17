@@ -115,7 +115,7 @@ public class PolicyCompletenessCompliance {
 		}
 	}
 
-	public void validateSDForCompletenessCompliance(Object dataToCheck) throws IOException {
+	public void validateSDForCompletenessCompliance(Object dataToCheck) throws IOException, CompletenessException, ComplianceException {
 		if(bpHasSLPInConnection())
 		{	// already loaded BP had SLP info
 			// SD will be checked with the minimal connection checks
@@ -132,15 +132,9 @@ public class PolicyCompletenessCompliance {
 		}
 	}
 
-	private void runCompletenessCompliance(Object dataToCheck)	throws IOException {
+	private void runCompletenessCompliance(Object dataToCheck)	throws IOException, CompletenessException, ComplianceException {
 		List<ClassInstancePair> qvPairList = null;
-		try {
-			qvPairList = this
-					.completenessCheck(dataToCheck);
-		} catch (CompletenessException e) {
-			System.err
-					.println("Error - The Service Description is incomplete");
-		}
+			qvPairList = this.completenessCheck(dataToCheck);
 
 		// reset dataToCheck if it's InputStream
 		if(dataToCheck instanceof InputStream)
@@ -150,14 +144,7 @@ public class PolicyCompletenessCompliance {
 		
 		// Perform compliance check
 		if (qvPairList != null) {
-			try {
-				this.complianceCheck(
-						dataToCheck,
-						qvPairList);
-			} catch (ComplianceException e) {
-				System.err
-						.println("Error - The Service Description is uncompliant");
-			}
+				this.complianceCheck(dataToCheck, qvPairList);
 		}
 	}
 
@@ -274,7 +261,7 @@ public class PolicyCompletenessCompliance {
 	public void validateBrokerPolicy(Object bpFileData) throws IOException,
 		NoSuchMethodException, ClassNotFoundException,
 		InstantiationException, IllegalAccessException,
-		InvocationTargetException, BrokerPolicyException {
+		InvocationTargetException, BrokerPolicyException, CompletenessException, ComplianceException {
 		
 		this.validateBrokerPolicy(new Object[] {bpFileData});
 	}
@@ -282,7 +269,7 @@ public class PolicyCompletenessCompliance {
 	public void validateBrokerPolicy(Object... bpFileData) throws IOException,
 			NoSuchMethodException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException,
-			InvocationTargetException, BrokerPolicyException {
+			InvocationTargetException, BrokerPolicyException, CompletenessException, ComplianceException {
 		
 		// Initial Creation
 		//acquireMemoryForData(OntModelSpec.RDFS_MEM);
