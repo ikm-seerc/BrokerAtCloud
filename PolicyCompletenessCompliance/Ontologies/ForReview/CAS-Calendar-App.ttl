@@ -14,7 +14,7 @@
 @prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#> .
 @prefix usdl-business-roles: <http://www.linked-usdl.org/ns/usdl-business-roles#> .
 @prefix fc: <http://www.broker-cloud.eu/service-descriptions/CAS/categories#>.
-@prefix gr: <http://purl.org/goodrelations/v1> .
+@prefix gr: <http://purl.org/goodrelations/v1#> .
 
 
 #############################################################################################

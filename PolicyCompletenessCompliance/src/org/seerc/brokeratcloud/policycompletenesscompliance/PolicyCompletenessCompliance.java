@@ -1965,7 +1965,7 @@ public class PolicyCompletenessCompliance {
 		queryStr.append("PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>");
 		queryStr.append("PREFIX usdl-core: <http://www.linked-usdl.org/ns/usdl-core#>");
 		queryStr.append("PREFIX usdl-sla: <http://www.linked-usdl.org/ns/usdl-sla#>");
-		queryStr.append("PREFIX usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker>");
+		queryStr.append("PREFIX usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#>");
 		//queryStr.append("PREFIX brokerpolicy: <http://www.broker-cloud.eu/d043567/linked-usdl-ontologies/SAP-HANA-Cloud-Apps-Broker/2014/01/brokerpolicy#>");
 		//queryStr.append("PREFIX cas: <http://www.broker-cloud.eu/service-descriptions/CAS/broker#>");
 		queryStr.append("PREFIX gr: <http://purl.org/goodrelations/v1#>");
@@ -2106,5 +2106,22 @@ public class PolicyCompletenessCompliance {
 		}
 		
 		return bpi_uri;
+	}
+
+	/*
+	 * Returns the isVariantOf of an SD
+	 */
+	public String getSDIsVariantOfURI(InputStream sdis) throws IOException {
+		// Initial Creation
+		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+	
+		// Add the SD into the Jena model
+		addDataToJenaModel(sdis);
+	
+		String si_uri = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}").toString(); // Service instance URI
+		String smi_uri = oneVarOneSolutionQuery("{<" + si_uri + "> usdl-core-cb:hasServiceModel ?var}").toString(); // Service model instance URI
+		String isVariantOfUri = oneVarOneSolutionQuery("{<" + smi_uri + "> gr:isVariantOf ?var}").toString(); // Service model instance URI
+		
+		return isVariantOfUri;
 	}
 }

@@ -6,7 +6,7 @@
 @prefix usdl-sla: <http://www.linked-usdl.org/ns/usdl-sla#> .
 @prefix usdl-sla-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#> .
 @prefix usdl-core: <http://www.linked-usdl.org/ns/usdl-core#> .
-@prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker>.
+@prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#>.
 @prefix usdl-business-roles: <http://www.linked-usdl.org/ns/usdl-business-roles#> .
 @prefix usdl-pref: <http://www.linked-usdl.org/ns/usdl-pref#> .
 @prefix pref-att:  <http://www.brokeratcloud.eu/v1/opt/SERVICE-ATTRIBUTE> .
@@ -17,7 +17,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix gr: <http://purl.org/goodrelations/v1> .
+@prefix gr: <http://purl.org/goodrelations/v1#> .
 # AF: Where do you use schema.org?
 @prefix s: <http://schema.org/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#>.

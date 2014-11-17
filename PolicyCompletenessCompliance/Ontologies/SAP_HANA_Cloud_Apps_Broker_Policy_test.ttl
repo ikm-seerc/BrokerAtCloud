@@ -12,7 +12,7 @@
 
 @prefix usdl-core: <http://www.linked-usdl.org/ns/usdl-core#> .
 
-@prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker>.
+@prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#>.
 
 @prefix usdl-business-roles: <http://www.linked-usdl.org/ns/usdl-business-roles#> .
 

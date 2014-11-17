@@ -7,7 +7,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker>.
+@prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#>.
 @prefix skos:  <http://www.w3.org/2004/02/skos/core#>. 
 
 

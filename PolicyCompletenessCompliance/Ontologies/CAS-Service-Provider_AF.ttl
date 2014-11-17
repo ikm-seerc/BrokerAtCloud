@@ -14,13 +14,13 @@
 # @prefix usdl-sla: <http://www.linked-usdl.org/ns/usdl-sla#> .
 # @prefix usdl-core: <http://www.linked-usdl.org/ns/usdl-core#> .
 @prefix s: <http://schema.org/> .
-@prefix gr: <http://purl.org/goodrelations/v1> .
+@prefix gr: <http://purl.org/goodrelations/v1#> .
 
 
 <http://www.broker-cloud.eu/service-descriptions/CAS/service-provider/> rdf:type owl:Ontology ;
 # AF: What purpose do the following owl imports serve? I think they can be removed...
 owl:imports <http://linked-usdl.org/ns/usdl-sla> ,
-<http://purl.org/goodrelations/v1> ,
+<http://purl.org/goodrelations/v1#> ,
 <http://www.linked-usdl.org/ns/usdl-core> ,
 <http://www.broker-cloud.eu/service-descriptions/CAS/broker> .
 
