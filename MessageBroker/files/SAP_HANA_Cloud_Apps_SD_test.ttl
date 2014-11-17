@@ -38,8 +38,7 @@ SD:EntityInvolvementSD a usdl-core:EntityInvolvement;
 
 SD:BusinessEntitySD a gr:BusinessEntity .
 
-SD:ServiceModelSAPHANAAppInstance a brokerpolicy:ServiceModelSAPHANAApp; # put . for demo
-	brokerpolicy:hasSLProfileForUserBasedApps SD:ServiceLevelProfileUserBasedAppsInstance .
+brokerpolicy:BrokerPolicySAPHANAApp brokerpolicy:hasSLProfileForUserBasedApps SD:ServiceLevelProfileUserBasedAppsInstance .
 	#brokerpolicy:hasSLProfileForUserBasedApps brokerpolicy:ServiceLevelProfileTransactionBasedAppsInstance.	
 	#brokerpolicy:hasSLProfileForUserBasedApps SD:ServiceLevelForAppSizingInstance .
 	#brokerpolicy:hasSLForAppSizing SD:ServiceLevelProfileUserBasedAppsInstance .

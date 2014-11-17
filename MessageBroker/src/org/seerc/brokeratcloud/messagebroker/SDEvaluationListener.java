@@ -150,6 +150,9 @@ public class SDEvaluationListener implements MessageListener {
 			// evaluation had problems in completeness, publish problem
 			mbsp.publishStringToTopic(gson.toJson(ep));
 		} catch (ComplianceException e) {
+			// An exception here denotes that completeness check went OK, set status
+			ep.getCompletenessReport().setStatus("OK");
+
 			System.err
 			.println("Error - The Service Description is uncompliant");
 			ep.getComplianceReport().setStatus("Error");
@@ -227,6 +230,9 @@ public class SDEvaluationListener implements MessageListener {
 	private void evaluateCompletenessCompliance(InputStream sdis) throws IOException, CompletenessException, ComplianceException 
 	{
 		gregEvaluator.getPcc().validateSDForCompletenessCompliance(sdis);
+		ep.getCompletenessReport().setStatus("OK");
+		ep.getComplianceReport().setStatus("OK");
+
 		/*
 		// Perform completeness check
 		List<ClassInstancePair> qvPairList = null;
