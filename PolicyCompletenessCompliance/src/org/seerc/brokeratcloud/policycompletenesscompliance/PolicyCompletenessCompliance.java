@@ -249,7 +249,7 @@ public class PolicyCompletenessCompliance {
 		// get the SD's service model
 		String smi_uri = null; // service model instance uri
 
-		int countSm = countQuery("{?sm gr:isVariantOf ?someValue;}");
+		int countSm = countQuery("{?sm gr:isVariantOf ?someValue}");
 
 		if (countSm == 0) {
 			writeMessageToCompletenessReport("Error - SD does not contain an instance of Service Model");
@@ -259,9 +259,33 @@ public class PolicyCompletenessCompliance {
 			throw new CompletenessException("SD must contain only 1 Service Model instance");
 		} else if (countSm == 1) {
 			writeMessageToCompletenessReport("OK - SD contains exactly 1 Service Model instance:");
-			RDFNode node = oneVarOneSolutionQuery("{?var gr:isVariantOf ?someValue;}");
+			RDFNode node = oneVarOneSolutionQuery("{?var gr:isVariantOf ?someValue}");
 			smi_uri = node.toString();
 			writeMessageToCompletenessReport(smi_uri);
+		}
+		
+		// for all Service Model properties from BP:
+		// if the SD's SM has a relation equal to uri
+		// then the var must be an instance of rangeUri
+		for(BrokerPolicyClass bpc:bp.getServiceModelMap().values())
+		{
+			for(Subproperty sp:bpc.getPropertyMap().values())
+			{
+				RDFNode qvNode = oneVarOneSolutionQuery("{<" + smi_uri + "> <" + sp.getUri() + "> ?var;}");
+				if(qvNode != null)
+				{	// there is a relation with the SD's SM
+					Integer countQVs = countQuery("{<" + qvNode.toString() + "> rdf:type <" + sp.getRangeUri() + ">}");
+					if(countQVs == 0)
+					{	// found relation with non-existent instance, throw exception
+						writeMessageToCompletenessReport("Error - SD's Service model instance has a " + sp.getUri() + " relation with non existent " + sp.getRangeUri() + " " + qvNode.toString() + ".");
+						throw new CompletenessException("SD's Service model instance has a " + sp.getUri() + " relation with non existent " + sp.getRangeUri() + " " + qvNode.toString() + ".");						
+					}
+					else
+					{
+						writeMessageToCompletenessReport("OK - SD's Service model instance has a correct " + sp.getUri() + " relation with the " + sp.getRangeUri() + " " + qvNode.toString() + ".");						
+					}
+				}
+			}
 		}
 	}
 	
