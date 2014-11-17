@@ -36,11 +36,10 @@ import com.hp.hpl.jena.util.FileManager;
 
 public class PolicyCompletenessCompliance {
 
-	private static final String brokerPolicyPath = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
-	//private static final String brokerPolicyPath = "Ontologies/ForReview/CAS-broker-policies.ttl";
-	private static final String serviceLevelProfilePath = "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl";
-	private static final String serviceDescriptionPath = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
-	//private static final String serviceDescriptionPath = "Ontologies/ForReview/CAS-AddressApp.ttl";
+	//private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
+	private static final Object[] brokerPolicyResources = {"Ontologies/ForReview/CAS-broker-policies.ttl", "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl"};
+	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
+	private static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl"};
 	
 	protected OntModel modelMem = null;
 	private BrokerPolicy bp = new BrokerPolicy();
@@ -98,14 +97,14 @@ public class PolicyCompletenessCompliance {
 			PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 
 			// validate broker policy first
-			//pc.validateBrokerPolicy(brokerPolicyPath, serviceLevelProfilePath);
-			pc.validateBrokerPolicy(brokerPolicyPath);
+			pc.validateBrokerPolicy(brokerPolicyResources);
+			//pc.validateBrokerPolicy(brokerPolicyPath);
 			
 			// Get broker policy in Java object structure
-			pc.getBrokerPolicy(brokerPolicyPath);
+			pc.getBrokerPolicy(brokerPolicyResources);
 
 			// Perform completeness check
-			pc.validateSDForCompletenessCompliance(serviceDescriptionPath);
+			pc.validateSDForCompletenessCompliance(serviceDescriptionResources);
 
 		} catch (Exception e) {
 			System.out.println("Failure: " + e.getClass().getName() + " - "
@@ -115,7 +114,7 @@ public class PolicyCompletenessCompliance {
 		}
 	}
 
-	public void validateSDForCompletenessCompliance(Object dataToCheck) throws IOException, CompletenessException, ComplianceException {
+	public void validateSDForCompletenessCompliance(Object... dataToCheck) throws IOException, CompletenessException, ComplianceException {
 		if(bpHasSLPInConnection())
 		{	// already loaded BP had SLP info
 			// SD will be checked with the minimal connection checks
@@ -123,16 +122,116 @@ public class PolicyCompletenessCompliance {
 			writeMessageToBrokerPolicyReport("Loaded BP had SLP information inside! Will run the minimal checks on this SD!");
 			writeMessageToBrokerPolicyReport("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			writeMessageToBrokerPolicyReport("");
-			writeMessageToBrokerPolicyReport("SD minimal checks here..."); // TODO
-			
+
+			runMinimalCheck(dataToCheck);			
 		}
 		else
 		{	// normal case, full completeness/compliance check in SD.
 			runCompletenessCompliance(dataToCheck);			
 		}
 	}
+	
+	private void runMinimalCheck(Object dataToCheck) throws IOException, CompletenessException, ComplianceException 
+	{
+		writeMessageToCompletenessReport("##################");
+		writeMessageToCompletenessReport("Minimal Check");
+		writeMessageToCompletenessReport("##################");
+		
+		// Initialize model in this case in order not to find entities from BP
+		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+		
+		// Add the file contents into the Jena model
+		addDataToJenaModel(dataToCheck);
 
-	private void runCompletenessCompliance(Object dataToCheck)	throws IOException, CompletenessException, ComplianceException {
+		writeMessageToCompletenessReport("----------------");
+		writeMessageToCompletenessReport("Usdl-core completeness section:");
+		writeMessageToCompletenessReport("----------------");
+
+		// check that instance of Service class exists. Will take the first one, could there be more than one? No, checking later
+		RDFNode sInstance = oneVarOneSolutionQuery("{?var a usdl-core:Service}");
+		if(sInstance == null)
+		{
+			writeMessageToCompletenessReport("Error - No Service instance was found in the Service Description.");
+			throw new CompletenessException("No Service instance was found in the Service Description.");
+		}
+		writeMessageToCompletenessReport("Service instance was found in the Service Description: " + sInstance.toString());		
+		
+		// check that instance of Service is associated with a hasMakeAndModel relation with a Service Model
+		RDFNode smInstance = oneVarOneSolutionQuery("{<" + sInstance.toString() + "> usdl-core-cb:hasServiceModel ?var}");
+		if(smInstance == null)
+		{
+			writeMessageToCompletenessReport("Error - No Service instance with usdl-core-cb:hasServiceModel association was found with a Service Model.");
+			throw new CompletenessException("No Service instance with usdl-core-cb:hasServiceModel association was found with a Service Model.");
+		}
+		writeMessageToCompletenessReport("Service instance usdl-core-cb:hasServiceModel association was found with the Service Model: " + smInstance.toString());		
+		
+		// check that instance of Entity Involvement exists
+		RDFNode eiInstance = oneVarOneSolutionQuery("{?var a usdl-core:EntityInvolvement}");
+		if(eiInstance == null)
+		{
+			writeMessageToCompletenessReport("Error - No Entity Involvement instance was found in the Service Description.");
+			throw new CompletenessException("No Entity Involvement instance was found in the Service Description.");
+		}
+		writeMessageToCompletenessReport("Entity Involvement instance was found in the Service Description: " + eiInstance.toString());		
+		
+		// check that Service instance is associated via a hasEntityInvolvement relation with the Entity Involvement instance
+		Integer heiAssociationsCount = countQuery("{<" + sInstance.toString() + "> usdl-core:hasEntityInvolvement <" + eiInstance.toString() + ">}");
+		if(heiAssociationsCount == 0)
+		{
+			writeMessageToCompletenessReport("Error - Service instance is not associated via a hasEntityInvolvement relation with the Entity Involvement instance.");
+			throw new CompletenessException("Service instance is not associated via a hasEntityInvolvement relation with the Entity Involvement instance.");
+		}
+		writeMessageToCompletenessReport("Service instance is associated via a hasEntityInvolvement relation with the Entity Involvement instance.");		
+		
+		// check that instance of Entity Involvement is associated via the withBusinessRole relation with the provider instance of the class BusinessRoles
+		Integer wbrAssociationsCountInstance = countQuery("{<" + eiInstance.toString() + "> usdl-core:withBusinessRole <" + USDL_BUSINESS_ROLES + "provider>}");
+		if(wbrAssociationsCountInstance == 0)
+		{
+			writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");
+			throw new CompletenessException("Entity Involvement instance is not associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");
+		}
+		writeMessageToCompletenessReport("Entity Involvement instance is associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");		
+		
+		// check that instance of Business Entity exists
+		RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
+		if(beInstance == null)
+		{
+			writeMessageToCompletenessReport("Error - No Business Entity instance was found in the Service Description.");
+			throw new CompletenessException("No Business Entity instance was found in the Service Description.");
+		}
+		writeMessageToCompletenessReport("Business Entity instance was found in the Service Description: " + beInstance.toString());		
+
+		// check that instance of Entity Involvement is associated via the ofBusinessEnity relation with the Business Entity instance
+		Integer obeAssociationsCountInstance = countQuery("{<" + eiInstance.toString() + "> usdl-core:ofBusinessEntity <" + beInstance.toString() + ">}");
+		if(obeAssociationsCountInstance == 0)
+		{
+			writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
+			throw new CompletenessException("Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
+		}
+		writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");		
+		
+		writeMessageToCompletenessReport("----------------");
+		writeMessageToCompletenessReport("Service Section:");
+		writeMessageToCompletenessReport("----------------");
+		String si_uri = null; // service instance uri
+
+		// how many usdl-core:Service instances are present in the SD?
+		int countSi = countQuery("{?si rdf:type usdl-core:Service}");
+
+		if (countSi == 0) {
+			writeMessageToCompletenessReport("Error - SD does not contain an instance of usdl-core:Service");
+			throw new CompletenessException("SD does not contain an instance of usdl-core:Service");
+		} else if (countSi > 1) {
+			writeMessageToCompletenessReport("Error - SD must contain only 1 service instance");
+			throw new CompletenessException("SD must contain only 1 service instance");
+		} else if (countSi == 1) {
+			writeMessageToCompletenessReport("OK - SD contains exactly 1 service instance of type usdl-core:Service");
+			RDFNode node = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}");
+			si_uri = node.toString();
+		}
+	}
+	
+	private void runCompletenessCompliance(Object dataToCheck) throws IOException, CompletenessException, ComplianceException {
 		List<ClassInstancePair> qvPairList = null;
 			qvPairList = this.completenessCheck(dataToCheck);
 
@@ -1005,7 +1104,7 @@ public class PolicyCompletenessCompliance {
 		writeMessageToCompletenessReport("Business Entity instance was found in the Service Description: " + beInstance.toString());		
 
 		// check that instance of Entity Involvement is associated via the ofBusinessEnity relation with the Business Entity instance
-		Integer obeAssociationsCountInstance = countQuery("{<" + eiInstance.toString() + "> usdl-core:ofBusinessEnity <" + beInstance.toString() + ">}");
+		Integer obeAssociationsCountInstance = countQuery("{<" + eiInstance.toString() + "> usdl-core:ofBusinessEntity <" + beInstance.toString() + ">}");
 		if(obeAssociationsCountInstance == 0)
 		{
 			writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
