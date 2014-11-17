@@ -187,7 +187,7 @@ public class SDEvaluationListener implements MessageListener {
 	 */
 	private InputStream getBpForSd(InputStream sdis) throws IOException, RegistryException, CompletenessException {
 		// get the broker policy URI defined in this SD
-		String brokerPolicyUri = gregEvaluator.getPcc().getSDMakeAndModelURI(sdis);
+		String brokerPolicyUri = gregEvaluator.getPcc().getSDIsVariantOfURI(sdis);
 		// find BP in GREG that has the same URI 
 		InputStream bpIs = this.findBpWithUri(brokerPolicyUri);
 		

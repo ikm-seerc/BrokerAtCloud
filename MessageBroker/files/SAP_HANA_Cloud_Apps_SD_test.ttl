@@ -12,6 +12,8 @@
 
 @prefix usdl-core: <http://www.linked-usdl.org/ns/usdl-core#> .
 
+@prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#> .
+
 @prefix usdl-business-roles: <http://www.linked-usdl.org/ns/usdl-business-roles#> .
 
 @prefix usdl-sla: <http://www.linked-usdl.org/ns/usdl-sla#> .
@@ -29,7 +31,7 @@
 
 SD:Service1 a usdl-core:ServiceIndividual, usdl-core:Service; # is the usdl-core:Service needed?
 	gr:hasMakeAndModel brokerpolicy:BrokerPolicySAPHANAApp;
-    usdl-core:hasServiceModel SD:ServiceModelSAPHANAAppInstance;
+    usdl-core-cb:hasServiceModel SD:ServiceModelSAPHANAAppInstance;
     usdl-core:hasEntityInvolvement SD:EntityInvolvementSD .
 
 SD:EntityInvolvementSD a usdl-core:EntityInvolvement;
@@ -38,6 +40,9 @@ SD:EntityInvolvementSD a usdl-core:EntityInvolvement;
 
 SD:BusinessEntitySD a gr:BusinessEntity .
 
+SD:ServiceModelSAPHANAAppInstance a brokerpolicy:ServiceModelSAPHANAApp; # put . for demo
+	gr:isVariantOf brokerpolicy:BrokerPolicySAPHANAApp;
+	brokerpolicy:hasSLProfileForUserBasedApps SD:ServiceLevelProfileUserBasedAppsInstance .
 brokerpolicy:BrokerPolicySAPHANAApp brokerpolicy:hasSLProfileForUserBasedApps SD:ServiceLevelProfileUserBasedAppsInstance .
 	#brokerpolicy:hasSLProfileForUserBasedApps brokerpolicy:ServiceLevelProfileTransactionBasedAppsInstance.	
 	#brokerpolicy:hasSLProfileForUserBasedApps SD:ServiceLevelForAppSizingInstance .
