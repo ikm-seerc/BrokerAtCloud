@@ -271,6 +271,14 @@ public class PolicyCompletenessCompliance {
 
 	}
 
+	public void validateBrokerPolicy(Object bpFileData) throws IOException,
+		NoSuchMethodException, ClassNotFoundException,
+		InstantiationException, IllegalAccessException,
+		InvocationTargetException, BrokerPolicyException {
+		
+		this.validateBrokerPolicy(new Object[] {bpFileData});
+	}
+	
 	public void validateBrokerPolicy(Object... bpFileData) throws IOException,
 			NoSuchMethodException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException,
