@@ -10,6 +10,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 import org.seerc.brokeratcloud.policycompletenesscompliance.BrokerPolicyException;
+import org.seerc.brokeratcloud.policycompletenesscompliance.CompletenessException;
+import org.seerc.brokeratcloud.policycompletenesscompliance.ComplianceException;
 import org.seerc.brokeratcloud.policycompletenesscompliance.PolicyCompletenessCompliance;
 
 @Path("/brokerPolicy/validate")
@@ -27,7 +29,7 @@ public class BrokerPolicyValidator {
 		} catch (NoSuchMethodException | ClassNotFoundException
 				| InstantiationException | IllegalAccessException
 				| InvocationTargetException | IOException
-				| BrokerPolicyException e) 
+				| BrokerPolicyException | CompletenessException | ComplianceException e) 
 		{
 			e.printStackTrace();
 			
