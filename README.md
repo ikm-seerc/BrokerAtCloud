@@ -36,6 +36,11 @@ https://github.com/chrispetsos-seerc/BrokerAtCloud/blob/master/MessageBroker/src
 
 Folder https://github.com/chrispetsos-seerc/BrokerAtCloud/tree/master/MessageBroker/resources/properties has some configuration files used for connecting to the WSO2 MB and GReg.
 
+MessageBrokerComponents
+----------------------------
+
+This is an Eclipse Dynamic Web project (web application) that wraps the MessageBroker project and starts various needed MB components on startup of the web application.
+
 org.seerc.brokeratcloud.webservice
 ----------------------------
 
