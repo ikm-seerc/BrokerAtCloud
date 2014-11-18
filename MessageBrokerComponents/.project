@@ -3,6 +3,8 @@
 	<name>MessageBrokerComponents</name>
 	<comment></comment>
 	<projects>
+		<project>MessageBroker</project>
+		<project>PolicyCompletenessCompliance</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

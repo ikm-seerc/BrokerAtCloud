@@ -2,6 +2,12 @@
     <wb-module deploy-name="MessageBrokerComponents">
         <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <dependent-module archiveName="MessageBroker.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/MessageBroker/MessageBroker">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="PolicyCompletenessCompliance.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PolicyCompletenessCompliance/PolicyCompletenessCompliance">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="context-root" value="MessageBrokerComponents"/>
         <property name="java-output-path" value="/MessageBrokerComponents/build/classes"/>
     </wb-module>
