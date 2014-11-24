@@ -1200,9 +1200,6 @@ public class PolicyCompletenessCompliance {
 			si_uri = node.toString();
 		}
 
-		// now bring back the cached model with BP inside in order to use it for further checks
-		modelMem = cachedModel;
-
 		writeMessageToCompletenessReport("-------------------------------");
 		writeMessageToCompletenessReport("Service - ServiceModel Section:");
 		writeMessageToCompletenessReport("-------------------------------");
@@ -1246,7 +1243,6 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport(USDL_CORE + "hasServiceModel");*/
 
 			// Get the service model instance
-			// TODO: The isVariantOf might be helpful here...
 			RDFNode node = oneVarOneSolutionQuery("{?var rdf:type <" + smc_uri
 					+ ">}");
 			smi_uri = node.toString(); // Service model instance URI
@@ -1289,6 +1285,24 @@ public class PolicyCompletenessCompliance {
 				}
 			}
 		//}
+			
+			// check gr:isVariantOf
+			int countIsVariantOf = countQuery("{<" + smi_uri + "> gr:isVariantOf ?someValue}");
+	
+			if (countIsVariantOf == 0) {
+				writeMessageToCompletenessReport("Error - Service Model does not declare gr:isVariantOf.");
+				throw new CompletenessException("Service Model does not declare gr:isVariantOf.");
+			} else if (countIsVariantOf > 1) {
+				writeMessageToCompletenessReport("Error - Service Model declares more than one gr:isVariantOf.");
+				throw new CompletenessException("Service Model declares more than one gr:isVariantOf.");
+			} else if (countIsVariantOf == 1) {
+				writeMessageToCompletenessReport("OK - Service Model gr:isVariantOf:");
+				RDFNode isVariantOfNode = oneVarOneSolutionQuery("{<" + smi_uri + "> gr:isVariantOf ?var}");
+				writeMessageToCompletenessReport(isVariantOfNode.toString());
+			}			
+
+		// now bring back the cached model with BP inside in order to use it for further checks
+		modelMem = cachedModel;
 
 		// smCip: needed input for Service Model - Service Level Profile section
 		// in stepCompletenessCheck method (smc_uri (subclass URI) is needed to
