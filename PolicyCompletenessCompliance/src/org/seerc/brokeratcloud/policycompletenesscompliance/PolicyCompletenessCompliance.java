@@ -2212,7 +2212,7 @@ public class PolicyCompletenessCompliance {
 	}
 	
 	
-	public String getSDServiceInstanceURI(Object sdFileData) throws IOException
+	public String getSDServiceInstanceURI(Object sdFileData) throws IOException, CompletenessException
 	{
 		// Initial Creation
 		acquireMemoryForData(OntModelSpec.RDFS_MEM);
@@ -2220,29 +2220,43 @@ public class PolicyCompletenessCompliance {
 		// Add the SD into the Jena model
 		addDataToJenaModel(sdFileData);
 
-		String si_uri = null; // service instance uri
-
-		RDFNode node = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}");
-		si_uri = node.toString();
-		
-		return si_uri;
+		try 
+		{
+			String si_uri = null; // service instance uri
+	
+			RDFNode node = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}");
+			si_uri = node.toString();
+			
+			return si_uri;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new CompletenessException("Problem getting service instance URI. Enclosed message: " + e.getMessage());
+		}
 	}
 
 	/*
 	 * Returns the Service Model class URI from a SD
 	 */
-	public String getSDServiceModelURI(Object sdFileData) throws IOException {
+	public String getSDServiceModelURI(Object sdFileData) throws IOException, CompletenessException {
 		// Initial Creation
 		acquireMemoryForData(OntModelSpec.RDFS_MEM);
 
 		// Add the SD into the Jena model
 		addDataToJenaModel(sdFileData);
 
-		String si_uri = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}").toString(); // Service instance URI
-		String smi_uri = oneVarOneSolutionQuery("{<" + si_uri + "> usdl-core:hasServiceModel ?var}").toString(); // Service model instance URI
-		String smc_uri = oneVarOneSolutionQuery("{<" + smi_uri + "> a ?var}").toString(); // Service model class URI
-		
-		return smc_uri;
+		try
+		{
+			String si_uri = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}").toString(); // Service instance URI
+			String smi_uri = oneVarOneSolutionQuery("{<" + si_uri + "> usdl-core:hasServiceModel ?var}").toString(); // Service model instance URI
+			String smc_uri = oneVarOneSolutionQuery("{<" + smi_uri + "> a ?var}").toString(); // Service model class URI
+			
+			return smc_uri;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new CompletenessException("Problem getting service model URI. Enclosed message: " + e.getMessage());
+		}
 	}
 
 	/*
@@ -2274,7 +2288,7 @@ public class PolicyCompletenessCompliance {
 	/*
 	 * Returns the MakeAndModel that this SD refers to, that is the BP URI it should be checked against
 	 */
-	public String getSDMakeAndModelURI(InputStream sdis) throws IOException 
+	public String getSDMakeAndModelURI(InputStream sdis) throws IOException, CompletenessException 
 	{
 		// Initial Creation
 		acquireMemoryForData(OntModelSpec.RDFS_MEM);
@@ -2282,12 +2296,20 @@ public class PolicyCompletenessCompliance {
 		// Add the SD into the Jena model
 		addDataToJenaModel(sdis);
 
-		// the Service Individual instance 
-		RDFNode siInstance = oneVarOneSolutionQuery("{?var a usdl-core:ServiceIndividual}");
-		// BP URI
-		String bpUri = oneVarOneSolutionQuery("{<" + siInstance.toString() + "> gr:hasMakeAndModel ?var}").toString();
-		
-		return bpUri;
+		try
+		{
+			// the Service Individual instance 
+			RDFNode siInstance = oneVarOneSolutionQuery("{?var a usdl-core:ServiceIndividual}");
+			// BP URI
+			String bpUri = oneVarOneSolutionQuery("{<" + siInstance.toString() + "> gr:hasMakeAndModel ?var}").toString();
+			
+			return bpUri;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new CompletenessException("Problem getting make and model URI. Enclosed message: " + e.getMessage());
+		}
+
 	}
 
 	/*
@@ -2316,17 +2338,23 @@ public class PolicyCompletenessCompliance {
 	/*
 	 * Returns the isVariantOf of an SD
 	 */
-	public String getSDIsVariantOfURI(InputStream sdis) throws IOException {
+	public String getSDIsVariantOfURI(InputStream sdis) throws IOException, CompletenessException {
 		// Initial Creation
 		acquireMemoryForData(OntModelSpec.RDFS_MEM);
 	
 		// Add the SD into the Jena model
 		addDataToJenaModel(sdis);
 	
-		String si_uri = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}").toString(); // Service instance URI
-		String smi_uri = oneVarOneSolutionQuery("{<" + si_uri + "> usdl-core-cb:hasServiceModel ?var}").toString(); // Service model instance URI
-		String isVariantOfUri = oneVarOneSolutionQuery("{<" + smi_uri + "> gr:isVariantOf ?var}").toString(); // Service model instance URI
-		
-		return isVariantOfUri;
+		try {
+			String si_uri = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}").toString(); // Service instance URI
+			String smi_uri = oneVarOneSolutionQuery("{<" + si_uri + "> usdl-core-cb:hasServiceModel ?var}").toString(); // Service model instance URI
+			String isVariantOfUri = oneVarOneSolutionQuery("{<" + smi_uri + "> gr:isVariantOf ?var}").toString(); // Service model instance URI
+			
+			return isVariantOfUri;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new CompletenessException("Problem getting gr:isVariantOf for service model instance. Enclosed message: " + e.getMessage());
+		}
 	}
 }
