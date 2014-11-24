@@ -35,7 +35,7 @@ SD:Service1 a usdl-core:ServiceIndividual, usdl-core:Service; # is the usdl-core
     usdl-core:hasEntityInvolvement SD:EntityInvolvementSD .
 
 SD:EntityInvolvementSD a usdl-core:EntityInvolvement;
-	usdl-core:withBusinessRole usdl-business-roles:Provider;
+	usdl-core:withBusinessRole usdl-business-roles:provider;
 	usdl-core:ofBusinessEntity SD:BusinessEntitySD .
 
 SD:BusinessEntitySD a gr:BusinessEntity .

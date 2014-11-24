@@ -36,10 +36,10 @@ import com.hp.hpl.jena.util.FileManager;
 
 public class PolicyCompletenessCompliance {
 
-	//private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
-	private static final Object[] brokerPolicyResources = {"Ontologies/ForReview/CAS-broker-policies.ttl", "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl"};
-	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
-	private static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl"};
+	private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
+	//private static final Object[] brokerPolicyResources = {"Ontologies/ForReview/CAS-broker-policies.ttl", "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl"};
+	private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
+	//private static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl"};
 	
 	protected OntModel modelMem = null;
 	private BrokerPolicy bp = new BrokerPolicy();
@@ -1102,13 +1102,18 @@ public class PolicyCompletenessCompliance {
 		writeMessageToCompletenessReport("Completeness Check");
 		writeMessageToCompletenessReport("##################");
 
-		// Initial Creation
-		//acquireMemoryForData(OntModelSpec.RDFS_MEM);
+		// Add the file contents into the Jena model prior to caching it
+		addDataToJenaModel(fileData);
+		// cache the current modelMem with BP inside in order to use it later for relations with instances checks
+		OntModel cachedModel = modelMem;
+
+		// Init model now in order not to find BP stuff inside
+		acquireMemoryForData(OntModelSpec.RDFS_MEM);
 
 		// Add the file contents into the Jena model
 		addDataToJenaModel(fileData);
 
-		/*writeMessageToCompletenessReport("----------------");
+		writeMessageToCompletenessReport("----------------");
 		writeMessageToCompletenessReport("Usdl-core completeness section:");
 		writeMessageToCompletenessReport("----------------");
 
@@ -1149,13 +1154,13 @@ public class PolicyCompletenessCompliance {
 		writeMessageToCompletenessReport("Service Individual instance is associated via a hasEntityInvolvement relation with the Entity Involvement instance.");		
 		
 		// check that instance of Entity Involvement is associated via the withBusinessRole relation with the Provider instance of the class BusinessRoles
-		Integer wbrAssociationsCountInstance = countQuery("{<" + eiInstance.toString() + "> usdl-core:withBusinessRole <" + USDL_BUSINESS_ROLES + "Provider>}");
+		Integer wbrAssociationsCountInstance = countQuery("{<" + eiInstance.toString() + "> usdl-core:withBusinessRole <" + USDL_BUSINESS_ROLES + "provider>}");
 		if(wbrAssociationsCountInstance == 0)
 		{
-			writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the withBusinessRole relation with the Provider instance of the class BusinessRoles.");
-			throw new CompletenessException("Entity Involvement instance is not associated via the withBusinessRole relation with the Provider instance of the class BusinessRoles.");
+			writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");
+			throw new CompletenessException("Entity Involvement instance is not associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");
 		}
-		writeMessageToCompletenessReport("Entity Involvement instance is associated via the withBusinessRole relation with the Provider instance of the class BusinessRoles.");		
+		writeMessageToCompletenessReport("Entity Involvement instance is associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");		
 		
 		// check that instance of Business Entity exists
 		RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
@@ -1173,9 +1178,9 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 			throw new CompletenessException("Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 		}
-		writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");*/		
+		writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");		
 		
-		/*writeMessageToCompletenessReport("----------------");
+		writeMessageToCompletenessReport("----------------");
 		writeMessageToCompletenessReport("Service Section:");
 		writeMessageToCompletenessReport("----------------");
 		String si_uri = null; // service instance uri
@@ -1193,7 +1198,10 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport("OK - SD contains exactly 1 service instance of type usdl-core:Service");
 			RDFNode node = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}");
 			si_uri = node.toString();
-		}*/
+		}
+
+		// now bring back the cached model with BP inside in order to use it for further checks
+		modelMem = cachedModel;
 
 		writeMessageToCompletenessReport("-------------------------------");
 		writeMessageToCompletenessReport("Service - ServiceModel Section:");
