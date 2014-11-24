@@ -131,7 +131,7 @@ public class PolicyCompletenessCompliance {
 		}
 	}
 	
-	private void runMinimalCheck(Object dataToCheck) throws IOException, CompletenessException, ComplianceException 
+	private void runMinimalCheck(Object... dataToCheck) throws IOException, CompletenessException, ComplianceException 
 	{
 		writeMessageToCompletenessReport("##################");
 		writeMessageToCompletenessReport("Minimal Check");
@@ -145,6 +145,15 @@ public class PolicyCompletenessCompliance {
 		// Initialize model in this case in order not to find entities from BP
 		acquireMemoryForData(OntModelSpec.RDFS_MEM);
 		
+		// if BP data are in InputStream, reset it to reuse it
+		for(int i=0;i<dataToCheck.length;i++)
+		{
+			if(dataToCheck[i] instanceof InputStream)
+			{
+				((InputStream) dataToCheck[i]).reset();
+			}
+		}
+
 		// Add the file contents into the Jena model
 		addDataToJenaModel(dataToCheck);
 		
@@ -294,14 +303,17 @@ public class PolicyCompletenessCompliance {
 		}
 	}
 	
-	private void runCompletenessCompliance(Object dataToCheck) throws IOException, CompletenessException, ComplianceException {
+	private void runCompletenessCompliance(Object... dataToCheck) throws IOException, CompletenessException, ComplianceException {
 		List<ClassInstancePair> qvPairList = null;
 			qvPairList = this.completenessCheck(dataToCheck);
 
-		// reset dataToCheck if it's InputStream
-		if(dataToCheck instanceof InputStream)
+		// if BP data are in InputStream, reset it to reuse it
+		for(int i=0;i<dataToCheck.length;i++)
 		{
-			((InputStream) dataToCheck).reset();
+			if(dataToCheck[i] instanceof InputStream)
+			{
+				((InputStream) dataToCheck[i]).reset();
+			}
 		}
 		
 		// Perform compliance check
@@ -1095,7 +1107,7 @@ public class PolicyCompletenessCompliance {
 		return qvMap;
 	}
 	
-	private List<ClassInstancePair> completenessCheck(Object fileData)
+	private List<ClassInstancePair> completenessCheck(Object... fileData)
 			throws IOException, CompletenessException {
 
 		writeMessageToCompletenessReport("##################");
@@ -1109,6 +1121,15 @@ public class PolicyCompletenessCompliance {
 
 		// Init model now in order not to find BP stuff inside
 		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+
+		// if BP data are in InputStream, reset it to reuse it
+		for(int i=0;i<fileData.length;i++)
+		{
+			if(fileData[i] instanceof InputStream)
+			{
+				((InputStream) fileData[i]).reset();
+			}
+		}
 
 		// Add the file contents into the Jena model
 		addDataToJenaModel(fileData);
