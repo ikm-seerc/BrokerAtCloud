@@ -67,6 +67,9 @@ public class SDEvaluationListener implements MessageListener {
 			System.out.println("SDEvaluationListener received the message with ID==> "
 					+ message.getJMSMessageID());
 			
+			// (re)instantiate evaluation report object
+			ep = new EvaluationReport();
+
 			BytesMessage bm = (BytesMessage) message;
 			
 			// get its bytes
@@ -116,9 +119,6 @@ public class SDEvaluationListener implements MessageListener {
 			
 			// reuse stream
 			sdis.reset();
-
-			// (re)instantiate evaluation report object
-			ep = new EvaluationReport();
 
 			ep.setServiceInstance(si);
 			

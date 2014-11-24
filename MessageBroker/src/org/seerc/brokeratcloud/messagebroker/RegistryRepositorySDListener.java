@@ -12,6 +12,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 
+import org.seerc.brokeratcloud.policycompletenesscompliance.CompletenessException;
 import org.seerc.brokeratcloud.policycompletenesscompliance.PolicyCompletenessCompliance;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -81,6 +82,8 @@ public class RegistryRepositorySDListener implements MessageListener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (RegistryException e) {
+			e.printStackTrace();
+		} catch (CompletenessException e) {
 			e.printStackTrace();
 		}
 	}
