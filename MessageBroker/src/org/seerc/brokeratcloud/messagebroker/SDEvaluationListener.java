@@ -40,6 +40,9 @@ public class SDEvaluationListener implements MessageListener {
 	MessageBrokerStringPublisher mbsp;
 	
 	WSO2GREGClient wso2gregClient;
+	
+	// The Fuseki client
+	FusekiClient fc;
 
 	public SDEvaluationListener()
 	{
@@ -52,6 +55,8 @@ public class SDEvaluationListener implements MessageListener {
 			mbsp = new MessageBrokerStringPublisher("EvaluationComponentSDReportPublisher", "SDReport");
 			
 			this.wso2gregClient = new WSO2GREGClient();
+			
+			fc = new FusekiClient();
 		} catch (Exception e) {
 			System.out.println("Failure: " + e.getClass().getName() + " - "
 					+ e.getMessage());
@@ -136,6 +141,13 @@ public class SDEvaluationListener implements MessageListener {
 
 			// evaluation went OK, publish serialized report
 			mbsp.publishStringToTopic(gson.toJson(ep));
+			
+			// reuse stream
+			sdis.reset();
+
+			// send to Fuseki
+			System.out.println("Evaluation went OK, sending received SD to Fuseki.");
+			fc.addInputStreamToFuseki(sdis);
 			
 			bOutput.close(); // close ByteArrayOutputStream
 		} catch (JMSException e) {
