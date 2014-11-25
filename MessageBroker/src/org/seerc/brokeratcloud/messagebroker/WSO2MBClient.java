@@ -1,100 +1,62 @@
 package org.seerc.brokeratcloud.messagebroker;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.jms.JMSException;
-import javax.jms.MessageListener;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicSession;
-import javax.jms.TopicSubscriber;
-import javax.naming.Binding;
-import javax.naming.InitialContext;
-import javax.naming.NameClassPair;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+
 
 public class WSO2MBClient {
 
-	private InitialContext ctx;
-	private String mbClientId;
-	private String mbUsername = "admin";
-	private String mbPassword = "admin";
-	private String mbVirtualHostName = "carbon"; // fixed
-	private String mbDefaultHostName = "localhost";
-	private String mbDefaultPort = "5673";
-	private String connectionFactoryName = "qpidConnectionfactory"; // fixed
-	private String topicName; // the topic should be predefined by the
-										// administrator of the MB
+	WSO2GREGClient gregInMB = new WSO2GREGClient(){
 
+		protected void readWSO2GREGProperties() 
+		{
+			// additional GReg in MB properties
+			Properties wso2_gregInMB_properties = new Properties();
+
+			try {
+				wso2_greg_properties.load(this.getClass().getResourceAsStream(wso2_greg_properties_path));
+				wso2_gregInMB_properties.load(this.getClass().getResourceAsStream("/properties/wso2_mb.properties"));
+				gregRepoURL = wso2_gregInMB_properties.getProperty("gregInMBRepoURL");
+				gregRepoUsername = wso2_greg_properties.getProperty("gregRepoUsername");
+				gregRepoPassword = wso2_greg_properties.getProperty("gregRepoPassword");
+				brokerPolicyPath = wso2_greg_properties.getProperty("brokerPolicyPath");
+				brokerPoliciesFolder = wso2_greg_properties.getProperty("brokerPoliciesFolder");
+				serviceDescriptionPath = wso2_greg_properties.getProperty("serviceDescriptionPath");
+				serviceDescriptionsFolder = wso2_greg_properties.getProperty("serviceDescriptionsFolder");
+			} catch (IOException e) {
+				System.err.println("Could not load properties file from: " + wso2_greg_properties_path);
+				e.printStackTrace();
+			}
+		}
+	};
+	
 	public static void main(String[] args) {
 		WSO2MBClient mbc = new WSO2MBClient();
-		mbc.getAllTopics();
+		try {
+			mbc.getAllTopics();
+		} catch (RegistryException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public WSO2MBClient() {
-		initializeContext(mbUsername, mbPassword);
 	}
 
-	// This sets ctx with the InitialContext object which contains all the information (opaque) required
-	// to connect to the message broker
-	private void initializeContext(String userName, String password) {
-		Properties properties = new Properties();
-		properties.put("java.naming.factory.initial",
-				"org.wso2.andes.jndi.PropertiesFileInitialContextFactory"); // InitialContextFactory
-		/*properties.put("connectionfactory." + connectionFactoryName,
-				getTCPConnectionURL(userName, password)); // ConnectionFactory
-*/		//properties.put("topic.*", "*");// Topic
-		try {
-			ctx = new InitialContext(properties);
-		} catch (NamingException e) {
-			e.printStackTrace();
+	public List<String> getAllTopics() throws RegistryException {
+		List<String> result = new ArrayList<String>();
+		Collection topicsFolder = (Collection)gregInMB.getRemote_registry().get("/_system/governance/event/topics");
+		for(String s:topicsFolder.getChildren())
+		{
+			String topicName = s.substring(s.lastIndexOf("/") + 1);
+			result.add(topicName);
 		}
+		
+		return result;
 	}
 
-	//creates a string which is used by the above method (line 52) in order to create the initial context
-	private String getTCPConnectionURL(String username, String password) {
-		// amqp://{username}:{password}@carbon/carbon?brokerlist='tcp://{hostname}:{port}'
-		return new StringBuffer().append("amqp://").append(username)
-				.append(":").append(password).append("@").append(mbClientId)
-				.append("/").append(mbVirtualHostName)
-				.append("?brokerlist='tcp://").append(mbDefaultHostName)
-				.append(":").append(mbDefaultPort).append("'").toString();
-	}
-
-	public void getAllTopics() {
-		try {
-			List<Topic> topics = new ArrayList<Topic>(); 
-			scanJndiForQueues(topics, "");
-			int i=0;
-		} catch (Exception e) {
-			System.out.println("Failure: " + e.getClass().getName() + " - "
-					+ e.getMessage());
-			e.printStackTrace();
-			return;
-		}
-	}
-
-	private void scanJndiForQueues(List<Topic> out, String path) throws NamingException {
-	    //InitialContext context = new InitialContext();
-	    Object resource = ctx.lookup(path);
-	    if (isSubContext(resource)) {
-	        NamingEnumeration<NameClassPair> list = ctx.list(path);
-	        while (list.hasMoreElements()) {
-	        	NameClassPair binding = list.nextElement();
-	            scanJndiForQueues(out, path + "/" + binding.getName());
-	        }
-	    } else if (resource instanceof Topic) {
-	        out.add((Topic) resource);
-	    } // else ignore Topics
-	}
-
-	private boolean isSubContext(Object object) {
-	    return javax.naming.Context.class.isAssignableFrom(object.getClass());
-	}
 }

@@ -68,7 +68,7 @@ public class WSO2GREGClient {
 		this.getRemoteRegistryInstance();
 	}
 	
-	private void readWSO2GREGProperties() 
+	protected void readWSO2GREGProperties() 
 	{
 		try {
 			wso2_greg_properties.load(this.getClass().getResourceAsStream(wso2_greg_properties_path));
