@@ -1,29 +1,26 @@
 package org.seerc.brokeratcloud.webservice;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.jms.Topic;
-import javax.naming.Binding;
-import javax.naming.InitialContext;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+
+import org.seerc.brokeratcloud.messagebroker.WSO2MBClient;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+
+import com.google.gson.Gson;
 
 @Path("/messageBroker")
 public class MessageBroker {
 
+	private WSO2MBClient mb = new WSO2MBClient();
+	Gson gson = new Gson();
+	
 	@GET
 	@Path("/getAllTopics")
-	public String getAllTopics()
+	public String getAllTopics() throws RegistryException
 	{
-		/*try {
-			List<Topic> topics = scanJndiForQueues("");
-			int i=0;
-		} catch (NamingException e) {
-			e.printStackTrace();
-		}*/
-		return "Hey";
+		List<String> topics = mb.getAllTopics();
+		return gson.toJson(topics);
 	}
 }
