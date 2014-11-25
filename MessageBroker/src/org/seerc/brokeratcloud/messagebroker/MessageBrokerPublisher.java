@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.UUID;
 
 import javax.jms.BytesMessage;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
@@ -35,6 +37,20 @@ public class MessageBrokerPublisher {
 			this.mbClientId = clientId;
 			this.topicName = topicName;
 			initializeContext(mbUsername, mbPassword);
+			/*
+			 * Create the topic if it doesn't exist by subscribing to it
+			 */
+			MessageBrokerSubscriber mbs = new MessageBrokerSubscriber(UUID.randomUUID().toString(), topicName, new MessageListener() {
+				// Empty MessageListener, just need to create the topic.
+				@Override
+				public void onMessage(Message arg0) {
+					// do nothing
+				}
+			});
+			// create the topic by subscribing
+			mbs.subscribeToTopic();
+			// release these resources should not be needed anymore
+			mbs.releaseResources();
 		} else {
 			throw new NullPointerException("clientId must not be null");
 		}
