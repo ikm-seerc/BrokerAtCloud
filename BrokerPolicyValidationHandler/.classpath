@@ -20,5 +20,6 @@
 	<classpathentry exported="true" kind="var" path="ECLIPSE_WORKSPACE/.metadata/.plugins/org.wso2.developerstudio.eclipse.libraries/lib/wsdl4j_1.6.2.wso2v4.jar"/>
 	<classpathentry exported="true" kind="var" path="ECLIPSE_WORKSPACE/.metadata/.plugins/org.wso2.developerstudio.eclipse.libraries/lib/XmlSchema_1.4.7.wso2v2.jar"/>
 	<classpathentry kind="src" path="/PolicyCompletenessCompliance"/>
+	<classpathentry kind="src" path="/MessageBroker"/>
 	<classpathentry kind="output" path="target"/>
 </classpath>
