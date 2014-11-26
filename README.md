@@ -50,7 +50,7 @@ BrokerPolicyValidationHandler
 ----------------------------
 This is a WSO2 Developer Studio Registry Handler project. It implements the Handler functionality for validating Broker Policies when they are PUT inside GReg at their specified path.
 
-It also contains the **BrokerAtCloud sub-project** which is a WSO2 Composite Application (CApp) that registers the handler when run inside GReg. Note that in order for the BrokerAtCloud CApp to run successfully in WSO2 Governance Registry, one should put inside CARBON_HOME/repository/components/lib the PolicyCompletenessCompliance code as a JAR file and the Apache Jena 2.11.1 JARs contained in its "lib" subfolder. Jena's JARs should be the following:
+It also contains the **BrokerAtCloud sub-project** which is a WSO2 Composite Application (CApp) that registers the handler when run inside GReg. Note that in order for the BrokerAtCloud CApp to run successfully in WSO2 Governance Registry, one should put inside CARBON_HOME/repository/components/lib the PolicyCompletenessCompliance and MessageBroker code as JAR files and the Apache Jena 2.11.1 JARs contained in its "lib" subfolder. Jena's JARs should be the following:
 
 commons-codec-1.6.jar
 
@@ -80,12 +80,14 @@ xercesImpl-2.11.0.jar
 
 xml-apis-1.4.01.jar
 
+Also the MessageBroker's JARs (appearing in its lib folder should be put in the same place (keep newer slf4j...).
+
 After those JARs have been put in place, one should restart GReg and should be able to run the "BrokerAtCloud" CApp inside WSO2 GReg.
 
-It should be also noted that whenever the PolicyCompletenessCompliance changes, one should:
+It should be also noted that whenever the PolicyCompletenessCompliance and/or MessageBroker changes, one should:
 
-1) Re-build the PolicyCompletenessCompliance jar.
+1) Re-build the PolicyCompletenessCompliance and/or MessageBroker jar.
 
-2) Copy the built jar in the CARBON_HOME/repository/components/lib folder.
+2) Copy the built jar(s) in the CARBON_HOME/repository/components/lib folder.
 
 3) Restart GReg
