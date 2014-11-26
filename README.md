@@ -80,6 +80,8 @@ xercesImpl-2.11.0.jar
 
 xml-apis-1.4.01.jar
 
+Also the MessageBroker's JARs (appearing in its lib folder should be put in the same place (keep newer slf4j...).
+
 After those JARs have been put in place, one should restart GReg and should be able to run the "BrokerAtCloud" CApp inside WSO2 GReg.
 
 It should be also noted that whenever the PolicyCompletenessCompliance and/or MessageBroker changes, one should:
