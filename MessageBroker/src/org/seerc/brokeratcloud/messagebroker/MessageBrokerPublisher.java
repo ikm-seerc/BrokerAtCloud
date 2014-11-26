@@ -37,20 +37,7 @@ public class MessageBrokerPublisher {
 			this.mbClientId = clientId;
 			this.topicName = topicName;
 			initializeContext(mbUsername, mbPassword);
-			/*
-			 * Create the topic if it doesn't exist by subscribing to it
-			 */
-			MessageBrokerSubscriber mbs = new MessageBrokerSubscriber(UUID.randomUUID().toString(), topicName, new MessageListener() {
-				// Empty MessageListener, just need to create the topic.
-				@Override
-				public void onMessage(Message arg0) {
-					// do nothing
-				}
-			});
-			// create the topic by subscribing
-			mbs.subscribeToTopic();
-			// release these resources should not be needed anymore
-			mbs.releaseResources();
+			WSO2MBClient.createTopic(topicName);
 		} else {
 			throw new NullPointerException("clientId must not be null");
 		}
