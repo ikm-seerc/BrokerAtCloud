@@ -2357,4 +2357,9 @@ public class PolicyCompletenessCompliance {
 			throw new CompletenessException("Problem getting gr:isVariantOf for service model instance. Enclosed message: " + e.getMessage());
 		}
 	}
+
+	public BrokerPolicy getBP() 
+	{
+		return this.bp;
+	}
 }
