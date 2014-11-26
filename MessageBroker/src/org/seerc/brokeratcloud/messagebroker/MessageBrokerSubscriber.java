@@ -102,7 +102,7 @@ public class MessageBrokerSubscriber {
 			System.out
 					.println("Releasing resources in Message Broker reserved by the Topic Listener...");
 
-			tConnection.close();
+			//tConnection.close();	// this suspends the Thread execution. Will see if we need to bring it back.
 			tSession.close();
 			tSubscriber.close();
 
