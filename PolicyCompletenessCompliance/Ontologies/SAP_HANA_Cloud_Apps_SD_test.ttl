@@ -55,12 +55,6 @@ fc:projectmanager a usdl-core-cb:ClassificationDimension ;
 	skos:broader fc:roles ;
 	skos:inScheme fc:CASConceptScheme .
 	
-brokerpolicy:BrokerPolicySAPHANAApp brokerpolicy:hasSLProfileForUserBasedApps SD:ServiceLevelProfileUserBasedAppsInstance .
-	#brokerpolicy:hasSLProfileForUserBasedApps brokerpolicy:ServiceLevelProfileTransactionBasedAppsInstance.	
-	#brokerpolicy:hasSLProfileForUserBasedApps SD:ServiceLevelForAppSizingInstance .
-	#brokerpolicy:hasSLForAppSizing SD:ServiceLevelProfileUserBasedAppsInstance .
-	#brokerpolicy:hasSLForAppSizing SD:ServiceLevelForAppSizingInstance .
-
 SD:ServiceLevelProfileUserBasedAppsInstance a brokerpolicy:ServiceLevelProfileUserBasedApps;
 	brokerpolicy:hasSLForAppSizing SD:ServiceLevelForAppSizingInstance .
 	

@@ -36,10 +36,10 @@ import com.hp.hpl.jena.util.FileManager;
 
 public class PolicyCompletenessCompliance {
 
-	//private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
-	private static final Object[] brokerPolicyResources = {"Ontologies/ForReview/CAS-broker-policies.ttl", "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl", "Ontologies/ForReview/CAS-functional-categories.ttl"};
-	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
-	private static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl", "Ontologies/ForReview/CAS-functional-categories.ttl"};
+	private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
+	//private static final Object[] brokerPolicyResources = {"Ontologies/ForReview/CAS-broker-policies.ttl", "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl", "Ontologies/ForReview/CAS-functional-categories.ttl"};
+	private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
+	//private static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl", "Ontologies/ForReview/CAS-functional-categories.ttl"};
 	
 	protected OntModel modelMem = null;
 	private BrokerPolicy bp = new BrokerPolicy();
