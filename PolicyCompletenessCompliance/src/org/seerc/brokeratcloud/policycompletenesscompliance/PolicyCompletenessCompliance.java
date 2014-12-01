@@ -37,7 +37,7 @@ import com.hp.hpl.jena.util.FileManager;
 public class PolicyCompletenessCompliance {
 
 	//private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
-	private static final Object[] brokerPolicyResources = {"Ontologies/ForReview/CAS-broker-policies.ttl", "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl"};
+	private static final Object[] brokerPolicyResources = {"Ontologies/ForReview/CAS-broker-policies.ttl", "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl", "Ontologies/ForReview/CAS-functional-categories.ttl"};
 	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
 	private static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl", "Ontologies/ForReview/CAS-functional-categories.ttl"};
 	
@@ -1343,6 +1343,8 @@ public class PolicyCompletenessCompliance {
 			}			
 		}
 
+		this.checkClassificationDimensionsInSD(smi_uri);
+
 		// now bring back the cached model with BP inside in order to use it for further checks
 		modelMem = cachedModel;
 
@@ -1423,7 +1425,7 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport("Error - Service Model instance has no classification dimensions declared.");
 			throw new CompletenessException("Service Model instance has no classification dimensions declared.");
 		}
-		writeMessageToCompletenessReport("Service Model instance has " + countCDs + " classification dimensions declared.");
+		writeMessageToCompletenessReport("Service Model instance has " + countCDs + " classification dimension(s) declared.");
 		
 		RDFNode[] cdsNodes = oneVarManySolutionsQuery("{<" + smi_uri + "> <" + USDL_CORE_CB + "hasClassificationDimension> ?var}");
 		for(int i=0;i<cdsNodes.length;i++)

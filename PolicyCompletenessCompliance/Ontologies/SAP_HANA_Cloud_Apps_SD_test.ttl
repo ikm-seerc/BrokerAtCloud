@@ -24,6 +24,10 @@
 
 @prefix SD: <http://www.provider1.com/service-description1#> .
 
+@prefix fc: <http://www.broker-cloud.eu/service-descriptions/CAS/categories#> .
+
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#>. 
+
 @base <http://www.provider1.com/service-description1/> .
 
 
@@ -42,7 +46,15 @@ SD:BusinessEntitySD a gr:BusinessEntity .
 
 SD:ServiceModelSAPHANAAppInstance a brokerpolicy:ServiceModelSAPHANAApp; # put . for demo
 	gr:isVariantOf brokerpolicy:BrokerPolicySAPHANAApp;
+	usdl-core-cb:hasClassificationDimension fc:projectmanager;
 	brokerpolicy:hasSLProfileForUserBasedApps SD:ServiceLevelProfileUserBasedAppsInstance .
+	
+fc:projectmanager a usdl-core-cb:ClassificationDimension ;
+	skos:prefLabel "Project management"@en ;
+	skos:altLabel "Projektmanagement"@de ;
+	skos:broader fc:roles ;
+	skos:inScheme fc:CASConceptScheme .
+	
 brokerpolicy:BrokerPolicySAPHANAApp brokerpolicy:hasSLProfileForUserBasedApps SD:ServiceLevelProfileUserBasedAppsInstance .
 	#brokerpolicy:hasSLProfileForUserBasedApps brokerpolicy:ServiceLevelProfileTransactionBasedAppsInstance.	
 	#brokerpolicy:hasSLProfileForUserBasedApps SD:ServiceLevelForAppSizingInstance .
