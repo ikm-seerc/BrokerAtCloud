@@ -39,7 +39,7 @@ public class PolicyCompletenessCompliance {
 	//private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
 	private static final Object[] brokerPolicyResources = {"Ontologies/ForReview/CAS-broker-policies.ttl", "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl"};
 	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
-	private static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl"};
+	private static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl", "Ontologies/ForReview/CAS-functional-categories.ttl"};
 	
 	protected OntModel modelMem = null;
 	private BrokerPolicy bp = new BrokerPolicy();
@@ -49,6 +49,7 @@ public class PolicyCompletenessCompliance {
 	private static final String USDL_CORE = "http://www.linked-usdl.org/ns/usdl-core#";
 	private static final String USDL_BUSINESS_ROLES = "http://www.linked-usdl.org/ns/usdl-business-roles#";
 	private static final String USDL_SLA = "http://www.linked-usdl.org/ns/usdl-sla#";
+	private static final String USDL_CORE_CB = "http://www.linked-usdl.org/ns/usdl-core/cloud-broker#";
 	private static final String RDFS = "http://www.w3.org/2000/01/rdf-schema#";
 	private static final String GR = "http://purl.org/goodrelations/v1#";
 	private static final String RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
@@ -278,6 +279,8 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport(node.toString());
 		}
 		
+		this.checkClassificationDimensionsInSD(smi_uri);
+
 		// now bring back the cached model with BP inside in order to use it for relations with instances checks
 		modelMem = cachedModel;
 
@@ -1413,6 +1416,30 @@ public class PolicyCompletenessCompliance {
 		return qvPairListTotal;
 	}
 
+	private void checkClassificationDimensionsInSD(String smi_uri) throws CompletenessException 
+	{
+		Integer countCDs = countQuery("{<" + smi_uri + "> <" + USDL_CORE_CB + "hasClassificationDimension> ?var}");
+		if (countCDs == 0) {
+			writeMessageToCompletenessReport("Error - Service Model instance has no classification dimensions declared.");
+			throw new CompletenessException("Service Model instance has no classification dimensions declared.");
+		}
+		writeMessageToCompletenessReport("Service Model instance has " + countCDs + " classification dimensions declared.");
+		
+		RDFNode[] cdsNodes = oneVarManySolutionsQuery("{<" + smi_uri + "> <" + USDL_CORE_CB + "hasClassificationDimension> ?var}");
+		for(int i=0;i<cdsNodes.length;i++)
+		{
+			// check CD exists
+			Integer cdCount = countQuery("{<" + cdsNodes[i].toString() + "> rdf:type <" + USDL_CORE_CB + "ClassificationDimension>}");
+			if(cdCount == 0)
+			{
+				writeMessageToCompletenessReport("Error - Classification dimension " + cdsNodes[i].toString() + " does not exist.");
+				throw new CompletenessException("Classification dimension " + cdsNodes[i].toString() + " does not exist.");
+			}
+			writeMessageToCompletenessReport("Found classification dimension " + cdsNodes[i].toString() + ".");
+		}
+		int i=0;
+	}
+
 	// ClassInstancePair Input: the instance URI used as a starting point for
 	// the various checks along with the class URI this instance belongs to, so
 	// that the properties connecting this instance with other instances can be
@@ -2177,6 +2204,23 @@ public class PolicyCompletenessCompliance {
 		return node;
 	}
 
+	private RDFNode[] oneVarManySolutionsQuery(String subQuery) {
+		QueryExecution qexec = returnQueryExecObject("SELECT ?var WHERE "
+				+ subQuery);
+		List<RDFNode> node = new ArrayList<RDFNode>();
+		try {
+			ResultSet rs = qexec.execSelect();
+
+			while (rs.hasNext()) {
+				QuerySolution soln = rs.nextSolution();
+				node.add(soln.get("?var"));
+			}
+		} finally {
+			qexec.close();
+		}
+		return node.toArray(new RDFNode[0]);
+	}
+
 	private QueryExecution returnQueryExecObject(String coreQuery) {
 		StringBuffer queryStr = new StringBuffer();
 		// Establish Prefixes
@@ -2192,6 +2236,7 @@ public class PolicyCompletenessCompliance {
 		//queryStr.append("PREFIX brokerpolicy: <http://www.broker-cloud.eu/d043567/linked-usdl-ontologies/SAP-HANA-Cloud-Apps-Broker/2014/01/brokerpolicy#>");
 		//queryStr.append("PREFIX cas: <http://www.broker-cloud.eu/service-descriptions/CAS/broker#>");
 		queryStr.append("PREFIX gr: <http://purl.org/goodrelations/v1#>");
+		queryStr.append("PREFIX fc: <http://www.broker-cloud.eu/service-descriptions/CAS/categories#>");
 
 		queryStr.append(coreQuery);
 
