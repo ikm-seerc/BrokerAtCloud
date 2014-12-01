@@ -36,10 +36,10 @@ import com.hp.hpl.jena.util.FileManager;
 
 public class PolicyCompletenessCompliance {
 
-	private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
-	//private static final Object[] brokerPolicyResources = {"Ontologies/ForReview/CAS-broker-policies.ttl", "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl"};
-	private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
-	//private static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl"};
+	//private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
+	private static final Object[] brokerPolicyResources = {"Ontologies/ForReview/CAS-broker-policies.ttl", "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl"};
+	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
+	private static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl"};
 	
 	protected OntModel modelMem = null;
 	private BrokerPolicy bp = new BrokerPolicy();
@@ -62,6 +62,9 @@ public class PolicyCompletenessCompliance {
 	
 	// The tee output stream that will output compliance report messages both to System.out and file.
 	TeeOutputStream complianceReportTos;
+	
+	// indicates whether the loaded BP has SLP in Connection (denoting that we should go for minimal SD check)
+	private boolean bpHasSLPInConnection = false;
 	
 	public PolicyCompletenessCompliance()
 	{
@@ -429,7 +432,8 @@ public class PolicyCompletenessCompliance {
 
 		bp.setQualitativeValueMapWithInstances(getQualitativeValueMap(qualVSubclassList));
 		
-
+		// indicate whether this BP has SLP in connection
+		checkBpHasSLPInConnection();
 	}
 
 	public void validateBrokerPolicy(Object bpFileData) throws IOException,
@@ -765,7 +769,11 @@ public class PolicyCompletenessCompliance {
 		writeMessageToBrokerPolicyReport("");
 	}
 
-	public boolean bpHasSLPInConnection()
+	public boolean bpHasSLPInConnection() {
+		return this.bpHasSLPInConnection;
+	}
+
+	private void checkBpHasSLPInConnection()
 			throws IOException {
 		RDFNode smInstance = oneVarOneSolutionQuery("{?var rdf:type <" + bp.getServiceModelMap().keySet().iterator().next()
 				+ ">}");
@@ -783,13 +791,15 @@ public class PolicyCompletenessCompliance {
 						RDFNode slpConnection = oneVarOneSolutionQuery("{<" + smInstance.toString() + "> <" + hasSlpProperty + "> ?var}");
 						if(slpConnection != null)
 						{	// found SLP connection
-							return true;
+							this.bpHasSLPInConnection = true;
+							return;
 						}
 					}
 				}
 			}
 		}
-		return false;
+		this.bpHasSLPInConnection = false;
+		return;
 	}
 
 	public void checkCorrectStringDeclaration(String stringClassUri, String relationToLookFor) throws BrokerPolicyException {
@@ -1134,178 +1144,185 @@ public class PolicyCompletenessCompliance {
 		// Add the file contents into the Jena model
 		addDataToJenaModel(fileData);
 
-		writeMessageToCompletenessReport("----------------");
-		writeMessageToCompletenessReport("Usdl-core completeness section:");
-		writeMessageToCompletenessReport("----------------");
-
-		// check that instance of Service Individual class exists. Will take the first one, could there be more than one? TODO
-		RDFNode siInstance = oneVarOneSolutionQuery("{?var a usdl-core:ServiceIndividual}");
-		if(siInstance == null)
+		// Usdl-core SD checks should be done only on pure SDs, not on BP-like-SD cases. Those types of checks run in minimal check flow for minimal SDs.
+		if(!this.bpHasSLPInConnection())
 		{
-			writeMessageToCompletenessReport("Error - No Service Individual instance was found in the Service Description.");
-			throw new CompletenessException("No Service Individual instance was found in the Service Description.");
+			writeMessageToCompletenessReport("----------------");
+			writeMessageToCompletenessReport("Usdl-core completeness section:");
+			writeMessageToCompletenessReport("----------------");
+	
+			// check that instance of Service Individual class exists. Will take the first one, could there be more than one? TODO
+			RDFNode siInstance = oneVarOneSolutionQuery("{?var a usdl-core:ServiceIndividual}");
+			if(siInstance == null)
+			{
+				writeMessageToCompletenessReport("Error - No Service Individual instance was found in the Service Description.");
+				throw new CompletenessException("No Service Individual instance was found in the Service Description.");
+			}
+			writeMessageToCompletenessReport("Service Individual instance was found in the Service Description: " + siInstance.toString());		
+			
+			// check that instance of Service Individual is associated with a hasMakeAndModel relation with a Broker Policy
+			RDFNode bpInstance = oneVarOneSolutionQuery("{<" + siInstance.toString() + "> gr:hasMakeAndModel ?var}");
+			if(bpInstance == null)
+			{
+				writeMessageToCompletenessReport("Error - No Service Individual instance gr:hasMakeAndModel association was found with a Broker Policy.");
+				throw new CompletenessException("No Service Individual instance gr:hasMakeAndModel association was found with a Broker Policy.");
+			}
+			writeMessageToCompletenessReport("Service Individual instance gr:hasMakeAndModel association was found with the Broker Policy: " + bpInstance.toString());		
+			
+			// check that instance of Entity Involvement exists
+			RDFNode eiInstance = oneVarOneSolutionQuery("{?var a usdl-core:EntityInvolvement}");
+			if(eiInstance == null)
+			{
+				writeMessageToCompletenessReport("Error - No Entity Involvement instance was found in the Service Description.");
+				throw new CompletenessException("No Entity Involvement instance was found in the Service Description.");
+			}
+			writeMessageToCompletenessReport("Entity Involvement instance was found in the Service Description: " + eiInstance.toString());		
+			
+			// check that Service Individual instance is associated via a hasEntityInvolvement relation with the Entity Involvement instance
+			Integer heiAssociationsCount = countQuery("{<" + siInstance.toString() + "> usdl-core:hasEntityInvolvement <" + eiInstance.toString() + ">}");
+			if(heiAssociationsCount == 0)
+			{
+				writeMessageToCompletenessReport("Error - Service Individual instance is not associated via a hasEntityInvolvement relation with the Entity Involvement instance.");
+				throw new CompletenessException("Service Individual instance is not associated via a hasEntityInvolvement relation with the Entity Involvement instance.");
+			}
+			writeMessageToCompletenessReport("Service Individual instance is associated via a hasEntityInvolvement relation with the Entity Involvement instance.");		
+			
+			// check that instance of Entity Involvement is associated via the withBusinessRole relation with the Provider instance of the class BusinessRoles
+			Integer wbrAssociationsCountInstance = countQuery("{<" + eiInstance.toString() + "> usdl-core:withBusinessRole <" + USDL_BUSINESS_ROLES + "provider>}");
+			if(wbrAssociationsCountInstance == 0)
+			{
+				writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");
+				throw new CompletenessException("Entity Involvement instance is not associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");
+			}
+			writeMessageToCompletenessReport("Entity Involvement instance is associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");		
+			
+			// check that instance of Business Entity exists
+			RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
+			if(beInstance == null)
+			{
+				writeMessageToCompletenessReport("Error - No Business Entity instance was found in the Service Description.");
+				throw new CompletenessException("No Business Entity instance was found in the Service Description.");
+			}
+			writeMessageToCompletenessReport("Business Entity instance was found in the Service Description: " + beInstance.toString());		
+	
+			// check that instance of Entity Involvement is associated via the ofBusinessEnity relation with the Business Entity instance
+			Integer obeAssociationsCountInstance = countQuery("{<" + eiInstance.toString() + "> usdl-core:ofBusinessEntity <" + beInstance.toString() + ">}");
+			if(obeAssociationsCountInstance == 0)
+			{
+				writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
+				throw new CompletenessException("Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
+			}
+			writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");		
+			
+			writeMessageToCompletenessReport("----------------");
+			writeMessageToCompletenessReport("Service Section:");
+			writeMessageToCompletenessReport("----------------");
+			String si_uri = null; // service instance uri
+	
+			// how many usdl-core:Service instances are present in the SD?
+			int countSi = countQuery("{?si rdf:type usdl-core:Service}");
+	
+			if (countSi == 0) {
+				writeMessageToCompletenessReport("Error - SD does not contain an instance of usdl-core:Service");
+				throw new CompletenessException("SD does not contain an instance of usdl-core:Service");
+			} else if (countSi > 1) {
+				writeMessageToCompletenessReport("Error - SD must contain only 1 service instance");
+				throw new CompletenessException("SD must contain only 1 service instance");
+			} else if (countSi == 1) {
+				writeMessageToCompletenessReport("OK - SD contains exactly 1 service instance of type usdl-core:Service");
+				RDFNode node = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}");
+				si_uri = node.toString();
+			}
 		}
-		writeMessageToCompletenessReport("Service Individual instance was found in the Service Description: " + siInstance.toString());		
-		
-		// check that instance of Service Individual is associated with a hasMakeAndModel relation with a Broker Policy
-		RDFNode bpInstance = oneVarOneSolutionQuery("{<" + siInstance.toString() + "> gr:hasMakeAndModel ?var}");
-		if(bpInstance == null)
-		{
-			writeMessageToCompletenessReport("Error - No Service Individual instance gr:hasMakeAndModel association was found with a Broker Policy.");
-			throw new CompletenessException("No Service Individual instance gr:hasMakeAndModel association was found with a Broker Policy.");
-		}
-		writeMessageToCompletenessReport("Service Individual instance gr:hasMakeAndModel association was found with the Broker Policy: " + bpInstance.toString());		
-		
-		// check that instance of Entity Involvement exists
-		RDFNode eiInstance = oneVarOneSolutionQuery("{?var a usdl-core:EntityInvolvement}");
-		if(eiInstance == null)
-		{
-			writeMessageToCompletenessReport("Error - No Entity Involvement instance was found in the Service Description.");
-			throw new CompletenessException("No Entity Involvement instance was found in the Service Description.");
-		}
-		writeMessageToCompletenessReport("Entity Involvement instance was found in the Service Description: " + eiInstance.toString());		
-		
-		// check that Service Individual instance is associated via a hasEntityInvolvement relation with the Entity Involvement instance
-		Integer heiAssociationsCount = countQuery("{<" + siInstance.toString() + "> usdl-core:hasEntityInvolvement <" + eiInstance.toString() + ">}");
-		if(heiAssociationsCount == 0)
-		{
-			writeMessageToCompletenessReport("Error - Service Individual instance is not associated via a hasEntityInvolvement relation with the Entity Involvement instance.");
-			throw new CompletenessException("Service Individual instance is not associated via a hasEntityInvolvement relation with the Entity Involvement instance.");
-		}
-		writeMessageToCompletenessReport("Service Individual instance is associated via a hasEntityInvolvement relation with the Entity Involvement instance.");		
-		
-		// check that instance of Entity Involvement is associated via the withBusinessRole relation with the Provider instance of the class BusinessRoles
-		Integer wbrAssociationsCountInstance = countQuery("{<" + eiInstance.toString() + "> usdl-core:withBusinessRole <" + USDL_BUSINESS_ROLES + "provider>}");
-		if(wbrAssociationsCountInstance == 0)
-		{
-			writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");
-			throw new CompletenessException("Entity Involvement instance is not associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");
-		}
-		writeMessageToCompletenessReport("Entity Involvement instance is associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");		
-		
-		// check that instance of Business Entity exists
-		RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
-		if(beInstance == null)
-		{
-			writeMessageToCompletenessReport("Error - No Business Entity instance was found in the Service Description.");
-			throw new CompletenessException("No Business Entity instance was found in the Service Description.");
-		}
-		writeMessageToCompletenessReport("Business Entity instance was found in the Service Description: " + beInstance.toString());		
-
-		// check that instance of Entity Involvement is associated via the ofBusinessEnity relation with the Business Entity instance
-		Integer obeAssociationsCountInstance = countQuery("{<" + eiInstance.toString() + "> usdl-core:ofBusinessEntity <" + beInstance.toString() + ">}");
-		if(obeAssociationsCountInstance == 0)
-		{
-			writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
-			throw new CompletenessException("Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
-		}
-		writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");		
-		
-		writeMessageToCompletenessReport("----------------");
-		writeMessageToCompletenessReport("Service Section:");
-		writeMessageToCompletenessReport("----------------");
-		String si_uri = null; // service instance uri
-
-		// how many usdl-core:Service instances are present in the SD?
-		int countSi = countQuery("{?si rdf:type usdl-core:Service}");
-
-		if (countSi == 0) {
-			writeMessageToCompletenessReport("Error - SD does not contain an instance of usdl-core:Service");
-			throw new CompletenessException("SD does not contain an instance of usdl-core:Service");
-		} else if (countSi > 1) {
-			writeMessageToCompletenessReport("Error - SD must contain only 1 service instance");
-			throw new CompletenessException("SD must contain only 1 service instance");
-		} else if (countSi == 1) {
-			writeMessageToCompletenessReport("OK - SD contains exactly 1 service instance of type usdl-core:Service");
-			RDFNode node = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}");
-			si_uri = node.toString();
-		}
-
-		writeMessageToCompletenessReport("-------------------------------");
-		writeMessageToCompletenessReport("Service - ServiceModel Section:");
-		writeMessageToCompletenessReport("-------------------------------");
-		String smi_uri = null; // service model instance uri
-
-		// -----------------------------------------------
-		// Get the URI of the ServiceModel subclass from the BP
-		Iterator<String> smcIter = bp.getServiceModelMap().keySet().iterator();
-		String smc_uri = null;
-
-		// we know there is only 1 service model class (broker policy file is
-		// properly created)
-		smc_uri = smcIter.next();
-		// -----------------------------------------------
-
-		/*int countSmi = countQuery("{<" + si_uri
-				+ "> usdl-core:hasServiceModel ?var}"); // how many instances
-														// are associated with
-														// the usdl-core:Service
-														// instance found
-														// previously via the
-														// usdl-core:hasServiceModel
-														// property?
-
-		if (countSmi == 0) {
-			writeMessageToCompletenessReport("Error - Instance:");
-			writeMessageToCompletenessReport(si_uri);
-			writeMessageToCompletenessReport("is not connected to any instance via the appropriate property");
-			writeMessageToCompletenessReport(USDL_CORE + "hasServiceModel");
-			throw new CompletenessException("Instance: " + si_uri + " is not connected to any instance via the appropriate property " + USDL_CORE + "hasServiceModel");
-		} else if (countSmi > 1) {
-			writeMessageToCompletenessReport("Error - Instance: ");
-			writeMessageToCompletenessReport(si_uri);
-			writeMessageToCompletenessReport("must be connected to only 1 instance via the appropriate property");
-			writeMessageToCompletenessReport(USDL_CORE + "hasServiceModel");
-			throw new CompletenessException("Instance: " + si_uri + " must be connected to only 1 instance via the appropriate property " + USDL_CORE + "hasServiceModel");
-		} else if (countSmi == 1) {
-			writeMessageToCompletenessReport("OK - Instance: ");
-			writeMessageToCompletenessReport(si_uri);
-			writeMessageToCompletenessReport("is correctly connected to exactly 1 instance via the appropriate property");
-			writeMessageToCompletenessReport(USDL_CORE + "hasServiceModel");*/
-
-			// Get the service model instance
-			RDFNode node = oneVarOneSolutionQuery("{?var rdf:type <" + smc_uri
-					+ ">}");
-			smi_uri = node.toString(); // Service model instance URI
-			int countSmi2 = countQuery("{<" + smi_uri + "> rdf:type <"
-					+ smc_uri + ">}"); // count the occurrences of this triple
-										// in the file contents, the possible result is
-										// either 0 or 1
-			if (countSmi2 == 0) {// couldn't find an instance of the
-									// correct service model subclass or
-				writeMessageToCompletenessReport("Error - Instance");
-				writeMessageToCompletenessReport(smi_uri);
-				writeMessageToCompletenessReport("does not belong to the correct type:");
-				writeMessageToCompletenessReport(smc_uri);
-				throw new CompletenessException("Instance " + smi_uri + " does not belong to the correct type: " + smc_uri);
-			} else { // countSmi2 = 1
-				writeMessageToCompletenessReport("OK - Found exactly 1  instance of the correct type:");
-				writeMessageToCompletenessReport(smc_uri);
-				/*writeMessageToCompletenessReport("which is correctly connected to the instance:");
-				writeMessageToCompletenessReport(si_uri);*/
-
-				int countSmi3 = countQuery("{<" + smi_uri
-						+ "> rdf:type ?someType}"); // maybe the service model
-													// instance is associated
-													// with other types, count
-													// the number of types the
-													// service model instance is
-													// associated with
-				if (countSmi3 > 1) {
-					writeMessageToCompletenessReport("Error - The instance URI:");
+			writeMessageToCompletenessReport("-------------------------------");
+			writeMessageToCompletenessReport("Service - ServiceModel Section:");
+			writeMessageToCompletenessReport("-------------------------------");
+			String smi_uri = null; // service model instance uri
+	
+			// -----------------------------------------------
+			// Get the URI of the ServiceModel subclass from the BP
+			Iterator<String> smcIter = bp.getServiceModelMap().keySet().iterator();
+			String smc_uri = null;
+	
+			// we know there is only 1 service model class (broker policy file is
+			// properly created)
+			smc_uri = smcIter.next();
+			// -----------------------------------------------
+	
+			/*int countSmi = countQuery("{<" + si_uri
+					+ "> usdl-core:hasServiceModel ?var}"); // how many instances
+															// are associated with
+															// the usdl-core:Service
+															// instance found
+															// previously via the
+															// usdl-core:hasServiceModel
+															// property?
+	
+			if (countSmi == 0) {
+				writeMessageToCompletenessReport("Error - Instance:");
+				writeMessageToCompletenessReport(si_uri);
+				writeMessageToCompletenessReport("is not connected to any instance via the appropriate property");
+				writeMessageToCompletenessReport(USDL_CORE + "hasServiceModel");
+				throw new CompletenessException("Instance: " + si_uri + " is not connected to any instance via the appropriate property " + USDL_CORE + "hasServiceModel");
+			} else if (countSmi > 1) {
+				writeMessageToCompletenessReport("Error - Instance: ");
+				writeMessageToCompletenessReport(si_uri);
+				writeMessageToCompletenessReport("must be connected to only 1 instance via the appropriate property");
+				writeMessageToCompletenessReport(USDL_CORE + "hasServiceModel");
+				throw new CompletenessException("Instance: " + si_uri + " must be connected to only 1 instance via the appropriate property " + USDL_CORE + "hasServiceModel");
+			} else if (countSmi == 1) {
+				writeMessageToCompletenessReport("OK - Instance: ");
+				writeMessageToCompletenessReport(si_uri);
+				writeMessageToCompletenessReport("is correctly connected to exactly 1 instance via the appropriate property");
+				writeMessageToCompletenessReport(USDL_CORE + "hasServiceModel");*/
+	
+				// Get the service model instance
+				RDFNode node = oneVarOneSolutionQuery("{?var rdf:type <" + smc_uri
+						+ ">}");
+				smi_uri = node.toString(); // Service model instance URI
+				int countSmi2 = countQuery("{<" + smi_uri + "> rdf:type <"
+						+ smc_uri + ">}"); // count the occurrences of this triple
+											// in the file contents, the possible result is
+											// either 0 or 1
+				if (countSmi2 == 0) {// couldn't find an instance of the
+										// correct service model subclass or
+					writeMessageToCompletenessReport("Error - Instance");
 					writeMessageToCompletenessReport(smi_uri);
-					writeMessageToCompletenessReport("is falsely associated with other types");
-					throw new CompletenessException("The instance URI: " + smi_uri + " is falsely associated with other types");
-				} else {
-					writeMessageToCompletenessReport("OK - Found exactly 1 instance of the correct type:");
+					writeMessageToCompletenessReport("does not belong to the correct type:");
+					writeMessageToCompletenessReport(smc_uri);
+					throw new CompletenessException("Instance " + smi_uri + " does not belong to the correct type: " + smc_uri);
+				} else { // countSmi2 = 1
+					writeMessageToCompletenessReport("OK - Found exactly 1  instance of the correct type:");
 					writeMessageToCompletenessReport(smc_uri);
 					/*writeMessageToCompletenessReport("which is correctly connected to the instance:");
 					writeMessageToCompletenessReport(si_uri);*/
-					writeMessageToCompletenessReport("and no other types are associated with this instance");
-					writeMessageToCompletenessReport("");
+	
+					int countSmi3 = countQuery("{<" + smi_uri
+							+ "> rdf:type ?someType}"); // maybe the service model
+														// instance is associated
+														// with other types, count
+														// the number of types the
+														// service model instance is
+														// associated with
+					if (countSmi3 > 1) {
+						writeMessageToCompletenessReport("Error - The instance URI:");
+						writeMessageToCompletenessReport(smi_uri);
+						writeMessageToCompletenessReport("is falsely associated with other types");
+						throw new CompletenessException("The instance URI: " + smi_uri + " is falsely associated with other types");
+					} else {
+						writeMessageToCompletenessReport("OK - Found exactly 1 instance of the correct type:");
+						writeMessageToCompletenessReport(smc_uri);
+						/*writeMessageToCompletenessReport("which is correctly connected to the instance:");
+						writeMessageToCompletenessReport(si_uri);*/
+						writeMessageToCompletenessReport("and no other types are associated with this instance");
+						writeMessageToCompletenessReport("");
+					}
 				}
-			}
-		//}
+			//}
+
+		// Usdl-core SD checks should be done only on pure SDs, not on BP-like-SD cases. Those types of checks run in minimal check flow for minimal SDs.
+		if(!this.bpHasSLPInConnection())
+		{
 			
 			// check gr:isVariantOf
 			int countIsVariantOf = countQuery("{<" + smi_uri + "> gr:isVariantOf ?someValue}");
@@ -1321,6 +1338,7 @@ public class PolicyCompletenessCompliance {
 				RDFNode isVariantOfNode = oneVarOneSolutionQuery("{<" + smi_uri + "> gr:isVariantOf ?var}");
 				writeMessageToCompletenessReport(isVariantOfNode.toString());
 			}			
+		}
 
 		// now bring back the cached model with BP inside in order to use it for further checks
 		modelMem = cachedModel;
