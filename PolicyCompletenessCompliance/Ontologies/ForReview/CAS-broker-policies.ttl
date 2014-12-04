@@ -801,20 +801,20 @@ cas:VarSecurity rdfs:subClassOf usdl-sla:Variable .
 cas:AvailabilityHigh rdf:type cas:AllowedAvailabilityValue;
 	rdfs:label "High Availability for apps is between 99,98 and 100%";
 	gr:hasUnitOfMeasurement "P1"^^xsd:string; #Percent
-	gr:hasMinValue "99,98"^^xsd:int;
-	gr:hasMaxValue "100"^^xsd:int. 
+	gr:hasMinValueFloat "99.98"^^xsd:float;
+	gr:hasMaxValueFloat "100"^^xsd:float. 
 
 cas:AvailabilityMedium rdf:type cas:AllowedAvailabilityValue;
 	rdfs:label "Medium Availability for apps is between 99,5 and 100%";
 	gr:hasUnitOfMeasurement "P1"^^xsd:string; #Percent
-	gr:hasMinValue "99,5"^^xsd:int;
-	gr:hasMaxValue "100"^^xsd:int. 
+	gr:hasMinValueFloat "99.5"^^xsd:float;
+	gr:hasMaxValueFloat "100"^^xsd:float. 
 
 cas:AvailabilityLow rdf:type cas:AllowedAvailabilityValue;
 	rdfs:label "Low Availability for apps is between 99 and 100%";
 	gr:hasUnitOfMeasurement "P1"^^xsd:string; #Percent
-	gr:hasMinValue "99"^^xsd:int;
-	gr:hasMaxValue "100"^^xsd:int. 
+	gr:hasMinValueFloat "99"^^xsd:float;
+	gr:hasMaxValueFloat "100"^^xsd:float. 
 
 
 

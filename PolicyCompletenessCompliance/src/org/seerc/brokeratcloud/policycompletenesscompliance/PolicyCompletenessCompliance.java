@@ -1348,6 +1348,8 @@ public class PolicyCompletenessCompliance {
 		// now bring back the cached model with BP inside in order to use it for further checks
 		modelMem = cachedModel;
 
+		this.checkQuantitativeValuesRanges();
+		
 		// smCip: needed input for Service Model - Service Level Profile section
 		// in stepCompletenessCheck method (smc_uri (subclass URI) is needed to
 		// find the
@@ -1416,6 +1418,127 @@ public class PolicyCompletenessCompliance {
 		}
 
 		return qvPairListTotal;
+	}
+
+	private void checkQuantitativeValuesRanges() throws CompletenessException 
+	{
+		for(QuantitativeValue qv:this.bp.getQuantitativeValueMap().values())
+		{
+			// get all instances of this QV, including those in SD
+			RDFNode[] qvInstances = oneVarManySolutionsQuery("{?var rdf:type <" + qv.getUri() + ">}");
+			// is this QV a range?
+			Integer isRangeCount = countQuery("{<" + qv.getUri() + "> <" + USDL_CORE_CB + "isRange> ?var}");
+			for(RDFNode qvInstance:qvInstances)
+			{	// for every QV instance
+				if(isRangeCount !=0)
+				{	// it's range
+					if(this.bp.getQuantitativeValueIntegerMap().containsKey(qv.getUri()))
+					{	// integer range
+						RDFNode hasMinValueInteger = oneVarOneSolutionQuery("{<" + qvInstance.toString() + "> <" + GR + "hasMinValueInteger> ?var}");
+						if(hasMinValueInteger == null)
+						{
+							writeMessageToCompletenessReport("Error - QV instance " + qvInstance.toString() + " is integer range and does not declare hasMinValueInteger.");
+							throw new CompletenessException("QV instance " + qvInstance.toString() + " is integer range and does not declare hasMinValueInteger.");
+						}
+						
+						try {
+							checkCorrectIntegerDeclaration(qvInstance.toString(), "gr:hasMinValueInteger");
+						} catch (BrokerPolicyException e) {
+							e.printStackTrace();
+							throw new CompletenessException(e.getMessage());
+						}
+						writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " is integer range and declares hasMinValueInteger " + hasMinValueInteger.toString() + ".");
+						
+						RDFNode hasMaxValueInteger = oneVarOneSolutionQuery("{<" + qvInstance.toString() + "> <" + GR + "hasMaxValueInteger> ?var}");
+						if(hasMaxValueInteger == null)
+						{
+							writeMessageToCompletenessReport("Error - QV instance " + qvInstance.toString() + " is integer range and does not declare hasMaxValueInteger.");
+							throw new CompletenessException("QV instance " + qvInstance.toString() + " is integer range and does not declare hasMaxValueInteger.");
+						}
+						
+						try {
+							checkCorrectIntegerDeclaration(qvInstance.toString(), "gr:hasMaxValueInteger");
+						} catch (BrokerPolicyException e) {
+							e.printStackTrace();
+							throw new CompletenessException(e.getMessage());
+						}
+						writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " is integer range and declares hasMaxValueInteger " + hasMaxValueInteger.toString() + ".");
+
+					}
+					else
+					{	// float range
+						RDFNode hasMinValueFloat = oneVarOneSolutionQuery("{<" + qvInstance.toString() + "> <" + GR + "hasMinValueFloat> ?var}");
+						if(hasMinValueFloat == null)
+						{
+							writeMessageToCompletenessReport("Error - QV instance " + qvInstance.toString() + " is float range and does not declare hasMinValueFloat.");
+							throw new CompletenessException("QV instance " + qvInstance.toString() + " is float range and does not declare hasMinValueFloat.");
+						}
+						
+						try {
+							checkCorrectFloatDeclaration(qvInstance.toString(), "gr:hasMinValueFloat");
+						} catch (BrokerPolicyException e) {
+							e.printStackTrace();
+							throw new CompletenessException(e.getMessage());
+						}
+						writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " is float range and declares hasMinValueFloat " + hasMinValueFloat.toString() + ".");
+						
+						RDFNode hasMaxValueFloat = oneVarOneSolutionQuery("{<" + qvInstance.toString() + "> <" + GR + "hasMaxValueFloat> ?var}");
+						if(hasMaxValueFloat == null)
+						{
+							writeMessageToCompletenessReport("Error - QV instance " + qvInstance.toString() + " is float range and does not declare hasMaxValueFloat.");
+							throw new CompletenessException("QV instance " + qvInstance.toString() + " is float range and does not declare hasMaxValueFloat.");
+						}
+						
+						try {
+							checkCorrectFloatDeclaration(qvInstance.toString(), "gr:hasMaxValueFloat");
+						} catch (BrokerPolicyException e) {
+							e.printStackTrace();
+							throw new CompletenessException(e.getMessage());
+						}
+						writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " is float range and declares hasMaxValueFloat " + hasMaxValueFloat.toString() + ".");
+						
+					}
+				}
+				else
+				{	// it's simple value, NOT range
+					if(this.bp.getQuantitativeValueIntegerMap().containsKey(qv.getUri()))
+					{	// integer value
+						RDFNode hasValueInteger = oneVarOneSolutionQuery("{<" + qvInstance.toString() + "> <" + GR + "hasValueInteger> ?var}");
+						if(hasValueInteger == null)
+						{
+							writeMessageToCompletenessReport("Error - QV instance " + qvInstance.toString() + " is integer value and does not declare hasValueInteger.");
+							throw new CompletenessException("QV instance " + qvInstance.toString() + " is integer value and does not declare hasValueInteger.");
+						}
+						
+						try {
+							checkCorrectIntegerDeclaration(qvInstance.toString(), "gr:hasValueInteger");
+						} catch (BrokerPolicyException e) {
+							e.printStackTrace();
+							throw new CompletenessException(e.getMessage());
+						}
+						writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " is integer value and declares hasValueInteger " + hasValueInteger.toString() + ".");						
+					}
+					else
+					{	// float value
+						RDFNode hasValueFloat = oneVarOneSolutionQuery("{<" + qvInstance.toString() + "> <" + GR + "hasValueFloat> ?var}");
+						if(hasValueFloat == null)
+						{
+							writeMessageToCompletenessReport("Error - QV instance " + qvInstance.toString() + " is float value and does not declare hasValueFloat.");
+							throw new CompletenessException("QV instance " + qvInstance.toString() + " is float value and does not declare hasValueFloat.");
+						}
+						
+						try {
+							checkCorrectFloatDeclaration(qvInstance.toString(), "gr:hasValueFloat");
+						} catch (BrokerPolicyException e) {
+							e.printStackTrace();
+							throw new CompletenessException(e.getMessage());
+						}
+						writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " is float value and declares hasValueFloat " + hasValueFloat.toString() + ".");												
+					}
+				}				
+			}
+		}
+		
 	}
 
 	private void checkClassificationDimensionsInSD(String smi_uri) throws CompletenessException 
