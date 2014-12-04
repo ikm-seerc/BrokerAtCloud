@@ -17,6 +17,8 @@ import org.apache.commons.io.output.TeeOutputStream;
 
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.query.Query;
@@ -25,6 +27,7 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
@@ -110,12 +113,68 @@ public class PolicyCompletenessCompliance {
 			// Perform completeness check
 			pc.validateSDForCompletenessCompliance(serviceDescriptionResources);
 
+			//pc.performStressTest();
+			
 		} catch (Exception e) {
 			System.out.println("Failure: " + e.getClass().getName() + " - "
 					+ e.getMessage());
 			e.printStackTrace();
 			return;
 		}
+	}
+
+	private void performStressTest() 
+	{
+		/*
+		 * For each triple (T) in model:
+		 * 		For all three elements (E) in triple (T):
+		 * 			1) Make a typo in (E)
+		 * 			2) Run validation mechanism. You should get Exception (X).
+		 * 			3) if(X)
+		 * 					correct typo in (E)
+		 * 					continue loop
+		 * 			   else
+		 * 					report that failure has not been caught.
+		 * 			
+		 */
+		
+		OntModel cachedModel = this.modelMem;
+		//int numOfTriples = this.modelMem.getGraph().size();
+		List<Triple> triplesList = cachedModel.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
+		//numOfTriples = triplesList.size();
+		for(Triple t:triplesList)
+		{
+			PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+			
+			// initially set the same model
+			pc.modelMem = cachedModel;
+			// delete the current triple
+			pc.modelMem.getGraph().delete(t);
+			// add the "errored" with typo triple
+			Triple erroredT = Triple.create(t.getSubject(), t.getPredicate(), t.getObject());
+
+			// validate broker policy first
+			try {
+				pc.validateBrokerPolicy(brokerPolicyResources);
+
+				// Get broker policy in Java object structure
+				pc.getBrokerPolicy(brokerPolicyResources);
+
+				// Perform completeness check
+				pc.validateSDForCompletenessCompliance(serviceDescriptionResources);
+
+				//pc.modelMem = cachedModel;
+
+			} catch (NoSuchMethodException | ClassNotFoundException
+					| InstantiationException | IllegalAccessException
+					| InvocationTargetException | IOException
+					| BrokerPolicyException | CompletenessException
+					| ComplianceException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		int i=0;
 	}
 
 	public void validateSDForCompletenessCompliance(Object... dataToCheck) throws IOException, CompletenessException, ComplianceException {
