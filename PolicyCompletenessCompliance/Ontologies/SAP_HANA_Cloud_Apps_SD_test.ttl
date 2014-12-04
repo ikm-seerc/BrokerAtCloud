@@ -80,7 +80,8 @@ SD:QVNumberOfUsersRangeInstance a brokerpolicy:QVNumberOfUsersRange;
     gr:hasMaxValueInteger "80"^^xsd:integer.
     
 SD:QVDocumentStorageRangeInstance a brokerpolicy:QVDocumentStorageRange;
-	gr:hasValueInteger "80"^^xsd:integer; # put . for demo
+	gr:hasMinValueInteger "80"^^xsd:integer; # put . for demo
+	gr:hasMaxValueInteger "81"^^xsd:integer; # put . for demo
 	#gr:hasValueInteger brokerpolicy:VarNumberOfUsers;
 	#gr:hasValueInteger "2000"^^xsd:integer;
 	gr:hasUnitOfMeasurement "GB"^^xsd:string .

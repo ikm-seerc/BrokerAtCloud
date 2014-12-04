@@ -150,18 +150,21 @@ brokerpolicy:QVNumberOfUsersRange a rdfs:Class, owl:Class;
    gr:hasMinValueInteger "1"^^xsd:integer;
    gr:hasMaxValueInteger "10000"^^xsd:integer;
    gr:hasUnitOfMeasurement ""^^xsd:string;
+   usdl-core-cb:isRange "true"^^xsd:boolean;
    rdfs:subClassOf gr:QuantitativeValueInteger .
 
 brokerpolicy:QVDocumentStorageRange a rdfs:Class, owl:Class;
    gr:hasMinValueInteger "1"^^xsd:integer;
    gr:hasMaxValueInteger "10000"^^xsd:integer;
    gr:hasUnitOfMeasurement ""^^xsd:string;
+   usdl-core-cb:isRange "true"^^xsd:boolean;
    rdfs:subClassOf gr:QuantitativeValueInteger .
 
 brokerpolicy:QVAvailabilityRange a rdfs:Class, owl:Class;
    gr:hasMinValueFloat "1"^^xsd:float;
    gr:hasMaxValueFloat "10000"^^xsd:float;
    gr:hasUnitOfMeasurement ""^^xsd:string;
+   usdl-core-cb:isRange "true"^^xsd:boolean;
    rdfs:subClassOf gr:QuantitativeValueFloat .
 
 ### Subproperties to connect Service Model to distinguished Service Level Profiles
