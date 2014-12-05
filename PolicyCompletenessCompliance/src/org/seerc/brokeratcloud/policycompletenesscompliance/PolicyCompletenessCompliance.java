@@ -7,6 +7,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -140,10 +142,18 @@ public class PolicyCompletenessCompliance {
 		 * 			
 		 */
 		
+		// nullify System.out
+		System.setOut(new PrintStream(new OutputStream() {
+            public void write(int b) {
+                //DO NOTHING
+            }
+        }));
+		
 		//OntModel cachedModel = this.modelMem;
 		//int numOfTriples = this.modelMem.getGraph().size();
 		//List<Triple> triplesList = this.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
 		//numOfTriples = triplesList.size();
+		int problemNumber = 0;
 		
 		PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 
@@ -151,67 +161,74 @@ public class PolicyCompletenessCompliance {
 		
 		//InputStream is = convertTriplesToInputStream(pc);
 		
-		try {
 			// load BP first
-			pc.addDataToJenaModel(brokerPolicyResources);
+			try {
+				pc.addDataToJenaModel(brokerPolicyResources);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			//get triples
 			List<Triple> bpTriplesList = pc.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
 			InputStream bpIs = null;
 			for(Triple t:bpTriplesList)
 			{
-				// reset model
-				pc.modelMem.removeAll();
-				// add data
-				pc.addDataToJenaModel(brokerPolicyResources);
-				// delete triple
-				pc.modelMem.getGraph().delete(t);
-				// create erroredT
-				Triple erroredT = createErroredT(t);
-				// add erroredT
-				pc.modelMem.getGraph().add(erroredT);
-				// convert to InputStream
-				bpIs = convertTriplesToInputStream(pc);
-				// reset model
-				pc.modelMem.removeAll();
-				// validate broker policy
-				pc.validateBrokerPolicy(bpIs);
+				Triple erroredT = null;
+				try {
+					// reset model
+					pc.modelMem.removeAll();
+					// add data
+					pc.addDataToJenaModel(brokerPolicyResources);
+					// delete triple
+					pc.modelMem.getGraph().delete(t);
+					// create erroredT
+					erroredT = createErroredT(t);
+					// add erroredT
+					pc.modelMem.getGraph().add(erroredT);
+					// convert to InputStream
+					bpIs = convertTriplesToInputStream(pc);
+					// reset model
+					pc.modelMem.removeAll();
+					// validate broker policy
+					pc.validateBrokerPolicy(bpIs);
+				} catch (Exception e) {
+				}
+				System.err.println("Problem #" + ++problemNumber + "-----------------------------------");
+				System.err.println("Changing triple:");
+				System.err.println(t);
+				System.err.println("to:");
+				System.err.println(erroredT);
+				System.err.println("did not cause a problem!");
+				System.err.println("-------------------------------------------------------------------");
+				System.err.println();
 			}
-			// reset model
-			pc.modelMem.removeAll();
 
-			// now load SD
-			pc.addDataToJenaModel(serviceDescriptionResources);
-			//get triples
-			List<Triple> sdTriplesList = pc.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
-			// convert to InputStream
-			InputStream sdIs = convertTriplesToInputStream(pc);
-			// reset model
-			pc.modelMem.removeAll();
-
-			// reset and add the bpIs
-			bpIs.reset();
-			pc.addDataToJenaModel(bpIs);
-			// Perform completeness/compliance check
-			pc.validateSDForCompletenessCompliance(sdIs);
-
-			//pc.modelMem = cachedModel;
-
-		} catch (NoSuchMethodException | ClassNotFoundException
-				| InstantiationException | IllegalAccessException
-				| InvocationTargetException | IOException
-				| BrokerPolicyException | CompletenessException
-				| ComplianceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
+		/*// reset model
+		pc.modelMem.removeAll();
+
+		// now load SD
+		pc.addDataToJenaModel(serviceDescriptionResources);
+		//get triples
+		List<Triple> sdTriplesList = pc.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
+		// convert to InputStream
+		InputStream sdIs = convertTriplesToInputStream(pc);
+		// reset model
+		pc.modelMem.removeAll();
+
+		// reset and add the bpIs
+		bpIs.reset();
+		pc.addDataToJenaModel(bpIs);
+		// Perform completeness/compliance check
+		pc.validateSDForCompletenessCompliance(sdIs);*/
+
 		int i=0;
 	}
 
 	private Triple createErroredT(Triple t) {
-		Node subject = t.getSubject();
-		Node erroredSubject = createErroredNode(subject);
-		Triple erroredT = new Triple(erroredSubject, t.getPredicate(), t.getObject());
+		Node erroredSubject = createErroredNode(t.getSubject());
+		Node erroredPredicate = createErroredNode(t.getPredicate());
+		Node erroredObject = createErroredNode(t.getObject());
+		Triple erroredT = new Triple(erroredSubject, erroredPredicate, erroredObject);
 		return erroredT;
 	}
 
