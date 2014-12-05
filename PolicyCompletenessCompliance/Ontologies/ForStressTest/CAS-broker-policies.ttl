@@ -151,14 +151,6 @@ rdfs:comment "Übertragbarkeit der App-Daten in andere Systeme (Export)".
 # AF: This property is not further specified, commented out 
 # cas:hasScalability rdfs:subPropertyOf gr:quantitativeProductOrServiceProperty.
 
-cas:hasMaxConcurrentUsers rdfs:subPropertyOf gr:quantitativeProductOrServiceProperty, cas:hasScalability;
-rdfs:domain cas:CASServiceModel;
-rdfs:range cas:AllowedMaxConcurrentUsersValue; 
-rdfs:label "Maximale Anzahl gleichzeitiger Benutzer"@de;
-rdfs:label "Maximum Amount of concurrent users"@en;
-rdfs:comment "Empfohlene maximale Menge gleichzeitiger Benutzer" .
-#cas:measuredBy cas:Monitoring.
-
 cas:hasMaxAmountOfData rdfs:subPropertyOf gr:quantitativeProductOrServiceProperty, cas:hasScalability; 
 rdfs:domain cas:CASServiceModel;
 rdfs:range cas:AllowedMaxAmountOfDataValue; 
@@ -216,15 +208,6 @@ rdfs:comment "Bezahlmodell: einmalig, Grundgebühr, pro Benutzer, ..." .
 # cas:measuredBy cas:CAS .
  
 
-cas:hasSuitability rdfs:subPropertyOf gr:qualitativeProductOrServiceProperty; 
-rdfs:domain cas:CASServiceModel;
-rdfs:range cas:AllowedSuitabilityValue; 
-rdfs:label "Passgenauigkeit"@de;
-rdfs:label "Suitability"@en;
-rdfs:comment "Übereinstimmung Branche, Rolle, passt die angegebene Funktionsweise zum Funktionsumfang" .
-# cas:measuredBy cas:QS, cas:Rating .
- 
-
 ## ToDo: Can preformance be measured in different ways then by response time? 
 ## Should it be relative to the amount of data that is queried?
 cas:hasMinimumResponseTime rdfs:subPropertyOf gr:quantitativeProductOrServiceProperty;
@@ -234,15 +217,6 @@ rdfs:label "Minimale Antwortszeit"@de;
 rdfs:label "Minimum Response Time"@en;
 rdfs:comment "Reaktionszeit bei bestimmten/häufigen Operationen" .
 # cas:measuredBy cas:Monitoring .
-
-
-cas:hasMaximumResponseTime rdfs:subPropertyOf gr:quantitativeProductOrServiceProperty;
-rdfs:domain cas:CASServiceModel;
-rdfs:range cas:AllowedMaximumResponseTimeValue;
-rdfs:label "Maximale Antwortszeit"@de;
-rdfs:label "Maximum Response Time"@en;
-rdfs:comment "Reaktionszeit bei bestimmten/häufigen Operationen" .
-# cas:measuredBy cas:Monitoring;
 
 
 cas:hasDataPrivacy rdfs:subPropertyOf gr:qualitativeProductOrServiceProperty; 
@@ -256,11 +230,7 @@ rdfs:comment "Übertragung von Daten an externe Dienste" .
 
 cas:hasSecurityManagement rdfs:subPropertyOf gr:qualitativeProductOrServiceProperty; 
 rdfs:domain cas:CASServiceModel;
-rdfs:range cas:AllowedSecurityManagementValue; 
-rdfs:label "Sicherheitsmanagement"@de;
-rdfs:label "Security Management"@en;
-rdfs:comment "Sichere Kanäle (Verschlüsselung) bei Zugriff auf externe Dienste" .
-# cas:measuredBy cas:QS, cas:CodeAnalysis .
+rdfs:range cas:AllowedSecurityManagementValue.
  
 
 cas:Recoverability rdfs:subPropertyOf gr:qualitativeProductOrServiceProperty;
@@ -395,14 +365,6 @@ gr:hasMaxValueFloat "1000"^^xsd:float;
 usdl-core-cb:higherIsBetter "true"^^xsd:boolean;
 usdl-core-cb:isRange "true"^^xsd:boolean .
 
-cas:AllowedMinimumResponseTimeValue rdfs:subClassOf gr:QuantitativeValueFloat;
-rdfs:label "Allowed Minimum Response Time for apps is between 2 and 50";
-gr:hasUnitOfMeasurement "C26"^^xsd:string; #Milliseconds
-gr:hasMinValueFloat "2"^^xsd:float;
-gr:hasMaxValueFloat "50"^^xsd:float;
-usdl-core-cb:higherIsBetter "true"^^xsd:boolean;
-usdl-core-cb:isRange "true"^^xsd:boolean .
-
 cas:AllowedMaximumResponseTimeValue rdfs:subClassOf gr:QuantitativeValueFloat;
 rdfs:label "Allowed Maximum Response Time for apps is between 50 1000";
 gr:hasUnitOfMeasurement "C26"^^xsd:string; #Milliseconds
@@ -435,9 +397,6 @@ rdfs:label "low auditability"@en.
 
 ## Todo: define labels for all allowed values
 
-cas:AllowedContractingExperienceValue rdfs:subClassOf gr:QualitativeValue;
-rdfs:label "Allowed values for Contracting Experience: good, medium, bad." .
-
 cas:ACEVgood a cas:AllowedContractingExperienceValue.
 
 cas:ACEVmedium a cas:AllowedContractingExperienceValue;
@@ -462,9 +421,6 @@ cas:AllowedExtensibilityValue rdfs:subClassOf gr:QualitativeValue;
 rdfs:label "Allowed values for extensibility: good, medium, low." .
 
 cas:AEVgood a cas:AllowedExtensibilityValue.
-
-cas:AEVmedium a cas:AllowedExtensibilityValue;
-gr:lesser cas:AEVgood.
 
 cas:AEVlow a cas:AllowedExtensibilityValue;
 gr:lesser cas:AEVmedium.
@@ -607,10 +563,6 @@ cas:ALVgood a cas:AllowedLearnabilityValue.
 cas:ALVmedium a cas:AllowedLearnabilityValue;
 gr:lesser cas:ALVgood.
 
-cas:ALVbad a cas:AllowedLearnabilityValue;
-gr:lesser cas:ALVmedium.
-
-
 cas:AllowedBrowserCompatibilityValue rdfs:subClassOf gr:QualitativeValue;
 rdfs:label "Allowed values for Learnability: good, medium, bad." .
 
@@ -620,9 +572,6 @@ cas:ABCVFirefox15 a  cas:AllowedBrowserCompatibilityValue.
 
 cas:ABCVChrome30 a cas:AllowedBrowserCompatibilityValue.
 
-
-cas:AllowedMonitoringValue rdfs:subClassOf gr:QualitativeValue;
-rdfs:label "Allowed values of Monitoring: complete, basic, none." .
 
 cas:AMVcomplete a cas:AllowedMonitoringValue.
 
@@ -816,26 +765,5 @@ cas:AvailabilityLow rdf:type cas:AllowedAvailabilityValue;
 	gr:hasMinValueFloat "99"^^xsd:float;
 	gr:hasMaxValueFloat "100"^^xsd:float. 
 
-
-
-##################################################################################
-### Preference Variables 
-################################################################################## 
-
-cas-pref-att:Auditability rdfs:subClassOf usdl-pref:QualitativeVariable;
-	usdl-pref:refToServiceAttribute pref-att:attr-accountability-auditability;
-	usdl-core-cb:belongsTo fc:rootConcept.
-
-cas-pref-att:hasDefaultCASAuditability rdfs:subPropertyOf usdl-pref:hasDefaultQualitativeValue;
-	rdfs:domain cas-pref-att:Auditability;
-	rdfs:range cas:AllowedAuditabilityValue.
-
-cas-pref-att:Availability rdfs:subClassOf usdl-pref:QuantitativeVariable;
-	usdl-pref:refToServiceAttribute pref-att:attr-performance-availability;
-	usdl-core-cb:belongsTo fc:rootConcept.
-
-cas-pref-att:hasDefaultCASAvailability rdfs:subPropertyOf usdl-pref:hasDefaultQuantitativeValue;
-	rdfs:domain cas-pref-att:Availability;
-	rdfs:range cas:AllowedAvailabilityValue.
 
 
