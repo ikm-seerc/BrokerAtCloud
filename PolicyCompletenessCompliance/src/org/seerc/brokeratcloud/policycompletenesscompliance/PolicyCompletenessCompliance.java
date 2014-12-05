@@ -156,13 +156,26 @@ public class PolicyCompletenessCompliance {
 			pc.addDataToJenaModel(brokerPolicyResources);
 			//get triples
 			List<Triple> bpTriplesList = pc.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
-			// convert to InputStream
-			InputStream bpIs = convertTriplesToInputStream(pc);
-			// reset model
-			pc.modelMem.removeAll();
-			// validate broker policy
-			pc.validateBrokerPolicy(bpIs);
-
+			InputStream bpIs = null;
+			for(Triple t:bpTriplesList)
+			{
+				// reset model
+				pc.modelMem.removeAll();
+				// add data
+				pc.addDataToJenaModel(brokerPolicyResources);
+				// delete triple
+				pc.modelMem.getGraph().delete(t);
+				// create erroredT
+				Triple erroredT = createErroredT(t);
+				// add erroredT
+				pc.modelMem.getGraph().add(erroredT);
+				// convert to InputStream
+				bpIs = convertTriplesToInputStream(pc);
+				// reset model
+				pc.modelMem.removeAll();
+				// validate broker policy
+				pc.validateBrokerPolicy(bpIs);
+			}
 			// reset model
 			pc.modelMem.removeAll();
 
@@ -193,6 +206,30 @@ public class PolicyCompletenessCompliance {
 		}
 		
 		int i=0;
+	}
+
+	private Triple createErroredT(Triple t) {
+		Node subject = t.getSubject();
+		Node erroredSubject = createErroredNode(subject);
+		Triple erroredT = new Triple(erroredSubject, t.getPredicate(), t.getObject());
+		return erroredT;
+	}
+
+	private Node createErroredNode(Node node) {
+		Node erroredNode = null;
+		if(node.isLiteral())
+		{
+			erroredNode = Node.createLiteral(node.toString() + "1");
+		}
+		else if(node.isURI())
+		{
+			erroredNode = Node.createURI(node.toString() + "1");
+		}
+		else if(node.isVariable())
+		{
+			erroredNode = Node.createVariable(node.toString() + "1");
+		}
+		return erroredNode;
 	}
 
 	private InputStream convertTriplesToInputStream(PolicyCompletenessCompliance pc) {
