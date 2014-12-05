@@ -48,6 +48,9 @@ public class PolicyCompletenessCompliance {
 	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
 	private static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl", "Ontologies/ForReview/CAS-functional-categories.ttl"};
 	
+	private static final Object[] brokerPolicyStressTestResources = {"Ontologies/ForStressTest/CAS-broker-policies.ttl", "Ontologies/ForStressTest/CAS-Service-Level-Profile-silver.ttl", "Ontologies/ForStressTest/CAS-functional-categories.ttl"};
+	private static final Object[] serviceDescriptionStressTestResources = {"Ontologies/ForStressTest/CAS-AddressApp.ttl", "Ontologies/ForStressTest/CAS-Service-Provider.ttl", "Ontologies/ForStressTest/CAS-functional-categories.ttl"};
+
 	protected OntModel modelMem = null;
 	private BrokerPolicy bp = new BrokerPolicy();
 	private BrokerPolicyReportObject brokerPolicyReport; // this is where the broker policy report will be stored
@@ -154,6 +157,8 @@ public class PolicyCompletenessCompliance {
 		//List<Triple> triplesList = this.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
 		//numOfTriples = triplesList.size();
 		int problemNumber = 0;
+		int okTriples = 0;
+		int totalOK = 0;
 		
 		PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 
@@ -163,13 +168,15 @@ public class PolicyCompletenessCompliance {
 		
 			// load BP first
 			try {
-				pc.addDataToJenaModel(brokerPolicyResources);
+				pc.addDataToJenaModel(brokerPolicyStressTestResources);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
 			//get triples
 			List<Triple> bpTriplesList = pc.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
 			InputStream bpIs = null;
+			System.err.println("Total number of triples: " + bpTriplesList.size());
+			System.err.println("Triples changed that did not create problem:");
 			for(Triple t:bpTriplesList)
 			{
 				Triple erroredT = null;
@@ -177,7 +184,7 @@ public class PolicyCompletenessCompliance {
 					// reset model
 					pc.modelMem.removeAll();
 					// add data
-					pc.addDataToJenaModel(brokerPolicyResources);
+					pc.addDataToJenaModel(brokerPolicyStressTestResources);
 					// delete triple
 					pc.modelMem.getGraph().delete(t);
 					// create erroredT
@@ -190,24 +197,43 @@ public class PolicyCompletenessCompliance {
 					pc.modelMem.removeAll();
 					// validate broker policy
 					pc.validateBrokerPolicy(bpIs);
+					
+					// no exception with erroredT, this is a problem
+					if(okTriples > 0)
+					{
+						totalOK += okTriples;
+						System.err.println("... in the meantime " + okTriples + " OK ...");
+						okTriples = 0;
+					}
+					System.err.println(++problemNumber + ") " + t);
+					/*System.err.println(t);
+					System.err.println("to:");
+					System.err.println(erroredT);
+					System.err.println("did not cause a problem!");
+					System.err.println("-------------------------------------------------------------------");
+					System.err.println();*/
+				} catch (BrokerPolicyException | CompletenessException | ComplianceException e) {
+					okTriples++;
 				} catch (Exception e) {
+					// other exception with erroredT, this is a problem
+					if(okTriples > 0)
+					{
+						totalOK += okTriples;
+						System.err.println("... in the meantime " + okTriples + " OK ...");
+						okTriples = 0;
+					}
+					System.err.println(++problemNumber + ") " + e.getMessage() + " for " + t);
 				}
-				System.err.println("Problem #" + ++problemNumber + "-----------------------------------");
-				System.err.println("Changing triple:");
-				System.err.println(t);
-				System.err.println("to:");
-				System.err.println(erroredT);
-				System.err.println("did not cause a problem!");
-				System.err.println("-------------------------------------------------------------------");
-				System.err.println();
 			}
 
+			System.err.println("Total number of triples that caused problem: " + (totalOK + okTriples));
+			System.err.println("Total number of triples that did not cause problem: " + problemNumber);
 		
 		/*// reset model
 		pc.modelMem.removeAll();
 
 		// now load SD
-		pc.addDataToJenaModel(serviceDescriptionResources);
+		pc.addDataToJenaModel(serviceDescriptionStressTestResources);
 		//get triples
 		List<Triple> sdTriplesList = pc.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
 		// convert to InputStream
