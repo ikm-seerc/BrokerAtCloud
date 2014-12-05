@@ -1,5 +1,7 @@
 package org.seerc.brokeratcloud.policycompletenesscompliance;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -113,7 +115,7 @@ public class PolicyCompletenessCompliance {
 			// Perform completeness check
 			pc.validateSDForCompletenessCompliance(serviceDescriptionResources);
 
-			//pc.performStressTest();
+			pc.performStressTest();
 			
 		} catch (Exception e) {
 			System.out.println("Failure: " + e.getClass().getName() + " - "
@@ -138,43 +140,82 @@ public class PolicyCompletenessCompliance {
 		 * 			
 		 */
 		
-		OntModel cachedModel = this.modelMem;
+		//OntModel cachedModel = this.modelMem;
 		//int numOfTriples = this.modelMem.getGraph().size();
-		List<Triple> triplesList = cachedModel.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
+		//List<Triple> triplesList = this.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
 		//numOfTriples = triplesList.size();
+		
+		PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+
+		//loadTriples(triplesList, pc);
+		
+		//InputStream is = convertTriplesToInputStream(pc);
+		
+		try {
+			// load BP first
+			pc.addDataToJenaModel(brokerPolicyResources);
+			//get triples
+			List<Triple> bpTriplesList = pc.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
+			// convert to InputStream
+			InputStream bpIs = convertTriplesToInputStream(pc);
+			// reset model
+			pc.modelMem.removeAll();
+			// validate broker policy
+			pc.validateBrokerPolicy(bpIs);
+
+			// reset model
+			pc.modelMem.removeAll();
+
+			// now load SD
+			pc.addDataToJenaModel(serviceDescriptionResources);
+			//get triples
+			List<Triple> sdTriplesList = pc.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
+			// convert to InputStream
+			InputStream sdIs = convertTriplesToInputStream(pc);
+			// reset model
+			pc.modelMem.removeAll();
+
+			// reset and add the bpIs
+			bpIs.reset();
+			pc.addDataToJenaModel(bpIs);
+			// Perform completeness/compliance check
+			pc.validateSDForCompletenessCompliance(sdIs);
+
+			//pc.modelMem = cachedModel;
+
+		} catch (NoSuchMethodException | ClassNotFoundException
+				| InstantiationException | IllegalAccessException
+				| InvocationTargetException | IOException
+				| BrokerPolicyException | CompletenessException
+				| ComplianceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		int i=0;
+	}
+
+	private InputStream convertTriplesToInputStream(PolicyCompletenessCompliance pc) {
+		ByteArrayOutputStream outA = new ByteArrayOutputStream();
+		pc.modelMem.write(outA, "TURTLE");
+		InputStream decodedInput=new ByteArrayInputStream(outA.toByteArray());
+		return decodedInput;
+	}
+
+	private void loadTriples(List<Triple> triplesList,
+			PolicyCompletenessCompliance pc) {
 		for(Triple t:triplesList)
 		{
-			PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
-			
+			//PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+			pc.modelMem.getGraph().add(t);
 			// initially set the same model
-			pc.modelMem = cachedModel;
+			//pc.modelMem = cachedModel;
 			// delete the current triple
-			pc.modelMem.getGraph().delete(t);
+			//pc.modelMem.getGraph().delete(t);
 			// add the "errored" with typo triple
-			Triple erroredT = Triple.create(t.getSubject(), t.getPredicate(), t.getObject());
+			//Triple erroredT = Triple.create(t.getSubject(), t.getPredicate(), t.getObject());
 
-			// validate broker policy first
-			try {
-				pc.validateBrokerPolicy(brokerPolicyResources);
-
-				// Get broker policy in Java object structure
-				pc.getBrokerPolicy(brokerPolicyResources);
-
-				// Perform completeness check
-				pc.validateSDForCompletenessCompliance(serviceDescriptionResources);
-
-				//pc.modelMem = cachedModel;
-
-			} catch (NoSuchMethodException | ClassNotFoundException
-					| InstantiationException | IllegalAccessException
-					| InvocationTargetException | IOException
-					| BrokerPolicyException | CompletenessException
-					| ComplianceException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
-		int i=0;
 	}
 
 	public void validateSDForCompletenessCompliance(Object... dataToCheck) throws IOException, CompletenessException, ComplianceException {
