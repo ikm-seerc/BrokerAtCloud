@@ -120,7 +120,7 @@ public class PolicyCompletenessCompliance {
 			// Perform completeness check
 			pc.validateSDForCompletenessCompliance(serviceDescriptionResources);
 
-			pc.performStressTest();
+			//pc.performStressTest();
 			
 		} catch (Exception e) {
 			System.out.println("Failure: " + e.getClass().getName() + " - "
