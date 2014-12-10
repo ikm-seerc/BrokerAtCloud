@@ -4,6 +4,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
 import org.seerc.brokeratcloud.messagebroker.EvaluationComponentSDSubscriber;
+import org.seerc.brokeratcloud.messagebroker.OutOfRangeSLAViolationChecker;
 import org.seerc.brokeratcloud.messagebroker.RegistryRepositoryTopicSubscriber;
 
 public class MBComponentsServlet extends HttpServlet {
@@ -12,6 +13,7 @@ public class MBComponentsServlet extends HttpServlet {
     {
 		RegistryRepositoryTopicSubscriber.main(null);
 		EvaluationComponentSDSubscriber.main(null);
+		OutOfRangeSLAViolationChecker.main(null);
 		
         System.out.println("----------");
         System.out.println("---------- MBComponentsServlet Servlet Initialized successfully ----------");
