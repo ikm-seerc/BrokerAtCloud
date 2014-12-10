@@ -7,19 +7,30 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 public class OutOfRangeSLAViolationChecker{
 
-	private WSO2MBClient mb; 
-	private List<OutOfRangeSLAViolationSubscriber> qvTopicSubscribers;
+	/*private WSO2MBClient mb; 
+	private List<OutOfRangeSLAViolationSubscriber> qvTopicSubscribers;*/
 	
 	public OutOfRangeSLAViolationChecker()
 	{
-		mb = new WSO2MBClient();
+		/*
+		 * In order to avoid double out-of-range subscribers across VMs,
+		 * this component will PUT all BPs, which will trigger all validations of BPs,
+		 * which in turn cause all subscribers for QV topics to be initiated only
+		 * in the .CAR application inside GREG.
+		 */
+		
+		System.out.println("PUT all BPs to validate and generate out-of-range subscribers");
+		WSO2GREGClient greg = new WSO2GREGClient(); 
+		greg.putAllBrokerPolicies();
+		
+		/*mb = new WSO2MBClient();
 		qvTopicSubscribers = new ArrayList<OutOfRangeSLAViolationSubscriber>();
 		
-		/*
+		
 		 * 1) Subscribe to all monitoringTopics
 		 * 2) The listener of those subscribers should check the payload for out-of-range.
 		 *    If it is found out of range, it should send the message to the error topic. 
-		 */
+		 
 		
 		try {
 			List<String> allTopics = mb.getAllTopics();
@@ -50,7 +61,7 @@ public class OutOfRangeSLAViolationChecker{
 		    	}
 		    }
 
-		});		
+		});		*/
 	}
 
 	public static void main(String[] args) {

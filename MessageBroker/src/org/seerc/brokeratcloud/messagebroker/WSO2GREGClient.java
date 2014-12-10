@@ -17,6 +17,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.wso2.carbon.registry.app.RemoteRegistry;
+import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
@@ -163,5 +164,22 @@ public class WSO2GREGClient {
 		}
 		
 		System.out.println("Successfully put resource at " + pathToPutSiUri + ".");
+	}
+
+	/*
+	 * Performs a PUT in all BPs. This will trigger the process of creating out-of-range subscribers.
+	 */
+	public void putAllBrokerPolicies()
+	{
+		try {
+			Collection bpFolder = (Collection) this.getRemote_registry().get(this.brokerPoliciesFolder);
+			for(int i=0; i < bpFolder.getChildCount(); i++)
+			{
+				Resource bp = this.getRemote_registry().get(bpFolder.getChildren()[i]);
+				this.putWithRetryHack(bp.getPath(), bp);
+			}
+		} catch (RegistryException e) {
+			e.printStackTrace();
+		}
 	}
 }
