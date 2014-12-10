@@ -8,12 +8,12 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 public class OutOfRangeSLAViolationChecker{
 
 	private WSO2MBClient mb; 
-	private List<MessageBrokerSubscriber> qvTopicSubscribers;
+	private List<OutOfRangeSLAViolationSubscriber> qvTopicSubscribers;
 	
 	public OutOfRangeSLAViolationChecker()
 	{
 		mb = new WSO2MBClient();
-		qvTopicSubscribers = new ArrayList<MessageBrokerSubscriber>();
+		qvTopicSubscribers = new ArrayList<OutOfRangeSLAViolationSubscriber>();
 		
 		/*
 		 * 1) Subscribe to all monitoringTopics
@@ -28,7 +28,7 @@ public class OutOfRangeSLAViolationChecker{
 				if(topicName.startsWith(WSO2MBClient.monitoringTopicPrefix))
 				{ // monitoring Topic
 					String subscriberName = "subscriberFor_" + topicName;
-					MessageBrokerSubscriber qvSubscriber = new MessageBrokerSubscriber(subscriberName, topicName, new OutOfRangeSLAViolationListener());
+					OutOfRangeSLAViolationSubscriber qvSubscriber = new OutOfRangeSLAViolationSubscriber(subscriberName, topicName);
 					qvTopicSubscribers.add(qvSubscriber);
 					qvSubscriber.subscribeToTopic();
 					System.out.println("Created QV out of range subscriber " + subscriberName);
@@ -44,7 +44,7 @@ public class OutOfRangeSLAViolationChecker{
 
 		    @Override
 		    public void run() {
-		    	for(MessageBrokerSubscriber mbs:qvTopicSubscribers)
+		    	for(OutOfRangeSLAViolationSubscriber mbs:qvTopicSubscribers)
 		    	{
 		    		mbs.releaseResources();
 		    	}

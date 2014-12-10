@@ -29,7 +29,7 @@ public class MessageBrokerSubscriber {
 	private String mbDefaultHostName = "localhost";
 	private String mbDefaultPort = "5673";
 	private String connectionFactoryName = "qpidConnectionfactory"; // fixed
-	private String topicName; // the topic should be predefined by the
+	protected String topicName; // the topic should be predefined by the
 										// administrator of the MB
 
 	private MessageListener messageListener;
