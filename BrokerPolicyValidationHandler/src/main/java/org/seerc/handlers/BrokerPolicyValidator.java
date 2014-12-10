@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 
 import org.seerc.brokeratcloud.messagebroker.MessageBrokerSubscriber;
 import org.seerc.brokeratcloud.messagebroker.OutOfRangeSLAViolationListener;
+import org.seerc.brokeratcloud.messagebroker.OutOfRangeSLAViolationSubscriber;
 import org.seerc.brokeratcloud.messagebroker.WSO2MBClient;
 import org.seerc.brokeratcloud.policycompletenesscompliance.BrokerPolicy;
 import org.seerc.brokeratcloud.policycompletenesscompliance.BrokerPolicyClass;
@@ -73,35 +74,26 @@ public class BrokerPolicyValidator extends Handler {
 				{ // it is QuantitativeValue, create topic
 					try {
 						String topicName = WSO2MBClient.monitoringTopicPrefix + new URI(candidateQV).getFragment();
-						// If MB contains the topic, there is no need in creating it again or subscribing for out-of-range. The latter has already been done on startup.
-						if(!this.mb.getAllTopics().contains(topicName))
-						{	// new topic create it and create new out-of-range subscriber
-							WSO2MBClient.createTopic(topicName);
-							// also create a OutOfRangeSLAViolationListener for the new QV monitoring topic
-							String subscriberName = "subscriberFor_" + topicName;
-							final MessageBrokerSubscriber qvSubscriber = new MessageBrokerSubscriber(subscriberName, topicName, new OutOfRangeSLAViolationListener());
-							qvSubscriber.subscribeToTopic();
-							// cleanup on JVM shutdown - will only run when running from command-line, NOT from within IDE.
-							Runtime.getRuntime().addShutdownHook(new Thread() {
-	
-							    @Override
-							    public void run() {
-							    	qvSubscriber.releaseResources();
-							    }
-	
-							});		
-	
-							System.out.println("Created topic " + topicName + ".");
-						}
-						else
-						{
-							System.out.println(topicName + " already exists. There is no need in creating it again or subscribing for out-of-range. The latter has already been done on startup.");
-						}
+						// new topic create it and create new out-of-range subscriber
+						WSO2MBClient.createTopic(topicName);
+						// also create a OutOfRangeSLAViolationListener for the new QV monitoring topic
+						String subscriberName = "subscriberFor_" + topicName;
+						final OutOfRangeSLAViolationSubscriber qvSubscriber = new OutOfRangeSLAViolationSubscriber(subscriberName, topicName);
+						System.out.println("Created QV out of range subscriber " + subscriberName);
+						qvSubscriber.subscribeToTopic();
+						// cleanup on JVM shutdown - will only run when running from command-line, NOT from within IDE.
+						Runtime.getRuntime().addShutdownHook(new Thread() {
+
+						    @Override
+						    public void run() {
+						    	qvSubscriber.releaseResources();
+						    }
+
+						});		
+
+						System.out.println("Created topic " + topicName + ".");
 					} catch (URISyntaxException e) {
 						System.out.println("QV in Broker Policy did not have a proper URI name. Cannot create topic.");						
-						e.printStackTrace();
-					} catch (RegistryException e) {
-						System.out.println("Could not get current topics from MB. Cannot create topic.");						
 						e.printStackTrace();
 					}
 				}

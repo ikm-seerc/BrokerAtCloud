@@ -41,4 +41,17 @@ public class OutOfRangeSLAViolationSubscriber extends MessageBrokerSubscriber {
 			super.subscribeToTopic();
 		}
 	}	
+	
+	public void releaseResources()
+	{
+		if(this.deactivated)
+		{
+			// do nothing
+			System.out.println("This OutOfRangeSLAViolationSubscriber is deactivated. No need to release resources...");
+		}
+		else
+		{	// release resources normally
+			super.releaseResources();
+		}
+	}
 }
