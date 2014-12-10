@@ -7,8 +7,6 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 public class OutOfRangeSLAViolationChecker{
 
-	private static final String monitoringTopicPrefix = "monitoringTopic-";
-	
 	private WSO2MBClient mb; 
 	private List<MessageBrokerSubscriber> qvTopicSubscribers;
 	
@@ -27,7 +25,7 @@ public class OutOfRangeSLAViolationChecker{
 			List<String> allTopics = mb.getAllTopics();
 			for(String topicName:allTopics)
 			{
-				if(topicName.startsWith(monitoringTopicPrefix))
+				if(topicName.startsWith(WSO2MBClient.monitoringTopicPrefix))
 				{ // monitoring Topic
 					String subscriberName = "subscriberFor_" + topicName;
 					MessageBrokerSubscriber qvSubscriber = new MessageBrokerSubscriber(subscriberName, topicName, new OutOfRangeSLAViolationListener());

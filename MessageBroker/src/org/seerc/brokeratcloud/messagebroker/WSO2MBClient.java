@@ -15,6 +15,8 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 public class WSO2MBClient {
 
+	public static String monitoringTopicPrefix = "monitoringTopic-";
+	
 	WSO2GREGClient gregInMB = new WSO2GREGClient(){
 
 		protected void readWSO2GREGProperties() 

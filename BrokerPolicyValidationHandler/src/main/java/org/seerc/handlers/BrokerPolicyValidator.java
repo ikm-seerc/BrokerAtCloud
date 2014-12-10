@@ -9,6 +9,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.seerc.brokeratcloud.messagebroker.MessageBrokerSubscriber;
+import org.seerc.brokeratcloud.messagebroker.OutOfRangeSLAViolationListener;
 import org.seerc.brokeratcloud.messagebroker.WSO2MBClient;
 import org.seerc.brokeratcloud.policycompletenesscompliance.BrokerPolicy;
 import org.seerc.brokeratcloud.policycompletenesscompliance.BrokerPolicyClass;
@@ -63,8 +65,22 @@ public class BrokerPolicyValidator extends Handler {
 				if(bp.getQuantitativeValueMap().keySet().contains(candidateQV))
 				{ // it is QuantitativeValue, create topic
 					try {
-						String topicName = "monitoringTopic-" + new URI(candidateQV).getFragment();
+						String topicName = WSO2MBClient.monitoringTopicPrefix + new URI(candidateQV).getFragment();
 						WSO2MBClient.createTopic(topicName);
+						// also create a OutOfRangeSLAViolationListener for the new QV monitoring topic
+						String subscriberName = "subscriberFor_" + topicName;
+						final MessageBrokerSubscriber qvSubscriber = new MessageBrokerSubscriber(subscriberName, topicName, new OutOfRangeSLAViolationListener());
+						qvSubscriber.subscribeToTopic();
+						// cleanup on JVM shutdown - will only run when running from command-line, NOT from within IDE.
+						Runtime.getRuntime().addShutdownHook(new Thread() {
+
+						    @Override
+						    public void run() {
+						    	qvSubscriber.releaseResources();
+						    }
+
+						});		
+
 						System.out.println("Created topic " + topicName + ".");						
 					} catch (URISyntaxException e) {
 						System.out.println("QV in Broker Policy did not have a proper URI name. Cannot create topic.");						
