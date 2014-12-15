@@ -2730,4 +2730,34 @@ public class PolicyCompletenessCompliance {
 	{
 		return this.bp;
 	}
+
+	public boolean qvIsInRange(String qvToCheck, Float qvValue)
+	{
+		Float minValueRange;
+		Float maxValueRange;
+		
+		if(this.bp.getQuantitativeValueIntegerMap().containsKey(qvToCheck))
+		{	// it's integer
+			String minInteger = oneVarOneSolutionQuery("{<" + qvToCheck + "> gr:hasMinValueInteger ?var}").toString();
+			String maxInteger = oneVarOneSolutionQuery("{<" + qvToCheck + "> gr:hasMaxValueInteger ?var}").toString();
+			minValueRange = Float.parseFloat(minInteger);
+			maxValueRange = Float.parseFloat(maxInteger);
+		}
+		else
+		{	// it's float
+			String minFloat = oneVarOneSolutionQuery("{<" + qvToCheck + "> gr:hasMinValueFloat ?var}").toString();
+			String maxFloat = oneVarOneSolutionQuery("{<" + qvToCheck + "> gr:hasMaxValueFloat ?var}").toString();
+			minValueRange = Float.parseFloat(minFloat.substring(0, minFloat.indexOf("^^")));
+			maxValueRange = Float.parseFloat(maxFloat.substring(0, maxFloat.indexOf("^^")));
+		}
+		
+		if(qvValue.floatValue() >= minValueRange && qvValue.floatValue() <= maxValueRange)
+		{	// OK it's in range
+			return true;
+		}
+		else
+		{	// out of range
+			return false;
+		}
+	}
 }
