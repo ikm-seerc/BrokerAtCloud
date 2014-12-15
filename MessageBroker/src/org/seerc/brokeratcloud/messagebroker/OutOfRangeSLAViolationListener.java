@@ -62,10 +62,11 @@ public class OutOfRangeSLAViolationListener implements MessageListener {
 			Float qvValue = this.parseQVValueFromJsonMonitoringEvent(contents);
 			
 			// check BPs for QV and if it's in range
-			if(this.qvIsInRange(qvToCheck, qvValue))
-			{
+			if(!this.qvIsInRange(qvToCheck, qvValue))
+			{	// not in range
 				// send event to SLA violation errors topic
 				System.out.println("QV " + qvToCheck + " with value " + qvValue + " was found out of range. Sending event to SLA violation errors topic.");
+				this.sendMonitoringEventToSLAViolationsTopic(contents);
 			}
 			
 		} catch (JMSException e) {
@@ -91,6 +92,12 @@ public class OutOfRangeSLAViolationListener implements MessageListener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void sendMonitoringEventToSLAViolationsTopic(String contents)
+	{
+		MessageBrokerStringPublisher slaViolationReporter = new MessageBrokerStringPublisher("slaViolationReporter", WSO2MBClient.slaViolationErrorReportingTopic);
+		slaViolationReporter.publishStringToTopic(contents);
 	}
 
 	private boolean qvIsInRange(String qvToCheck, Float qvValue) throws RegistryException, SecurityException, IllegalArgumentException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException
@@ -134,7 +141,7 @@ public class OutOfRangeSLAViolationListener implements MessageListener {
 	private Float parseQVValueFromJsonMonitoringEvent(String contents)
 	{
 		// TODO parse QV value from JSON
-		return 98.7f;
+		return 108.7f;
 	}
 
 	private String parseQVFromJsonMonitoringEvent(String contents)
