@@ -644,6 +644,16 @@ gr:lesser cas:AIVhigh.
 cas:AIVlow a cas:AllowedInteroperabilityValue;
 gr:lesser cas:AIVmedium.
 
+cas:AllowedOperabilityValue rdfs:subClassOf gr:QualitativeValue;
+rdfs:label "Allowed values of Operability: high, medium, low." .
+
+cas:AOVhigh a cas:AllowedOperabilityValue.
+
+cas:AOVmedium a cas:AllowedOperabilityValue;
+gr:lesser cas:AOVhigh.
+
+cas:AOVlow a cas:AllowedOperabilityValue;
+gr:lesser cas:AOVmedium.
 
 cas:AllowedAdaptabilityValue rdfs:subClassOf gr:QualitativeValue;
 rdfs:label "Allowed values of Adaptability: high, medium, low.".

@@ -754,6 +754,31 @@ public class PolicyCompletenessCompliance {
 		// read the broker policy classes
 		this.getBrokerPolicy(bpFileData);
 		
+		/*
+		 * For every Framework declaration, the range should be declared as subclass of Quantitative or Qualitative Value.  
+		 */
+		for(BrokerPolicyClass bpc:bp.getServiceModelMap().values())
+		{
+			for(Subproperty sp:bpc.getPropertyMap().values())
+			{
+				String range = sp.getRangeUri();
+				/*
+				 * If it's the SLP declaration, omit it
+				 */
+				Integer countIfSlp = countQuery("{<" + range + "> rdfs:subClassOf usdl-sla:ServiceLevelProfile}");
+				if(countIfSlp != 0) continue;
+				
+				Integer countQuantitativeValueIntegerSubclass = countQuery("{<" + range + "> rdfs:subClassOf gr:QuantitativeValueInteger}");
+				Integer countQuantitativeValueFloatSubclass = countQuery("{<" + range + "> rdfs:subClassOf gr:QuantitativeValueFloat}");
+				Integer countQualitativeValueSubclass = countQuery("{<" + range + "> rdfs:subClassOf gr:QualitativeValue}");
+				if(countQuantitativeValueIntegerSubclass == 0 && countQuantitativeValueFloatSubclass == 0 && countQualitativeValueSubclass == 0)
+				{	// problem, found a range in Framework declaration that is not Quantitative or Qualitative Value
+					writeMessageToBrokerPolicyReport("Error - Range " + range + " declared in \"Framework\" subproperty " + sp.getUri() + " is not a subclass of Quantitative or Qualitative Value.");
+					throw new BrokerPolicyException("Error - Range " + range + " declared in \"Framework\" subproperty " + sp.getUri() + " is not a subclass of Quantitative or Qualitative Value.");
+				}
+			}
+		}
+		
 		// At least one SLP should exist
 		if(bp.getServiceLevelProfileMap() == null || bp.getServiceLevelProfileMap().size() <1)
 		{
