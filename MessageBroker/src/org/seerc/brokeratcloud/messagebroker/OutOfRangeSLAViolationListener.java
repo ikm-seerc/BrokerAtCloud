@@ -9,6 +9,7 @@ import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 
 import org.seerc.brokeratcloud.policycompletenesscompliance.EvaluationReport;
 import org.seerc.brokeratcloud.policycompletenesscompliance.PolicyCompletenessCompliance;
@@ -41,17 +42,10 @@ public class OutOfRangeSLAViolationListener implements MessageListener {
 			System.out.println("OutOfRangeSLAViolationListener received the message with ID==> "
 					+ message.getJMSMessageID());
 			
-			BytesMessage bm = (BytesMessage) message;
+			TextMessage tm = (TextMessage) message;
 			
-			// get its bytes
-			ByteArrayOutputStream bOutput = new ByteArrayOutputStream();
-			int i;
-			while((i=bm.readInt())!=-1){
-				bOutput.write(i);
-			}
-
 			// make it a String
-			String contents = new String(bOutput.toByteArray(), "UTF-8");
+			String contents = tm.getText();
 			
 			System.out.println(contents);
 			
@@ -96,7 +90,7 @@ public class OutOfRangeSLAViolationListener implements MessageListener {
 
 	private void sendMonitoringEventToSLAViolationsTopic(String contents)
 	{
-		MessageBrokerStringPublisher slaViolationReporter = new MessageBrokerStringPublisher("slaViolationReporter", WSO2MBClient.slaViolationErrorReportingTopic);
+		MessageBrokerTextMessagePublisher slaViolationReporter = new MessageBrokerTextMessagePublisher("slaViolationReporter", WSO2MBClient.slaViolationErrorReportingTopic);
 		slaViolationReporter.publishStringToTopic(contents);
 	}
 
