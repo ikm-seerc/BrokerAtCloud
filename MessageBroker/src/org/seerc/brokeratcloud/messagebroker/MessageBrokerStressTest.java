@@ -1,6 +1,9 @@
 package org.seerc.brokeratcloud.messagebroker;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -9,6 +12,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+
+import javax.jms.BytesMessage;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 
 import org.wso2.andes.util.FileUtils;
 
@@ -21,7 +29,7 @@ public class MessageBrokerStressTest {
 	public MessageBrokerStressTest()
 	{
 		try {
-			this.test2();
+			this.test6();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}		
@@ -87,6 +95,50 @@ public class MessageBrokerStressTest {
 			Thread.sleep(10000);
 		}
 
+	}
+	
+	private void test5() throws Exception
+	{
+		int index = 0;
+
+		while(true)
+		{
+			++index;
+			System.out.println("Sending message #" + index);
+
+			URL url = new URL(
+					"http://localhost:8080/org.seerc.brokeratcloud.webservice/rest/topics/monitoring/monitoring/sintef");
+			HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
+			httpCon.setDoOutput(true);
+			httpCon.setRequestMethod("POST");
+			OutputStreamWriter out = new OutputStreamWriter(
+					httpCon.getOutputStream());
+			out.write(String.valueOf(index));
+			out.close();
+			httpCon.getInputStream();
+			httpCon.disconnect();
+			
+			//Thread.sleep(5000);
+		}
+	}
+	
+	private void test6() throws Exception
+	{
+		MessageBrokerSubscriber mbs = new MessageBrokerSubscriber("subscriber1", "monitoring", 
+				new MessageListener() {
+			public void onMessage(Message message){
+				try {
+					System.out.println("Got message #" + ((TextMessage)message).getText());
+				} catch (Exception e) {
+					System.out.println("Failure: " + e.getClass().getName() + " - "
+							+ e.getMessage());
+					e.printStackTrace();
+					return;
+				}
+			}
+		}
+		);
+		mbs.subscribeToTopic();
 	}
 	
 	private void doPut() throws Exception

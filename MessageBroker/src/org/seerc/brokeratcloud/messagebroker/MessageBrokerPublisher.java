@@ -19,6 +19,8 @@ import javax.jms.TopicSession;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+
 //This class is the template of a topic publisher for WSO2 Message Broker
 public class MessageBrokerPublisher {
 	protected InitialContext ctx;
@@ -37,7 +39,16 @@ public class MessageBrokerPublisher {
 			this.mbClientId = clientId;
 			this.topicName = topicName;
 			initializeContext(mbUsername, mbPassword);
-			WSO2MBClient.createTopic(topicName);
+			WSO2MBClient mb = new WSO2MBClient();
+			try {
+				// only create topic if it doesn't exist
+				if(!mb.getAllTopics().contains(topicName))
+				{
+					WSO2MBClient.createTopic(topicName);
+				}
+			} catch (RegistryException e) {
+				e.printStackTrace();
+			}
 		} else {
 			throw new NullPointerException("clientId must not be null");
 		}
