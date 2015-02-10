@@ -1,8 +1,11 @@
 package org.seerc.brokeratcloud.webservice;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import javax.ws.rs.DELETE;
@@ -11,9 +14,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.seerc.brokeratcloud.messagebroker.WSO2GREGClient;
+import org.seerc.brokeratcloud.policycompletenesscompliance.CompletenessException;
+import org.seerc.brokeratcloud.policycompletenesscompliance.PolicyCompletenessCompliance;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -28,12 +34,42 @@ public class GovernanceRegistry {
 	// the Gson POJO de/serializer
 	Gson gson;
 	
+	PolicyCompletenessCompliance pcc;
+	
 	public GovernanceRegistry()
 	{
 		this.greg = new WSO2GREGClient();
 		this.gson = new Gson();
+		this.pcc = new PolicyCompletenessCompliance();
 	}
-	
+
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	@Path("/getServiceDescription")
+	public InputStream getServiceDescription(@QueryParam("serviceDescriptionUri") String serviceDescriptionUri) throws RegistryException, URISyntaxException {
+		URI resourceUri = new URI(serviceDescriptionUri);
+		// resourcePath is URI, should get the SD with this service instance URI
+		
+		// get all SDs
+		Collection sds = (Collection) this.greg.getRemote_registry().get(WSO2GREGClient.getServiceDescriptionsFolder());
+		for(int i=0; i<sds.getChildCount(); i++)
+		{
+			Resource sd = this.greg.getRemote_registry().get(sds.getChildren()[i]);
+			try {
+				String sdUri = this.pcc.getSDServiceInstanceURI(sd.getContentStream());
+				if(sdUri.equals(serviceDescriptionUri))
+				{	// we found the needed SD, return it
+					return sd.getContentStream();
+				}
+			} catch (IOException | CompletenessException e) {
+				System.out.println("Could not get service instance URI of " + sds.getChildren()[i]);
+				e.printStackTrace();
+			}
+		}
+		
+		throw new RegistryException("Could not find service description with service instance URI: " + serviceDescriptionUri);
+	}
+
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("/{resourcePath: .*}")
@@ -89,5 +125,4 @@ public class GovernanceRegistry {
 	public void putResource(@PathParam("resourcePath") String resourcePath) throws RegistryException {
 		this.greg.getRemote_registry().delete("/" + resourcePath);
 	}
-	
 }
