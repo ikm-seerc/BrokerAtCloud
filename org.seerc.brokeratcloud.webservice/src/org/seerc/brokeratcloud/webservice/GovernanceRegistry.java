@@ -46,8 +46,8 @@ public class GovernanceRegistry {
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("/getServiceDescription")
-	public InputStream getServiceDescription(@QueryParam("serviceDescriptionUri") String serviceDescriptionUri) throws RegistryException, URISyntaxException {
-		URI resourceUri = new URI(serviceDescriptionUri);
+	public InputStream getServiceDescription(@QueryParam("serviceInstanceUri") String serviceInstanceUri) throws RegistryException, URISyntaxException {
+		URI resourceUri = new URI(serviceInstanceUri);
 		// resourcePath is URI, should get the SD with this service instance URI
 		
 		// get all SDs
@@ -57,7 +57,7 @@ public class GovernanceRegistry {
 			Resource sd = this.greg.getRemote_registry().get(sds.getChildren()[i]);
 			try {
 				String sdUri = this.pcc.getSDServiceInstanceURI(sd.getContentStream());
-				if(sdUri.equals(serviceDescriptionUri))
+				if(sdUri.equals(serviceInstanceUri))
 				{	// we found the needed SD, return it
 					return sd.getContentStream();
 				}
@@ -67,7 +67,7 @@ public class GovernanceRegistry {
 			}
 		}
 		
-		throw new RegistryException("Could not find service description with service instance URI: " + serviceDescriptionUri);
+		throw new RegistryException("Could not find service description with service instance URI: " + serviceInstanceUri);
 	}
 
 	@GET
