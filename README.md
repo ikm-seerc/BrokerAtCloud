@@ -91,3 +91,7 @@ It should be also noted that whenever the PolicyCompletenessCompliance and/or Me
 2) Copy the built jar(s) in the CARBON_HOME/repository/components/lib folder.
 
 3) Restart GReg
+
+BrokerLibs
+----------------------------
+Needed JAR libs are no longer exported in JARs and WARs. This has been done in order to facilitate deployment, bundles were more than 50 MB. Now, all contents of lib folder in BrokerLibs should be placed in "<GREG_HOME>/repository/components/lib" and "<TOMCAT_HOME>/lib". Bundles have now been diminished to ~100/KB.
