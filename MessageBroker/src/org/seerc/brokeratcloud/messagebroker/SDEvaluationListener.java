@@ -107,7 +107,9 @@ public class SDEvaluationListener implements MessageListener {
 			System.out.println("Sending received SD to repository at " + pathToPutSiUri);
 			
 			if(this.wso2gregClient.getRemote_registry().resourceExists(pathToPutSiUri))
-			{	// resource exists, delete it
+			{	// resource exists, delete it first from Fuseki and then from GReg
+				InputStream currentSD = this.wso2gregClient.getRemote_registry().get(pathToPutSiUri).getContentStream();
+				fc.deleteInputStreamFromFuseki(currentSD);
 				this.wso2gregClient.getRemote_registry().delete(pathToPutSiUri);
 			}
 			

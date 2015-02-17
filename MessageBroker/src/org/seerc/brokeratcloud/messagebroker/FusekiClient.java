@@ -74,7 +74,7 @@ public class FusekiClient {
 		this.deleteInputStreamFromFuseki(FileUtils.openInputStream(file));
 	}
 
-	public void deleteInputStreamFromFuseki(FileInputStream stream) {
+	public void deleteInputStreamFromFuseki(InputStream stream) {
 		DatasetAccessor dataAccessor = DatasetAccessorFactory.createHTTP(datasetURL + "/data");
 
 		// current model in Fuseki
