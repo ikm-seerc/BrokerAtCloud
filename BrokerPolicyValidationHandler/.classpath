@@ -4,7 +4,6 @@
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry exported="true" kind="var" path="ECLIPSE_WORKSPACE/.metadata/.plugins/org.wso2.developerstudio.eclipse.libraries/lib/org.eclipse.osgi_3.8.1.v20120830-144521.jar"/>
 	<classpathentry exported="true" kind="var" path="ECLIPSE_WORKSPACE/.metadata/.plugins/org.wso2.developerstudio.eclipse.libraries/lib/org.wso2.carbon.registry.core_4.0.1.jar"/>
-	<classpathentry exported="true" kind="var" path="ECLIPSE_WORKSPACE/.metadata/.plugins/org.wso2.developerstudio.eclipse.libraries/lib/org.wso2.carbon.registry.api_4.0.0.jar"/>
 	<classpathentry exported="true" kind="var" path="ECLIPSE_WORKSPACE/.metadata/.plugins/org.wso2.developerstudio.eclipse.libraries/lib/abdera_1.0.0.wso2v3.jar"/>
 	<classpathentry exported="true" kind="var" path="ECLIPSE_WORKSPACE/.metadata/.plugins/org.wso2.developerstudio.eclipse.libraries/lib/axiom_1.2.11.wso2v4.jar"/>
 	<classpathentry exported="true" kind="var" path="ECLIPSE_WORKSPACE/.metadata/.plugins/org.wso2.developerstudio.eclipse.libraries/lib/axis2_1.6.1.wso2v10.jar"/>
