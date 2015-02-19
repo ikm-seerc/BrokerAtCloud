@@ -92,6 +92,10 @@ It should be also noted that whenever the PolicyCompletenessCompliance and/or Me
 
 3) Restart GReg
 
+ServiceDeprecationHandler
+----------------------------
+This is a WSO2 Developer Studio Registry Handler project. It implements the Handler functionality for service deprecation.
+
 BrokerLibs
 ----------------------------
 Needed JAR libs are no longer exported in JARs and WARs. This has been done in order to facilitate deployment, bundles were more than 50 MB. Now, all contents of lib folder in BrokerLibs should be placed in "<GREG_HOME>/repository/components/lib" and "<TOMCAT_HOME>/lib". Bundles have now been diminished to ~100/KB.
