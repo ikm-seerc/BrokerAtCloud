@@ -2,12 +2,12 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.seerc.BrokerPolicyValidationHandler</groupId>
-  <artifactId>BrokerPolicyValidationHandler</artifactId>
+  <groupId>org.seerc.ServiceDeprecationHandler</groupId>
+  <artifactId>ServiceDeprecationHandler</artifactId>
   <version>1.0.0</version>
   <packaging>bundle</packaging>
-  <name>BrokerPolicyValidationHandler</name>
-  <description>BrokerPolicyValidationHandler</description>
+  <name>ServiceDeprecationHandler</name>
+  <description>ServiceDeprecationHandler</description>
   <properties>
     <CApp.type>lib/registry/handlers</CApp.type>
   </properties>
@@ -127,10 +127,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>BrokerPolicyValidationHandler</Bundle-SymbolicName>
-            <Bundle-Name>BrokerPolicyValidationHandler</Bundle-Name>
-            <Bundle-Activator>org.wso2.custom.internal.registry.handler.Activator</Bundle-Activator>
-            <Export-Package>org.seerc.handlers.brokerPolicy</Export-Package>
+            <Bundle-SymbolicName>ServiceDeprecationHandler</Bundle-SymbolicName>
+            <Bundle-Name>ServiceDeprecationHandler</Bundle-Name>
+            <Bundle-Activator>org.wso2.custom.internal.serviceDeprecation.handler.Activator</Bundle-Activator>
+            <Export-Package>org.seerc.handlers.service</Export-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
           </instructions>
         </configuration>

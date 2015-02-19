@@ -12,8 +12,7 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.apache.axiom.om.util.AXIOMUtil;
-
-import org.seerc.handlers.BrokerPolicyValidator;
+import org.seerc.handlers.brokerPolicy.BrokerPolicyValidator;
 import org.wso2.carbon.registry.core.jdbc.handlers.filters.URLMatcher;
 
 public class Activator implements BundleActivator {

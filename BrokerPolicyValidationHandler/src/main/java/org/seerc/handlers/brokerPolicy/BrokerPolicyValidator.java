@@ -1,4 +1,4 @@
-package org.seerc.handlers;
+package org.seerc.handlers.brokerPolicy;
 
 import java.io.File;
 import java.io.FileInputStream;
