@@ -66,10 +66,10 @@ public class RegistryRepositorySDListener implements MessageListener {
 			// send SD to Registry Repository
 			System.out.println("Sending received SD to repository at " + pathToPutSiUri);
 			
-			if(this.wso2gregClient.getRemote_registry().resourceExists(pathToPutSiUri))
-			{	// resource exists, delete it
+			/*if(this.wso2gregClient.getRemote_registry().resourceExists(pathToPutSiUri))
+			{	// resource exists, do not delete it from GReg, putWithRetryHack() should overcome this
 				this.wso2gregClient.getRemote_registry().delete(pathToPutSiUri);
-			}
+			}*/
 			
 			Resource sdResource = this.wso2gregClient.getRemote_registry().newResource();
 			sdResource.setContentStream(sdis);
