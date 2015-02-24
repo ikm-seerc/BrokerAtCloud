@@ -36,6 +36,9 @@ public class ServiceDeprecation extends Handler {
 		
 		// send the service deprecation event
 		try {
+			// reuse stream
+			contentStream.reset();
+			
 			slp.serviceDeprecated(gregEvaluator.getPcc().getSDServiceInstanceURI(contentStream));
 		} catch (IOException | CompletenessException e) {
 			e.printStackTrace();
