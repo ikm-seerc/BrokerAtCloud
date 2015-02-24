@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
@@ -15,7 +14,6 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 
 import org.seerc.brokeratcloud.policycompletenesscompliance.BrokerPolicyException;
-import org.seerc.brokeratcloud.policycompletenesscompliance.ClassInstancePair;
 import org.seerc.brokeratcloud.policycompletenesscompliance.CompletenessException;
 import org.seerc.brokeratcloud.policycompletenesscompliance.ComplianceException;
 import org.seerc.brokeratcloud.policycompletenesscompliance.EvaluationReport;
@@ -43,6 +41,9 @@ public class SDEvaluationListener implements MessageListener {
 	
 	// The Fuseki client
 	FusekiClient fc;
+	
+	// The ServiceLifecyclePublisher for triggering events on create and update
+	ServiceLifecyclePublisher slp;
 
 	public SDEvaluationListener()
 	{
@@ -57,6 +58,8 @@ public class SDEvaluationListener implements MessageListener {
 			this.wso2gregClient = new WSO2GREGClient();
 			
 			fc = new FusekiClient();
+			
+			slp = new ServiceLifecyclePublisher();
 		} catch (Exception e) {
 			System.out.println("Failure: " + e.getClass().getName() + " - "
 					+ e.getMessage());
@@ -106,11 +109,17 @@ public class SDEvaluationListener implements MessageListener {
 			// send SD to Registry Repository
 			System.out.println("Sending received SD to repository at " + pathToPutSiUri);
 			
+			// flag to indicate whether this is an update or a creation of service
+			boolean serviceUpdated = false;
+			
 			if(this.wso2gregClient.getRemote_registry().resourceExists(pathToPutSiUri))
 			{	// resource exists, delete it first from Fuseki and then from GReg
 				InputStream currentSD = this.wso2gregClient.getRemote_registry().get(pathToPutSiUri).getContentStream();
 				fc.deleteInputStreamFromFuseki(currentSD);
 				this.wso2gregClient.getRemote_registry().delete(pathToPutSiUri);
+				
+				// this is a service update
+				serviceUpdated = true;
 			}
 			
 			Resource sdResource = this.wso2gregClient.getRemote_registry().newResource();
@@ -127,7 +136,7 @@ public class SDEvaluationListener implements MessageListener {
 			// reuse stream
 			sdis.reset();
 
-			ep.setServiceInstance(si);
+			ep.setServiceInstance(si.toString());
 			
 			// get the BrokerPolicy for this SD by looking in GReg BPs folder
 			InputStream bpInputStream = this.getBpForSd(sdis);
@@ -150,6 +159,15 @@ public class SDEvaluationListener implements MessageListener {
 			// send to Fuseki
 			System.out.println("Evaluation went OK, sending received SD to Fuseki.");
 			fc.addInputStreamToFuseki(sdis);
+			
+			if(serviceUpdated)
+			{	// update of service
+				this.slp.serviceUpdated(siUri.toString());
+			}
+			else
+			{	// creation of service
+				this.slp.serviceOnboarded(siUri.toString());
+			}
 			
 			bOutput.close(); // close ByteArrayOutputStream
 		} catch (JMSException e) {
