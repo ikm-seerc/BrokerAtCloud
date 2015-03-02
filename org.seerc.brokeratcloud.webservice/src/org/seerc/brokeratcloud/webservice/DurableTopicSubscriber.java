@@ -20,8 +20,8 @@ import javax.ws.rs.QueryParam;
 import org.seerc.brokeratcloud.messagebroker.MessageBrokerSubscriber;
 import org.wso2.carbon.event.client.broker.BrokerClientException;
 
-@Path("/subscriptions/evaluation")
-public class TopicSubscriber {
+@Path("/subscriptions/durable")
+public class DurableTopicSubscriber {
 
 	@PUT
 	@Path("/{topicName}/{clientId}")
@@ -52,8 +52,24 @@ public class TopicSubscriber {
 					e.printStackTrace();
 				}
 			}
-		}, false);
+		}, true);
 		mbs.subscribeToTopic();
+	}
+	
+	@PUT
+	@Path("/{topicName}/{clientId}/unsubscribe")
+	public void unsubscribeFromTopic(@PathParam("topicName") final String topicName, @PathParam("clientId") String clientId) throws BrokerClientException
+	{
+		// Normal MessageBrokerSubscriber which delegates messages in XML format to
+		// WS callback subscribers
+		MessageBrokerSubscriber mbs = new MessageBrokerSubscriber(clientId, topicName, new MessageListener() {
+			
+			@Override
+			public void onMessage(Message message) {
+				// empty message listener
+			}
+		}, false);
+		mbs.unsubscribe();
 	}
 	
 	protected void postMessageToWsCallbackEndpoint(String wsCallbackEndpoint, String msg) throws IOException
@@ -92,5 +108,20 @@ public class TopicSubscriber {
 		System.out.println("Got the WS callback message ==> " + message);
 		
 		return "OK";
+	}
+	
+	public static void main(String[] args) {
+		DurableTopicSubscriber dts = new DurableTopicSubscriber();
+		try {
+			dts.subscribeToTopic("serviceUpdatedTopic", "durableSubsciber", "http://requestb.in/12q65i01");
+			Thread.sleep(60000);
+			dts.unsubscribeFromTopic("serviceUpdatedTopic", "durableSubsciber");
+		} catch (BrokerClientException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

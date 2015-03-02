@@ -5,7 +5,7 @@ import javax.jms.MessageListener;
 public class EvaluationComponentSDSubscriber extends MessageBrokerSubscriber{
 
 	public EvaluationComponentSDSubscriber(String clientId, String topicName) {
-		super(clientId, topicName, new SDEvaluationListener());
+		super(clientId, topicName, new SDEvaluationListener(), false);
 	}
 
 	public static void main(String[] args) {

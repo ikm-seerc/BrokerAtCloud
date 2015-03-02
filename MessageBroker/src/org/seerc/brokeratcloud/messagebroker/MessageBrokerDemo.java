@@ -5,7 +5,7 @@ public class MessageBrokerDemo {
 	public static void main(String[] args) {
 		
 		MessageBrokerPublisher mbp = new MessageBrokerPublisher("publisher1", "SD");
-		MessageBrokerSubscriber mbs = new MessageBrokerSubscriber("subscriber1", "SD", new BytesMessageListener());
+		MessageBrokerSubscriber mbs = new MessageBrokerSubscriber("subscriber1", "SD", new BytesMessageListener(), false);
 		
 		mbs.subscribeToTopic();
 		//mbp.publishBytesMessageFromFileToTopic("files/SAP_HANA_Cloud_Apps_SD_test.ttl");

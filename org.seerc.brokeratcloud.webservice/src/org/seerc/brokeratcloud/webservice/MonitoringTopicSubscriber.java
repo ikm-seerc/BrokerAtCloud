@@ -48,7 +48,7 @@ public class MonitoringTopicSubscriber extends TopicSubscriber {
 					e.printStackTrace();
 				}
 			}
-		});
+		}, false);
 		mbs.subscribeToTopic();
 	}
 

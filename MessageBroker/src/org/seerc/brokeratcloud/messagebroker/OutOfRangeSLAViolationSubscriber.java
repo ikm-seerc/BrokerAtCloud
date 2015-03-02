@@ -17,7 +17,7 @@ public class OutOfRangeSLAViolationSubscriber extends MessageBrokerSubscriber {
 	private boolean deactivated = false;
 	
 	public OutOfRangeSLAViolationSubscriber(String clientId, String topicName) {
-		super(clientId, topicName, new OutOfRangeSLAViolationListener());
+		super(clientId, topicName, new OutOfRangeSLAViolationListener(), false);
 		
 		// if this topic is already activated, then this subscriber should be deactivated
 		if(alreadyActivatedTopics.contains(topicName))

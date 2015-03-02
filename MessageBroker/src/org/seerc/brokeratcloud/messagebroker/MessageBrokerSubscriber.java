@@ -33,13 +33,15 @@ public class MessageBrokerSubscriber {
 										// administrator of the MB
 
 	private MessageListener messageListener;
+	private boolean isDurable;
 	
 	//constructor - very similar to the corresponding publisher constructor
-	public MessageBrokerSubscriber(String clientId, String topicName, MessageListener messageListener) {
+	public MessageBrokerSubscriber(String clientId, String topicName, MessageListener messageListener, boolean isDurable) {
 		if (clientId != null) {
 			this.mbClientId = clientId;
 			this.topicName = topicName;
 			this.messageListener = messageListener;
+			this.isDurable = isDurable;
 			initializeContext(mbUsername, mbPassword);
 		} else {
 			throw new NullPointerException("clientId must not be null");
@@ -82,7 +84,14 @@ public class MessageBrokerSubscriber {
 					Session.AUTO_ACKNOWLEDGE);
 			
 			Topic topic = (Topic) ctx.lookup(topicName);
-			tSubscriber = tSession.createSubscriber(topic); //if the topic does not exist it is created at runtime by creating a subscriber for it (qpid default behavior, can't find a way to change this) 
+			if(this.isDurable)
+			{	// durable subscriber
+				tSubscriber = tSession.createDurableSubscriber(topic, this.mbClientId);				
+			}
+			else
+			{	// non-durable subscriber
+				tSubscriber = tSession.createSubscriber(topic); //if the topic does not exist it is created at runtime by creating a subscriber for it (qpid default behavior, can't find a way to change this) 
+			}
 
 			//activates/attaches the message listener (callback function) 
 			//this listener is called by the pub/sub server (message broker - mb) in order to inform the 
@@ -96,6 +105,23 @@ public class MessageBrokerSubscriber {
 		}
 	}
 
+	public void unsubscribe()
+	{
+		try {
+			TopicConnectionFactory tConnectionFactory = (TopicConnectionFactory) ctx
+					.lookup(connectionFactoryName);
+			tConnection = tConnectionFactory.createTopicConnection();
+			tConnection.start();
+			tSession = tConnection.createTopicSession(false,
+					Session.AUTO_ACKNOWLEDGE);
+			this.tSession.unsubscribe(this.mbClientId);
+		} catch (JMSException e) {
+			e.printStackTrace();
+		} catch (NamingException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void releaseResources() {
 
 		try {

@@ -76,7 +76,7 @@ public class WSO2MBClient {
 			public void onMessage(Message arg0) {
 				// do nothing
 			}
-		});
+		}, false);
 		// create the topic by subscribing
 		mbs.subscribeToTopic();
 		// release, these resources should not be needed anymore

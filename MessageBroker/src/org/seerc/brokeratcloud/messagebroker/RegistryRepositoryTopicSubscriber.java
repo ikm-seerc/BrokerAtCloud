@@ -22,7 +22,7 @@ public class RegistryRepositoryTopicSubscriber {
 		gregClient = new WSO2GREGClient();
 		
 		// instantiate the subscriber and override message listener
-		sdReportSubscriber = new MessageBrokerSubscriber("RegistryRepositoryTopicSubscriber", "SDReport", new RegistryRepositorySDReportListener(gregClient));
+		sdReportSubscriber = new MessageBrokerSubscriber("RegistryRepositoryTopicSubscriber", "SDReport", new RegistryRepositorySDReportListener(gregClient), false);
 		
 		//subscribe to topic
 		sdReportSubscriber.subscribeToTopic();
