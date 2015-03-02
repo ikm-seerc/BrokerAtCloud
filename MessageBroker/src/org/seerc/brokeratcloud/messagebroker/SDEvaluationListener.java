@@ -112,13 +112,13 @@ public class SDEvaluationListener implements MessageListener {
 			// flag to indicate whether this is an update or a creation of service
 			boolean serviceUpdated = false;
 			
+			InputStream currentSD = null;
+			
 			if(this.wso2gregClient.getRemote_registry().resourceExists(pathToPutSiUri))
 			{	// resource exists, do not delete it from GReg, putWithRetryHack() should overcome this
 				//this.wso2gregClient.getRemote_registry().delete(pathToPutSiUri);
 				
-				// delete old from Fuseki
-				InputStream currentSD = this.wso2gregClient.getRemote_registry().get(pathToPutSiUri).getContentStream();
-				fc.deleteInputStreamFromFuseki(currentSD);
+				currentSD = this.wso2gregClient.getRemote_registry().get(pathToPutSiUri).getContentStream();
 
 				// this is a service update
 				serviceUpdated = true;
@@ -160,6 +160,11 @@ public class SDEvaluationListener implements MessageListener {
 
 			// send to Fuseki
 			System.out.println("Evaluation went OK, sending received SD to Fuseki and generating lifecycle events.");
+			if(serviceUpdated)
+			{
+				// delete old from Fuseki
+				fc.deleteInputStreamFromFuseki(currentSD);
+			}
 			fc.addInputStreamToFuseki(sdis);
 			
 			if(serviceUpdated)
