@@ -459,10 +459,10 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport(node.toString());
 		}
 		
-		this.checkClassificationDimensionsInSD(smi_uri);
-
 		// now bring back the cached model with BP inside in order to use it for relations with instances checks
 		modelMem = cachedModel;
+
+		this.checkClassificationDimensionsInSD(smi_uri);
 
 		// for all Service Model properties from BP:
 		// if the SD's SM has a relation equal to uri
@@ -1360,7 +1360,7 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport("----------------");
 	
 			// check that instance of Service Individual class exists. Will take the first one, could there be more than one? TODO
-			RDFNode siInstance = oneVarOneSolutionQuery("{?var a usdl-core:ServiceIndividual}");
+			/*RDFNode siInstance = oneVarOneSolutionQuery("{?var a usdl-core:ServiceIndividual}");
 			if(siInstance == null)
 			{
 				writeMessageToCompletenessReport("Error - No Service Individual instance was found in the Service Description.");
@@ -1375,7 +1375,7 @@ public class PolicyCompletenessCompliance {
 				writeMessageToCompletenessReport("Error - No Service Individual instance gr:hasMakeAndModel association was found with a Broker Policy.");
 				throw new CompletenessException("No Service Individual instance gr:hasMakeAndModel association was found with a Broker Policy.");
 			}
-			writeMessageToCompletenessReport("Service Individual instance gr:hasMakeAndModel association was found with the Broker Policy: " + bpInstance.toString());		
+			writeMessageToCompletenessReport("Service Individual instance gr:hasMakeAndModel association was found with the Broker Policy: " + bpInstance.toString());*/		
 			
 			// check that instance of Entity Involvement exists
 			RDFNode eiInstance = oneVarOneSolutionQuery("{?var a usdl-core:EntityInvolvement}");
@@ -1385,15 +1385,6 @@ public class PolicyCompletenessCompliance {
 				throw new CompletenessException("No Entity Involvement instance was found in the Service Description.");
 			}
 			writeMessageToCompletenessReport("Entity Involvement instance was found in the Service Description: " + eiInstance.toString());		
-			
-			// check that Service Individual instance is associated via a hasEntityInvolvement relation with the Entity Involvement instance
-			Integer heiAssociationsCount = countQuery("{<" + siInstance.toString() + "> usdl-core:hasEntityInvolvement <" + eiInstance.toString() + ">}");
-			if(heiAssociationsCount == 0)
-			{
-				writeMessageToCompletenessReport("Error - Service Individual instance is not associated via a hasEntityInvolvement relation with the Entity Involvement instance.");
-				throw new CompletenessException("Service Individual instance is not associated via a hasEntityInvolvement relation with the Entity Involvement instance.");
-			}
-			writeMessageToCompletenessReport("Service Individual instance is associated via a hasEntityInvolvement relation with the Entity Involvement instance.");		
 			
 			// check that instance of Entity Involvement is associated via the withBusinessRole relation with the Provider instance of the class BusinessRoles
 			Integer wbrAssociationsCountInstance = countQuery("{<" + eiInstance.toString() + "> usdl-core:withBusinessRole <" + USDL_BUSINESS_ROLES + "provider>}");
@@ -1441,6 +1432,15 @@ public class PolicyCompletenessCompliance {
 				RDFNode node = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}");
 				si_uri = node.toString();
 			}
+			
+			// check that Service Individual instance is associated via a hasEntityInvolvement relation with the Entity Involvement instance
+			Integer heiAssociationsCount = countQuery("{<" + si_uri + "> usdl-core:hasEntityInvolvement <" + eiInstance.toString() + ">}");
+			if(heiAssociationsCount == 0)
+			{
+				writeMessageToCompletenessReport("Error - Service instance is not associated via a hasEntityInvolvement relation with the Entity Involvement instance.");
+				throw new CompletenessException("Service instance is not associated via a hasEntityInvolvement relation with the Entity Involvement instance.");
+			}
+			writeMessageToCompletenessReport("Service instance is associated via a hasEntityInvolvement relation with the Entity Involvement instance.");					
 		}
 			writeMessageToCompletenessReport("-------------------------------");
 			writeMessageToCompletenessReport("Service - ServiceModel Section:");
@@ -1548,10 +1548,10 @@ public class PolicyCompletenessCompliance {
 			}			
 		}
 
-		this.checkClassificationDimensionsInSD(smi_uri);
-
 		// now bring back the cached model with BP inside in order to use it for further checks
 		modelMem = cachedModel;
+
+		this.checkClassificationDimensionsInSD(smi_uri);
 
 		this.checkQuantitativeValuesRanges();
 		
