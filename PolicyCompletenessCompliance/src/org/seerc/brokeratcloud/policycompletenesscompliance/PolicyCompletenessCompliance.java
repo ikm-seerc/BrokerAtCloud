@@ -1832,7 +1832,6 @@ public class PolicyCompletenessCompliance {
 
 			String nli_uri = null;
 
-			this.isBPInstance(instanceUri);
 			// This "if" section is entered for all subclasses used as domains
 			// to subproperties except for the ServiceModel subclass
 			// An instance that belongs to a subclass (domain subclass) must be
