@@ -1832,6 +1832,7 @@ public class PolicyCompletenessCompliance {
 
 			String nli_uri = null;
 
+			this.isBPInstance(instanceUri);
 			// This "if" section is entered for all subclasses used as domains
 			// to subproperties except for the ServiceModel subclass
 			// An instance that belongs to a subclass (domain subclass) must be
@@ -1847,7 +1848,7 @@ public class PolicyCompletenessCompliance {
 					throw new CompletenessException("Instance: " + instanceUri + " is not connected to any instance via the appropriate property " + prop.getUri());
 				}
 			}
-			if ((startClassIndex != 0 && countNli > 1) || (startClassIndex == 0 && countNli > 1 && !this.bpHasSLPInConnection())) {
+			if ((startClassIndex != 0 && countNli > 1) || (startClassIndex == 0 && countNli > 1 && !this.isBPInstance(instanceUri))) {
 				writeMessageToCompletenessReport("Error - Instance: ");
 				writeMessageToCompletenessReport(instanceUri);
 				writeMessageToCompletenessReport("must be connected to only 1 instance via the appropriate property");
@@ -1857,7 +1858,7 @@ public class PolicyCompletenessCompliance {
 			/*
 			 * In the BP validation service model can be connected to more than one SLPs 
 			 */
-			else if (startClassIndex == 0 && countNli > 1 && this.bpHasSLPInConnection()) {
+			else if (startClassIndex == 0 && countNli > 1 && this.isBPInstance(instanceUri)) {
 				writeMessageToCompletenessReport("OK - Instance: ");
 				writeMessageToCompletenessReport(instanceUri);
 				writeMessageToCompletenessReport("is correctly connected to more than 1 instances via the appropriate property");
@@ -2007,6 +2008,13 @@ public class PolicyCompletenessCompliance {
 			}
 		}
 		return nlPairList;
+	}
+
+	// a BP service model instance does not declare gr:isVariantOf
+	private boolean isBPInstance(String instanceUri) 
+	{
+		int countIsVariantOf = countQuery("{<" + instanceUri + "> gr:isVariantOf ?someValue}");
+		return countIsVariantOf == 0;
 	}
 
 	// qvPairList is a list of QV class-instance pairs (see ClassInstancePair
