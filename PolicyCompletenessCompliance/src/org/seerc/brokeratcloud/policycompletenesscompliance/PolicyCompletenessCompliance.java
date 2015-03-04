@@ -471,9 +471,16 @@ public class PolicyCompletenessCompliance {
 		{
 			for(Subproperty sp:bpc.getPropertyMap().values())
 			{
-				RDFNode qvNode = oneVarOneSolutionQuery("{<" + smi_uri + "> <" + sp.getUri() + "> ?var;}");
-				if(qvNode != null)
+				RDFNode[] qvNodes = oneVarManySolutionsQuery("{<" + smi_uri + "> <" + sp.getUri() + "> ?var;}");
+				if(qvNodes.length > 1)
+				{	// more than one relations with an instance
+					writeMessageToCompletenessReport("Error - SD's Service model instance has more than one " + sp.getUri() + " relations with instances of " + sp.getRangeUri() + ".");
+					throw new CompletenessException("SD's Service model instance has more than one " + sp.getUri() + " relations with instances of " + sp.getRangeUri() + ".");						
+				}
+				
+				if(qvNodes.length != 0)
 				{	// there is a relation with the SD's SM
+					RDFNode qvNode = qvNodes[0];
 					Integer countQVs = countQuery("{<" + qvNode.toString() + "> rdf:type <" + sp.getRangeUri() + ">}");
 					if(countQVs == 0)
 					{	// found relation with non-existent instance, throw exception
@@ -1840,13 +1847,84 @@ public class PolicyCompletenessCompliance {
 					throw new CompletenessException("Instance: " + instanceUri + " is not connected to any instance via the appropriate property " + prop.getUri());
 				}
 			}
-			if (countNli > 1) {
+			if ((startClassIndex != 0 && countNli > 1) || (startClassIndex == 0 && countNli > 1 && !this.bpHasSLPInConnection())) {
 				writeMessageToCompletenessReport("Error - Instance: ");
 				writeMessageToCompletenessReport(instanceUri);
 				writeMessageToCompletenessReport("must be connected to only 1 instance via the appropriate property");
 				writeMessageToCompletenessReport(prop.getUri());
 				throw new CompletenessException("Instance: " + instanceUri + " must be connected to only 1 instance via the appropriate property" + prop.getUri());
-			} else if (countNli == 1) {
+			}
+			/*
+			 * In the BP validation service model can be connected to more than one SLPs 
+			 */
+			else if (startClassIndex == 0 && countNli > 1 && this.bpHasSLPInConnection()) {
+				writeMessageToCompletenessReport("OK - Instance: ");
+				writeMessageToCompletenessReport(instanceUri);
+				writeMessageToCompletenessReport("is correctly connected to more than 1 instances via the appropriate property");
+				writeMessageToCompletenessReport(prop.getUri());
+
+				RDFNode[] nodes = oneVarManySolutionsQuery("{<" + instanceUri
+						+ "> <" + prop.getUri() + "> ?var}");
+				for(RDFNode node:nodes)
+				{
+					nli_uri = node.toString(); // Next level instance
+
+					// -------------------------------------------------------------
+					// This is a workaround so that BP file is not needed as an
+					// input to completenessCheck method
+					// but the information pertaining to the QV instances which are
+					// present in BP file is drawn from
+					// the BrokerPolicy object
+					int countNli2 = 0;
+					/*if (startClassIndex == 4) {
+
+						if (bp.getQuantitativeValueMap().get(prop.getRangeUri())
+								.getInstanceMap().containsKey(nli_uri)) {
+							countNli2 = 1;
+						} else {
+							countNli2 = countQuery("{<" + nli_uri + "> rdf:type <"
+									+ prop.getRangeUri() + ">}");
+						}
+					} else {*/
+						countNli2 = countQuery("{<" + nli_uri + "> rdf:type <"
+								+ prop.getRangeUri() + ">}");
+					//}
+					// ----------------------------------------------------------------
+
+					if (countNli2 == 0) {
+						writeMessageToCompletenessReport("Error - Instance");
+						writeMessageToCompletenessReport(nli_uri);
+						writeMessageToCompletenessReport("does not belong to the correct type:");
+						writeMessageToCompletenessReport(prop.getRangeUri());
+						throw new CompletenessException("Instance " + nli_uri + " does not belong to the correct type: " + prop.getRangeUri());
+					} else {
+						writeMessageToCompletenessReport("OK - Found exactly 1  instance of the correct type:");
+						writeMessageToCompletenessReport(prop.getRangeUri());
+						writeMessageToCompletenessReport("which is correctly connected to the instance:");
+						writeMessageToCompletenessReport(instanceUri);
+						int countSmi3 = countQuery("{<" + nli_uri
+								+ "> rdf:type ?someType}");
+						if (countSmi3 > 1) {
+							writeMessageToCompletenessReport("Error - The instance URI:");
+							writeMessageToCompletenessReport(nli_uri);
+							writeMessageToCompletenessReport("is falsely associated with other types");
+							throw new CompletenessException("The instance URI: " + nli_uri + " is falsely associated with other types");
+						} else {
+							writeMessageToCompletenessReport("OK - Found exactly 1 instance of the correct type:");
+							writeMessageToCompletenessReport(prop.getRangeUri());
+							writeMessageToCompletenessReport("which is correctly connected to the instance:");
+							writeMessageToCompletenessReport(instanceUri);
+							writeMessageToCompletenessReport("and no other types are associated with this instance");
+							writeMessageToCompletenessReport("");
+
+							ClassInstancePair nlCip = new ClassInstancePair(
+									prop.getRangeUri(), nli_uri);
+							nlPairList.add(nlCip);
+						}
+					}
+				}
+			} 
+			else if (countNli == 1) {
 				writeMessageToCompletenessReport("OK - Instance: ");
 				writeMessageToCompletenessReport(instanceUri);
 				writeMessageToCompletenessReport("is correctly connected to exactly 1 instance via the appropriate property");
