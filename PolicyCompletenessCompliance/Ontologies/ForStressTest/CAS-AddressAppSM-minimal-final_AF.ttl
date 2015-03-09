@@ -15,7 +15,7 @@
 @prefix usdl-business-roles: <http://www.linked-usdl.org/ns/usdl-business-roles#> .
 @prefix s: <http://schema.org/> .
 @prefix fc: <http://www.broker-cloud.eu/service-descriptions/CAS/categories#>.
-@prefix gr: <http://purl.org/goodrelations/v1> .
+@prefix gr: <http://purl.org/goodrelations/v1#> .
 
 
 

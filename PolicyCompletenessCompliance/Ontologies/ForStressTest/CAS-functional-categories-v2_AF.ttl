@@ -13,7 +13,7 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 # @prefix usdl-sla: <http://www.linked-usdl.org/ns/usdl-sla#> .
 # @prefix usdl-core: <http://www.linked-usdl.org/ns/usdl-core#> .
-@prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker>.
+@prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#>.
 # @prefix s: <http://schema.org/> .
 # @prefix gr: <http://purl.org/goodrelations/v1> .
 @prefix skos:  <http://www.w3.org/2004/02/skos/core#>. 
@@ -72,10 +72,10 @@ dcterms:title "Roles for which an app can be useful.";
 skos:prefLabel "Role"@en ;
 	skos:altLabel "Rolle"@de ;
 	skos:broader fc:rootConcept ;
-	skos:narrower fc:projectmanager, fc:developer, fc:marketing, fc:sales;
+	skos:narrower fc:projectmanagement, fc:developer, fc:marketing, fc:sales;
 	skos:inScheme fc:CASConceptScheme .
 	
-fc:projectmanager a usdl-core-cb:ClassificationDimension ;
+fc:projectmanagement a usdl-core-cb:ClassificationDimension ;
 	skos:prefLabel "Project management"@en ;
 	skos:altLabel "Projektmanagement"@de ;
 	skos:broader fc:roles ;

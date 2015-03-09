@@ -7,17 +7,17 @@ cas:CASBrokerPolicy cas:hasServiceLevelProfileCAS cas:CASServiceLevelProfileSilv
 #################################################################################
 #### Service Level Profiles 
 
-cas:ServiceLevelProfileSilver a cas:CASServiceLevelProfile ; 
+cas:CASServiceLevelProfileSilver a cas:CASServiceLevelProfile ; 
 cas:hasServiceLevelAvailability cas:SilverAvailability;  
 cas:hasServiceLevelSecurity cas:SilverSecurity. 
 
 #####################################################################################
 ### Service Levels 
 ## for silver 
-cas:SilverAvailability a cas:ServiceLevelAvailability;
+cas:SilverAvailability a cas:CASServiceLevelAvailability;
 cas:hasSLE-Availability cas:SLE-SilverAvailability.
 
-cas:SilverSecurity a cas:ServiceLevelSecurity;
+cas:SilverSecurity a cas:CASServiceLevelSecurity;
 cas:hasSLE-Security cas:SLE-SilverSecurity.
 
 #####################################################################################

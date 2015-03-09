@@ -49,7 +49,7 @@ public class PolicyCompletenessCompliance {
 	private static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl", "Ontologies/ForReview/CAS-functional-categories.ttl"};
 	
 	protected static final Object[] brokerPolicyStressTestResources = {"Ontologies/ForStressTest/CAS-broker-policies-minimal-final_AF.ttl", "Ontologies/ForStressTest/CAS-Service-Level-Profile-silver_AF.ttl", "Ontologies/ForStressTest/CAS-functional-categories-v2_AF.ttl"};
-	protected static final Object[] serviceDescriptionStressTestResources = {"Ontologies/ForStressTest/CAS-AddressApp.ttl", "Ontologies/ForStressTest/CAS-Service-Provider.ttl", "Ontologies/ForStressTest/CAS-functional-categories.ttl"};
+	protected static final Object[] serviceDescriptionStressTestResources = {"Ontologies/ForStressTest/CAS-AddressAppSM-minimal-final_AF.ttl", "Ontologies/ForStressTest/CAS-Service-Provider_AF.ttl", "Ontologies/ForStressTest/CAS-functional-categories-v2_AF.ttl"};
 
 	protected OntModel modelMem = null;
 	private BrokerPolicy bp = new BrokerPolicy();
