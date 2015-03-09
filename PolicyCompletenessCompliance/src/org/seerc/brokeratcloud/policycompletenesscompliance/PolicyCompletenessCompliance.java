@@ -48,8 +48,8 @@ public class PolicyCompletenessCompliance {
 	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
 	private static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl", "Ontologies/ForReview/CAS-functional-categories.ttl"};
 	
-	private static final Object[] brokerPolicyStressTestResources = {"Ontologies/ForStressTest/CAS-broker-policies.ttl", "Ontologies/ForStressTest/CAS-Service-Level-Profile-silver.ttl", "Ontologies/ForStressTest/CAS-functional-categories.ttl"};
-	private static final Object[] serviceDescriptionStressTestResources = {"Ontologies/ForStressTest/CAS-AddressApp.ttl", "Ontologies/ForStressTest/CAS-Service-Provider.ttl", "Ontologies/ForStressTest/CAS-functional-categories.ttl"};
+	protected static final Object[] brokerPolicyStressTestResources = {"Ontologies/ForStressTest/CAS-broker-policies-minimal-final_AF.ttl", "Ontologies/ForStressTest/CAS-Service-Level-Profile-silver_AF.ttl", "Ontologies/ForStressTest/CAS-functional-categories-v2_AF.ttl"};
+	protected static final Object[] serviceDescriptionStressTestResources = {"Ontologies/ForStressTest/CAS-AddressApp.ttl", "Ontologies/ForStressTest/CAS-Service-Provider.ttl", "Ontologies/ForStressTest/CAS-functional-categories.ttl"};
 
 	protected OntModel modelMem = null;
 	private BrokerPolicy bp = new BrokerPolicy();
