@@ -93,6 +93,12 @@ public class EvaluationStressTest {
 			System.err.println("Triples changed that did not create problem:");
 			for(Triple t:bpTriplesList)
 			{
+				if(tripleShouldBeIgnored(t))
+				{
+					System.err.println("Ignoring " + t);
+					continue;
+				}
+				
 				Triple erroredT = null;
 				try {
 					// reset model
@@ -162,6 +168,17 @@ public class EvaluationStressTest {
 		pc.validateSDForCompletenessCompliance(sdIs);*/
 
 		int i=0;
+	}
+
+	private boolean tripleShouldBeIgnored(Triple t)
+	{
+		if(	t.toString().contains("@rdfs:label")
+				|| t.toString().contains("@http://www.linked-usdl.org/ns/usdl-core/cloud-broker#higherIsBetter")
+				|| t.toString().contains("@http://www.broker-cloud.eu/service-descriptions/CAS/broker#measuredBy")
+			)
+			return true;
+		
+		return false;
 	}
 
 	private Triple createErroredT(Triple t) {

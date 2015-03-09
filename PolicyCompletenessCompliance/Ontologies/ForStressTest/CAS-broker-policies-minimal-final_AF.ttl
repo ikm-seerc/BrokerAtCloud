@@ -53,10 +53,6 @@ cas:CASBrokerPolicy a cas:CASServiceModel;
 	usdl-core:hasEntityInvolvement cas:CASEntitiyInvolvement;
 	# Indicate which broker-specific taxonomy applies to this broker policy
 	usdl-core-cb:hasClassificationDimension fc:rootConcept.
-	# Indicate to ICCS optimization mechanism the overall value ranges 
-	# to be used with quantitative preference variables serving as service attributes.
-	# This is a convention for now!
-	#cas:hasAvailability cas:AllowedAvailabilityValueRange . 
 
 ### Entity involvement
 cas:CASEntitiyInvolvement a usdl-core:EntityInvolvement;
@@ -126,50 +122,23 @@ gr:hasMaxValueFloat "100"^^xsd:float;
 usdl-core-cb:higherIsBetter "true"^^xsd:boolean;
 usdl-core-cb:isRange "true"^^xsd:boolean .
 
-############################################################### 
-# cas:AllowedAvailabilityValueRange instance
-
-# This instance is used to specify the overall value range in the ICCS optimization mechanism according to current conventions.
-# 
-# In the future, ICCS could calculate the overall value range by analysing the intervals of the instances below.
-# 
-# Restricting the interval in the class definition as it is done above is probably not a good idea
-# because then some tooling has to check if the intervals specified in the instances below are within the interval 
-# of the class definition
-###############################################################
-
-cas:AllowedAvailabilityValueRange a cas:AllowedAvailabilityValue;
-	rdfs:label "High Availability for apps is between 99.98 and 100%";
-	gr:hasUnitOfMeasurement "P1"^^xsd:string; #Percent
-	gr:hasMinValueFloat "99"^^xsd:float;
-	gr:hasMaxValueFloat "100"^^xsd:float;
-	cas:measuredBy cas:Monitoring. 
-
-# gr:valueReference is used to refer to cas:AllowedAvailabilityValueRange instance
-# in order to distinguish the dinstinct intervals from the overall range.
-
-# Again if ICCS would calculate the overall value range this would not be required
-
 cas:AvailabilityHigh a cas:AllowedAvailabilityValue;
 	rdfs:label "High Availability for apps is between 99.98 and 100%";
 	gr:hasUnitOfMeasurement "P1"^^xsd:string; #Percent
 	gr:hasMinValueFloat "99.98"^^xsd:float;
-	gr:hasMaxValueFloat "100"^^xsd:float;
-	gr:valueReference cas:AllowedAvailabilityValueRange. 
+	gr:hasMaxValueFloat "100"^^xsd:float.
 
 cas:AvailabilityMedium a cas:AllowedAvailabilityValue;
 	rdfs:label "Medium Availability for apps is between 99.5 and 100%";
 	gr:hasUnitOfMeasurement "P1"^^xsd:string; #Percent
 	gr:hasMinValueFloat "99.5"^^xsd:float;
-	gr:hasMaxValueFloat "100"^^xsd:float;
-	gr:valueReference cas:AllowedAvailabilityValueRange.	
+	gr:hasMaxValueFloat "100"^^xsd:float.
 
 cas:AvailabilityLow a cas:AllowedAvailabilityValue;
 	rdfs:label "Low Availability for apps is between 99 and 100%";
 	gr:hasUnitOfMeasurement "P1"^^xsd:string; #Percent
 	gr:hasMinValueFloat "99"^^xsd:float;
-	gr:hasMaxValueFloat "100"^^xsd:float;
-	gr:valueReference cas:AllowedAvailabilityValueRange.	
+	gr:hasMaxValueFloat "100"^^xsd:float.
 
 
 #########################################################################################
@@ -307,26 +276,3 @@ cas:VarAvailability rdfs:subClassOf usdl-sla:Variable .
 
 cas:VarSecurity rdfs:subClassOf usdl-sla:Variable .
 
-##################################################################################
-# Preference Variables Schema Definition
-#
-# AF: This part belongs to the configuration of the ICCS optimization mechanism
-# It specifies binding of value classes to preference variables according to usdl-pref.ttl. 
-#
-#################################################################################
-
-cas-pref-att:Auditability rdfs:subClassOf usdl-pref:QualitativeVariable;
-	usdl-pref:refToServiceAttribute pref-att:attr-accountability-auditability;
-	usdl-core-cb:belongsTo fc:rootConcept.
-
-cas-pref-att:hasDefaultCASAuditability rdfs:subPropertyOf usdl-pref:hasDefaultQualitativeValue;
-rdfs:domain cas-pref-att:Auditability;
-rdfs:range cas:AllowedAuditabilityValue.
-
-cas-pref-att:Availability rdfs:subClassOf usdl-pref:QuantitativeVariable;
-	usdl-pref:refToServiceAttribute pref-att:attr-performance-availability;
-	usdl-core-cb:belongsTo fc:rootConcept.
-
-cas-pref-att:hasDefaultCASAvailability rdfs:subPropertyOf usdl-pref:hasDefaultQuantitativeValue;
-	rdfs:domain cas-pref-att:Availability;
-	rdfs:range cas:AllowedAvailabilityValue.
