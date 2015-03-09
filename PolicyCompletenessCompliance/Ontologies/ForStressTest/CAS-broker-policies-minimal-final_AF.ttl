@@ -232,29 +232,6 @@ cas:APCVdevelopment a cas:AllowedProviderCertificationValue.
 
 
 ######################################################################################
-### Measurement options: Here are CAS specific extensions defined by which the 
-### value classes above can be measured in CAS environment. 
-#####################################################################################
-
-cas:Measuring a rdfs:Class .
-
-cas:QS a cas:Measuring.
-
-cas:Monitoring a cas:Measuring.
-
-cas:CodeAnalysis a cas:Measuring.
-
-cas:AppPortfolio a cas:Measuring.
-
-cas:SupportStatistics a cas:Measuring.
-
-cas:AppProviderProfile a cas:Measuring .
-
-cas:measuredBy a rdf:Property;
-rdfs:domain gr:QuantitativeValue, gr:QualitativeValue;
-rdfs:range: cas:Measuring .
-
-######################################################################################
 ### Service level profiles
 ######################################################################################
 
