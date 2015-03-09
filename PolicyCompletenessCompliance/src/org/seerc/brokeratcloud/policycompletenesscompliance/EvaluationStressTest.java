@@ -16,7 +16,7 @@ public class EvaluationStressTest {
 	public static void main(String[] args) {
 		EvaluationStressTest est = new EvaluationStressTest();
 		est.normalEvaluate();
-		//est.performStressTest();
+		est.performStressTest();
 	}
 
 	private void normalEvaluate()
