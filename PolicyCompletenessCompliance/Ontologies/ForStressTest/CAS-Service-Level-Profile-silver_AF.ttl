@@ -2,7 +2,7 @@
 
 #################################################################################
 ### Bind Broker Policy to the Silver profile 
-cas:CASBrokerPolicy cas:hasServiceLevelProfileCAS cas:ServiceLevelProfileSilver.	
+cas:CASBrokerPolicy cas:hasServiceLevelProfileCAS cas:CASServiceLevelProfileSilver.	
 
 #################################################################################
 #### Service Level Profiles 
