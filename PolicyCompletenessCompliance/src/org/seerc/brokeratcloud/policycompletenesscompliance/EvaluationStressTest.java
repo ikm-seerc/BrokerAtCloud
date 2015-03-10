@@ -13,6 +13,32 @@ import com.hp.hpl.jena.graph.Triple;
 
 public class EvaluationStressTest {
 
+	String[] elementsThatMakeTriplesIgnored = 
+		{
+			"@rdfs:label",
+			"@http://www.linked-usdl.org/ns/usdl-core/cloud-broker#higherIsBetter",
+			"@http://www.broker-cloud.eu/service-descriptions/CAS/broker#measuredBy",
+			"@http://purl.org/goodrelations/v1#lesser",
+			"@http://www.w3.org/2004/02/skos/core#inScheme",
+			"@http://www.w3.org/2004/02/skos/core#broader",
+			"@http://www.w3.org/2004/02/skos/core#altLabel",
+			"@http://www.w3.org/2004/02/skos/core#prefLabel",
+			"@rdfs:comment",
+			"@http://purl.org/goodrelations/v1#taxID",
+			"@http://purl.org/goodrelations/v1#legalName",
+			"@http://xmlns.com/foaf/0.1/logo",
+			"@http://xmlns.com/foaf/0.1/homepage",
+			"@http://www.w3.org/2004/02/skos/core#narrower",
+			"@http://www.w3.org/2004/02/skos/core#altLabel",
+			"@http://www.w3.org/2004/02/skos/core#prefLabel",
+			"@owl:versionInfo",
+			"@http://purl.org/dc/terms/modified",
+			"@http://purl.org/dc/terms/created",
+			"@http://purl.org/dc/terms/description",
+			"@http://purl.org/dc/terms/title",
+			"owl:Ontology"
+		};
+	
 	public static void main(String[] args) {
 		EvaluationStressTest est = new EvaluationStressTest();
 		est.normalEvaluate();
@@ -176,30 +202,13 @@ public class EvaluationStressTest {
 
 	private boolean tripleShouldBeIgnored(Triple t)
 	{
-		if(	t.toString().contains("@rdfs:label")
-				|| t.toString().contains("@http://www.linked-usdl.org/ns/usdl-core/cloud-broker#higherIsBetter")
-				|| t.toString().contains("@http://www.broker-cloud.eu/service-descriptions/CAS/broker#measuredBy")
-				|| t.toString().contains("@http://purl.org/goodrelations/v1#lesser")
-				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#inScheme")
-				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#broader")
-				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#altLabel")
-				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#prefLabel")
-				|| t.toString().contains("@rdfs:comment")
-				|| t.toString().contains("@http://purl.org/goodrelations/v1#taxID")
-				|| t.toString().contains("@http://purl.org/goodrelations/v1#legalName")
-				|| t.toString().contains("@http://xmlns.com/foaf/0.1/logo")
-				|| t.toString().contains("@http://xmlns.com/foaf/0.1/homepage")
-				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#narrower")
-				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#altLabel")
-				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#prefLabel")
-				|| t.toString().contains("@owl:versionInfo")
-				|| t.toString().contains("@http://purl.org/dc/terms/modified")
-				|| t.toString().contains("@http://purl.org/dc/terms/created")
-				|| t.toString().contains("@http://purl.org/dc/terms/description")
-				|| t.toString().contains("@http://purl.org/dc/terms/title")
-				|| t.toString().contains("owl:Ontology")
-			)
-			return true;
+		for(String element:elementsThatMakeTriplesIgnored)
+		{
+			if(t.toString().contains(element))
+			{
+				return true;				
+			}
+		}
 		
 		return false;
 	}
