@@ -122,7 +122,7 @@ public class EvaluationStressTest {
 			{
 				if(tripleShouldBeIgnored(t))
 				{
-					System.err.println("Ignoring " + t);
+					//System.err.println("Ignoring " + t);
 					totalIgnored++;
 					continue;
 				}
@@ -150,7 +150,7 @@ public class EvaluationStressTest {
 					if(okTriples > 0)
 					{
 						totalOK += okTriples;
-						System.err.println("... in the meantime " + okTriples + " OK ...");
+						//System.err.println("... in the meantime " + okTriples + " OK ...");
 						okTriples = 0;
 					}
 					System.err.println(++problemNumber + ") " + t);
@@ -167,7 +167,7 @@ public class EvaluationStressTest {
 					if(okTriples > 0)
 					{
 						totalOK += okTriples;
-						System.err.println("... in the meantime " + okTriples + " OK ...");
+						//System.err.println("... in the meantime " + okTriples + " OK ...");
 						okTriples = 0;
 					}
 					System.err.println(++problemNumber + ") " + e.getMessage() + " for " + t);
