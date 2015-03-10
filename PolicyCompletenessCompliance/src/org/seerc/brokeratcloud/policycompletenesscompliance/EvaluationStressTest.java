@@ -135,8 +135,42 @@ public class EvaluationStressTest {
 					pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
 					// delete triple
 					pc.modelMem.getGraph().delete(t);
-					// create erroredT
-					erroredT = createErroredT(t);
+					// create erroredSubjectT
+					erroredT = createErroredSubjectT(t);
+					// add erroredT
+					pc.modelMem.getGraph().add(erroredT);
+					// convert to InputStream
+					bpIs = convertTriplesToInputStream(pc);
+					// reset model
+					pc.modelMem.removeAll();
+					// validate broker policy
+					pc.validateBrokerPolicy(bpIs);
+					
+					// reset model
+					pc.modelMem.removeAll();
+					// add data
+					pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+					// delete triple
+					pc.modelMem.getGraph().delete(t);
+					// create erroredPredicateT
+					erroredT = createErroredPredicateT(t);
+					// add erroredT
+					pc.modelMem.getGraph().add(erroredT);
+					// convert to InputStream
+					bpIs = convertTriplesToInputStream(pc);
+					// reset model
+					pc.modelMem.removeAll();
+					// validate broker policy
+					pc.validateBrokerPolicy(bpIs);
+					
+					// reset model
+					pc.modelMem.removeAll();
+					// add data
+					pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+					// delete triple
+					pc.modelMem.getGraph().delete(t);
+					// create erroredObjectT
+					erroredT = createErroredObjectT(t);
 					// add erroredT
 					pc.modelMem.getGraph().add(erroredT);
 					// convert to InputStream
@@ -213,11 +247,21 @@ public class EvaluationStressTest {
 		return false;
 	}
 
-	private Triple createErroredT(Triple t) {
+	private Triple createErroredSubjectT(Triple t) {
 		Node erroredSubject = createErroredNode(t.getSubject());
+		Triple erroredT = new Triple(erroredSubject, t.getPredicate(), t.getObject());
+		return erroredT;
+	}
+
+	private Triple createErroredPredicateT(Triple t) {
 		Node erroredPredicate = createErroredNode(t.getPredicate());
+		Triple erroredT = new Triple(t.getSubject(), erroredPredicate, t.getObject());
+		return erroredT;
+	}
+
+	private Triple createErroredObjectT(Triple t) {
 		Node erroredObject = createErroredNode(t.getObject());
-		Triple erroredT = new Triple(erroredSubject, erroredPredicate, erroredObject);
+		Triple erroredT = new Triple(t.getSubject(), t.getPredicate(), erroredObject);
 		return erroredT;
 	}
 
