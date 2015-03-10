@@ -44,9 +44,9 @@ import com.hp.hpl.jena.util.FileManager;
 public class PolicyCompletenessCompliance {
 
 	//private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
-	protected static final Object[] brokerPolicyResources = {"Ontologies/ForReview/CAS-broker-policies.ttl", "Ontologies/ForReview/CAS-Service-Level-Profile-silver.ttl", "Ontologies/ForReview/CAS-functional-categories.ttl"};
+	protected static final Object[] brokerPolicyResources = {"Ontologies/Current/CAS-broker-policies.ttl"};
 	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
-	protected static final Object[] serviceDescriptionResources = {"Ontologies/ForReview/CAS-AddressApp.ttl", "Ontologies/ForReview/CAS-Service-Provider.ttl", "Ontologies/ForReview/CAS-functional-categories.ttl"};
+	protected static final Object[] serviceDescriptionResources = {"Ontologies/Current/CAS-AddressApp1.ttl"};
 	
 	protected static final Object[] brokerPolicyStressTestResources = {"Ontologies/ForStressTest/CAS-broker-policies-minimal-final_AF.ttl", "Ontologies/ForStressTest/CAS-Service-Level-Profile-silver_AF.ttl", "Ontologies/ForStressTest/CAS-functional-categories-v2_AF.ttl"};
 	protected static final Object[] serviceDescriptionStressTestResources = {"Ontologies/ForStressTest/CAS-AddressAppSM-minimal-final_AF.ttl", "Ontologies/ForStressTest/CAS-Service-Provider_AF.ttl", "Ontologies/ForStressTest/CAS-functional-categories-v2_AF.ttl"};
