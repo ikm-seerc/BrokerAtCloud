@@ -73,6 +73,7 @@ public class EvaluationStressTest {
 		int problemNumber = 0;
 		int okTriples = 0;
 		int totalOK = 0;
+		int totalIgnored = 0;
 		
 		PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 
@@ -96,6 +97,7 @@ public class EvaluationStressTest {
 				if(tripleShouldBeIgnored(t))
 				{
 					System.err.println("Ignoring " + t);
+					totalIgnored++;
 					continue;
 				}
 				
@@ -149,6 +151,7 @@ public class EvaluationStressTest {
 
 			System.err.println("Total number of triples that caused problem: " + (totalOK + okTriples));
 			System.err.println("Total number of triples that did not cause problem: " + problemNumber);
+			System.err.println("Total number of triples ignored: " + totalIgnored);
 		
 		/*// reset model
 		pc.modelMem.removeAll();
@@ -181,6 +184,20 @@ public class EvaluationStressTest {
 				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#broader")
 				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#altLabel")
 				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#prefLabel")
+				|| t.toString().contains("@rdfs:comment")
+				|| t.toString().contains("@http://purl.org/goodrelations/v1#taxID")
+				|| t.toString().contains("@http://purl.org/goodrelations/v1#legalName")
+				|| t.toString().contains("@http://xmlns.com/foaf/0.1/logo")
+				|| t.toString().contains("@http://xmlns.com/foaf/0.1/homepage")
+				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#narrower")
+				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#altLabel")
+				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#prefLabel")
+				|| t.toString().contains("@owl:versionInfo")
+				|| t.toString().contains("@http://purl.org/dc/terms/modified")
+				|| t.toString().contains("@http://purl.org/dc/terms/created")
+				|| t.toString().contains("@http://purl.org/dc/terms/description")
+				|| t.toString().contains("@http://purl.org/dc/terms/title")
+				|| t.toString().contains("owl:Ontology")
 			)
 			return true;
 		

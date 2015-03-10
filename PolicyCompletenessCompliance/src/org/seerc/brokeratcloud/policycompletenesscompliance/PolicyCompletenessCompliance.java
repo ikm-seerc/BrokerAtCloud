@@ -882,6 +882,12 @@ public class PolicyCompletenessCompliance {
 					{
 						if(!sp1.getDomainUri().equals(sp2.getDomainUri()))
 						{	// different variables
+							if(sp1.getRangeUri() == null)
+							{
+								writeMessageToBrokerPolicyReport("Error - Subproperty " + sp1.getUri() + " has a null range.");
+								throw new BrokerPolicyException("Subproperty " + sp1.getUri() + " has a null range.");								
+							}
+							
 							if(sp1.getRangeUri().equals(sp2.getRangeUri()))
 							{	// same range, throw exception
 								writeMessageToBrokerPolicyReport("Error - Variables " + sp1.getDomainUri() + " and " + sp2.getDomainUri() + " are connected to the same value class " + sp1.getRangeUri() + ".");
@@ -998,7 +1004,7 @@ public class PolicyCompletenessCompliance {
 			{
 				for(Subproperty smSp:smBpc.getPropertyMap().values())
 				{
-					if(smSp.getRangeUri().equals(slpClassUri))
+					if(smSp.getRangeUri() != null && smSp.getRangeUri().equals(slpClassUri))
 					{	// we found the hasSLP property
 						String hasSlpProperty = smSp.getUri();
 						// check if broker policy instance is connected with this
