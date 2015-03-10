@@ -1826,8 +1826,8 @@ public class PolicyCompletenessCompliance {
 		// get the relevant subproperties from the BP object
 		if(bpClassMap.get(classUri) == null)
 		{	// catch any typos which generate a NPE
-			writeMessageToCompletenessReport("Class: " + classUri + " instance was not found although some next level instances are connected to it via subproperties.");
-			throw new CompletenessException("Class: " + classUri + " instance was not found although some next level instances are connected to it via subproperties.");
+			writeMessageToCompletenessReport("A problem has been detected around " + bpClassMap.keySet().iterator().next() + ".");
+			throw new CompletenessException("A problem has been detected around " + bpClassMap.keySet().iterator().next() + ".");
 		}
 		propertyMap = bpClassMap.get(classUri).getPropertyMap();
 		propertyCollection = propertyMap.values();
