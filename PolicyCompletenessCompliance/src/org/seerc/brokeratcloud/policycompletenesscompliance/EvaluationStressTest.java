@@ -51,14 +51,14 @@ public class EvaluationStressTest {
 			PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 
 			// validate broker policy first
-			pc.validateBrokerPolicy(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+			pc.validateBrokerPolicy(PolicyCompletenessCompliance.brokerPolicyResources);
 			//pc.validateBrokerPolicy(brokerPolicyPath);
 			
 			// Get broker policy in Java object structure
-			pc.getBrokerPolicy(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+			pc.getBrokerPolicy(PolicyCompletenessCompliance.brokerPolicyResources);
 
 			// Perform completeness check
-			pc.validateSDForCompletenessCompliance(PolicyCompletenessCompliance.serviceDescriptionStressTestResources);
+			pc.validateSDForCompletenessCompliance(PolicyCompletenessCompliance.serviceDescriptionResources);
 
 			//pc.performStressTest();
 			
@@ -109,7 +109,7 @@ public class EvaluationStressTest {
 		
 			// load BP first
 			try {
-				pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+				pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyResources);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
@@ -132,7 +132,7 @@ public class EvaluationStressTest {
 					// reset model
 					pc.modelMem.removeAll();
 					// add data
-					pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+					pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyResources);
 					// delete triple
 					pc.modelMem.getGraph().delete(t);
 					// create erroredSubjectT
@@ -149,7 +149,7 @@ public class EvaluationStressTest {
 					// reset model
 					pc.modelMem.removeAll();
 					// add data
-					pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+					pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyResources);
 					// delete triple
 					pc.modelMem.getGraph().delete(t);
 					// create erroredPredicateT
@@ -166,7 +166,7 @@ public class EvaluationStressTest {
 					// reset model
 					pc.modelMem.removeAll();
 					// add data
-					pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+					pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyResources);
 					// delete triple
 					pc.modelMem.getGraph().delete(t);
 					// create erroredObjectT
