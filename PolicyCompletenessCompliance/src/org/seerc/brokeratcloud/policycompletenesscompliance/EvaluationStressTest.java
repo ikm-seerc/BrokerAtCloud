@@ -143,6 +143,7 @@ public class EvaluationStressTest {
 						okTriples = 0;
 					}
 					System.err.println(++problemNumber + ") " + e.getMessage() + " for " + t);
+					e.printStackTrace();
 				}
 			}
 
@@ -175,6 +176,11 @@ public class EvaluationStressTest {
 		if(	t.toString().contains("@rdfs:label")
 				|| t.toString().contains("@http://www.linked-usdl.org/ns/usdl-core/cloud-broker#higherIsBetter")
 				|| t.toString().contains("@http://www.broker-cloud.eu/service-descriptions/CAS/broker#measuredBy")
+				|| t.toString().contains("@http://purl.org/goodrelations/v1#lesser")
+				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#inScheme")
+				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#broader")
+				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#altLabel")
+				|| t.toString().contains("@http://www.w3.org/2004/02/skos/core#prefLabel")
 			)
 			return true;
 		

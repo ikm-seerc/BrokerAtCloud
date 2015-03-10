@@ -1818,6 +1818,11 @@ public class PolicyCompletenessCompliance {
 		instanceUri = cip.getInstanceUri();
 
 		// get the relevant subproperties from the BP object
+		if(bpClassMap.get(classUri) == null)
+		{	// catch any typos which generate a NPE
+			writeMessageToCompletenessReport("Class: " + classUri + " instance was not found although some next level instances are connected to it via subproperties.");
+			throw new CompletenessException("Class: " + classUri + " instance was not found although some next level instances are connected to it via subproperties.");
+		}
 		propertyMap = bpClassMap.get(classUri).getPropertyMap();
 		propertyCollection = propertyMap.values();
 
