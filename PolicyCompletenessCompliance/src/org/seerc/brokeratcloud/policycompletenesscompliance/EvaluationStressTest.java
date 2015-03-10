@@ -19,6 +19,7 @@ public class EvaluationStressTest {
 			"@http://www.linked-usdl.org/ns/usdl-core/cloud-broker#higherIsBetter",
 			"@http://www.broker-cloud.eu/service-descriptions/CAS/broker#measuredBy",
 			"@http://purl.org/goodrelations/v1#lesser",
+			"@http://purl.org/goodrelations/v1#greater",
 			"@http://www.w3.org/2004/02/skos/core#inScheme",
 			"@http://www.w3.org/2004/02/skos/core#broader",
 			"@http://www.w3.org/2004/02/skos/core#altLabel",
@@ -36,7 +37,13 @@ public class EvaluationStressTest {
 			"@http://purl.org/dc/terms/created",
 			"@http://purl.org/dc/terms/description",
 			"@http://purl.org/dc/terms/title",
-			"owl:Ontology"
+			"owl:Ontology",
+			"/broker-pref-attr#",
+			"@http://www.w3.org/2004/02/skos/core#topConceptOf",
+			"@http://www.w3.org/2004/02/skos/core#skos:prefLabel",
+			"@http://purl.org/dc/terms/publisher",
+			"@http://purl.org/dc/terms/creator",
+			"@http://www.w3.org/2004/02/skos/core#hasTopConcept"
 		};
 	
 	public static void main(String[] args) {
