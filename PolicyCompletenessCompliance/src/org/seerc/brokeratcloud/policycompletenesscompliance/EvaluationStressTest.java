@@ -46,6 +46,9 @@ public class EvaluationStressTest {
 			"@http://www.w3.org/2004/02/skos/core#hasTopConcept"
 		};
 	
+	private static Object[] bpResources = PolicyCompletenessCompliance.brokerPolicyStressTestResources;
+	private static Object[] sdResources = PolicyCompletenessCompliance.serviceDescriptionStressTestResources;
+	
 	public static void main(String[] args) {
 		EvaluationStressTest est = new EvaluationStressTest();
 		est.normalEvaluate();
@@ -58,11 +61,11 @@ public class EvaluationStressTest {
 			PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 
 			// validate broker policy first
-			pc.validateBrokerPolicy(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+			pc.validateBrokerPolicy(bpResources);
 			//pc.validateBrokerPolicy(brokerPolicyPath);
 			
 			// Get broker policy in Java object structure
-			pc.getBrokerPolicy(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+			pc.getBrokerPolicy(bpResources);
 
 			// Perform completeness check
 			pc.validateSDForCompletenessCompliance(PolicyCompletenessCompliance.serviceDescriptionStressTestResources);
@@ -116,7 +119,7 @@ public class EvaluationStressTest {
 		
 			// load BP first
 			try {
-				pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+				pc.addDataToJenaModel(bpResources);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
@@ -139,7 +142,7 @@ public class EvaluationStressTest {
 					// reset model
 					pc.modelMem.removeAll();
 					// add data
-					pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+					pc.addDataToJenaModel(bpResources);
 					// delete triple
 					pc.modelMem.getGraph().delete(t);
 					// create erroredSubjectT
@@ -156,7 +159,7 @@ public class EvaluationStressTest {
 					// reset model
 					pc.modelMem.removeAll();
 					// add data
-					pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+					pc.addDataToJenaModel(bpResources);
 					// delete triple
 					pc.modelMem.getGraph().delete(t);
 					// create erroredPredicateT
@@ -173,7 +176,7 @@ public class EvaluationStressTest {
 					// reset model
 					pc.modelMem.removeAll();
 					// add data
-					pc.addDataToJenaModel(PolicyCompletenessCompliance.brokerPolicyStressTestResources);
+					pc.addDataToJenaModel(bpResources);
 					// delete triple
 					pc.modelMem.getGraph().delete(t);
 					// create erroredObjectT
