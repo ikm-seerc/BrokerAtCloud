@@ -45,10 +45,15 @@ public class EvaluationStressTest {
 			"@http://purl.org/dc/terms/creator",
 			"@http://www.w3.org/2004/02/skos/core#hasTopConcept"
 		};
-	
+
 	private static Object[] bpResources = PolicyCompletenessCompliance.brokerPolicyStressTestResources;
 	private static Object[] sdResources = PolicyCompletenessCompliance.serviceDescriptionStressTestResources;
-	
+
+	int problemNumber = 0;
+	int okTriples = 0;
+	int totalOK = 0;
+	int totalIgnored = 0;
+
 	public static void main(String[] args) {
 		EvaluationStressTest est = new EvaluationStressTest();
 		est.normalEvaluate();
@@ -63,7 +68,7 @@ public class EvaluationStressTest {
 			// validate broker policy first
 			pc.validateBrokerPolicy(bpResources);
 			//pc.validateBrokerPolicy(brokerPolicyPath);
-			
+
 			// Get broker policy in Java object structure
 			pc.getBrokerPolicy(bpResources);
 
@@ -71,7 +76,7 @@ public class EvaluationStressTest {
 			pc.validateSDForCompletenessCompliance(PolicyCompletenessCompliance.serviceDescriptionStressTestResources);
 
 			//pc.performStressTest();
-			
+
 		} catch (Exception e) {
 			System.out.println("Failure: " + e.getClass().getName() + " - "
 					+ e.getMessage());
@@ -79,13 +84,13 @@ public class EvaluationStressTest {
 			return;
 		}
 	}
-	
+
 	private void performStressTest() 
 	{
 		/*
 		 * For each triple (T) in model:
 		 * 		For all three elements (E) in triple (T):
-		 * 			1) Make a typo in (E)
+		 * 			1) Make a typo in every element s, p, o of (E)
 		 * 			2) Run validation mechanism. You should get Exception (X).
 		 * 			3) if(X)
 		 * 					correct typo in (E)
@@ -94,135 +99,121 @@ public class EvaluationStressTest {
 		 * 					report that failure has not been caught.
 		 * 			
 		 */
-		
-		// nullify System.out
-		System.setOut(new PrintStream(new OutputStream() {
-            public void write(int b) {
-                //DO NOTHING
-            }
-        }));
-		
-		//OntModel cachedModel = this.modelMem;
-		//int numOfTriples = this.modelMem.getGraph().size();
-		//List<Triple> triplesList = this.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
-		//numOfTriples = triplesList.size();
-		int problemNumber = 0;
-		int okTriples = 0;
-		int totalOK = 0;
-		int totalIgnored = 0;
-		
+
+		nullifySystemOut();
+
 		PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 
 		//loadTriples(triplesList, pc);
-		
+
 		//InputStream is = convertTriplesToInputStream(pc);
-		
-			// load BP first
-			try {
-				pc.addDataToJenaModel(bpResources);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			//get triples
-			List<Triple> bpTriplesList = pc.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
-			InputStream bpIs = null;
-			System.err.println("Total number of triples: " + bpTriplesList.size());
-			System.err.println("Triples changed that did not create problem:");
-			for(Triple t:bpTriplesList)
+
+		// load BP first
+		try {
+			pc.addDataToJenaModel(bpResources);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		//get triples
+		List<Triple> bpTriplesList = pc.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
+		InputStream bpIs = null;
+		System.err.println("Total number of triples: " + bpTriplesList.size());
+		System.err.println("Triples changed that did not create problem:");
+		for(Triple t:bpTriplesList)
+		{
+			if(tripleShouldBeIgnored(t))
 			{
-				if(tripleShouldBeIgnored(t))
+				//System.err.println("Ignoring " + t);
+				totalIgnored++;
+				continue;
+			}
+
+			Triple erroredT = null;
+			try {
+				// reset model
+				pc.modelMem.removeAll();
+				// add data
+				pc.addDataToJenaModel(bpResources);
+				// delete triple
+				pc.modelMem.getGraph().delete(t);
+				// create erroredSubjectT
+				erroredT = createErroredSubjectT(t);
+				// add erroredT
+				pc.modelMem.getGraph().add(erroredT);
+				// convert to InputStream
+				bpIs = convertTriplesToInputStream(pc);
+				// reset model
+				pc.modelMem.removeAll();
+				// validate broker policy
+				pc.validateBrokerPolicy(bpIs);
+
+				// reset model
+				pc.modelMem.removeAll();
+				// add data
+				pc.addDataToJenaModel(bpResources);
+				// delete triple
+				pc.modelMem.getGraph().delete(t);
+				// create erroredPredicateT
+				erroredT = createErroredPredicateT(t);
+				// add erroredT
+				pc.modelMem.getGraph().add(erroredT);
+				// convert to InputStream
+				bpIs = convertTriplesToInputStream(pc);
+				// reset model
+				pc.modelMem.removeAll();
+				// validate broker policy
+				pc.validateBrokerPolicy(bpIs);
+
+				// reset model
+				pc.modelMem.removeAll();
+				// add data
+				pc.addDataToJenaModel(bpResources);
+				// delete triple
+				pc.modelMem.getGraph().delete(t);
+				// create erroredObjectT
+				erroredT = createErroredObjectT(t);
+				// add erroredT
+				pc.modelMem.getGraph().add(erroredT);
+				// convert to InputStream
+				bpIs = convertTriplesToInputStream(pc);
+				// reset model
+				pc.modelMem.removeAll();
+				// validate broker policy
+				pc.validateBrokerPolicy(bpIs);
+
+				// no exception with erroredT, this is a problem
+				if(okTriples > 0)
 				{
-					//System.err.println("Ignoring " + t);
-					totalIgnored++;
-					continue;
+					totalOK += okTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					okTriples = 0;
 				}
-				
-				Triple erroredT = null;
-				try {
-					// reset model
-					pc.modelMem.removeAll();
-					// add data
-					pc.addDataToJenaModel(bpResources);
-					// delete triple
-					pc.modelMem.getGraph().delete(t);
-					// create erroredSubjectT
-					erroredT = createErroredSubjectT(t);
-					// add erroredT
-					pc.modelMem.getGraph().add(erroredT);
-					// convert to InputStream
-					bpIs = convertTriplesToInputStream(pc);
-					// reset model
-					pc.modelMem.removeAll();
-					// validate broker policy
-					pc.validateBrokerPolicy(bpIs);
-					
-					// reset model
-					pc.modelMem.removeAll();
-					// add data
-					pc.addDataToJenaModel(bpResources);
-					// delete triple
-					pc.modelMem.getGraph().delete(t);
-					// create erroredPredicateT
-					erroredT = createErroredPredicateT(t);
-					// add erroredT
-					pc.modelMem.getGraph().add(erroredT);
-					// convert to InputStream
-					bpIs = convertTriplesToInputStream(pc);
-					// reset model
-					pc.modelMem.removeAll();
-					// validate broker policy
-					pc.validateBrokerPolicy(bpIs);
-					
-					// reset model
-					pc.modelMem.removeAll();
-					// add data
-					pc.addDataToJenaModel(bpResources);
-					// delete triple
-					pc.modelMem.getGraph().delete(t);
-					// create erroredObjectT
-					erroredT = createErroredObjectT(t);
-					// add erroredT
-					pc.modelMem.getGraph().add(erroredT);
-					// convert to InputStream
-					bpIs = convertTriplesToInputStream(pc);
-					// reset model
-					pc.modelMem.removeAll();
-					// validate broker policy
-					pc.validateBrokerPolicy(bpIs);
-					
-					// no exception with erroredT, this is a problem
-					if(okTriples > 0)
-					{
-						totalOK += okTriples;
-						//System.err.println("... in the meantime " + okTriples + " OK ...");
-						okTriples = 0;
-					}
-					System.err.println(++problemNumber + ") " + t);
-					/*System.err.println(t);
+				System.err.println(++problemNumber + ") " + t);
+				/*System.err.println(t);
 					System.err.println("to:");
 					System.err.println(erroredT);
 					System.err.println("did not cause a problem!");
 					System.err.println("-------------------------------------------------------------------");
 					System.err.println();*/
-				} catch (BrokerPolicyException | CompletenessException | ComplianceException e) {
-					okTriples++;
-				} catch (Exception e) {
-					// other exception with erroredT, this is a problem
-					if(okTriples > 0)
-					{
-						totalOK += okTriples;
-						//System.err.println("... in the meantime " + okTriples + " OK ...");
-						okTriples = 0;
-					}
-					System.err.println(++problemNumber + ") " + e.getMessage() + " for " + t);
-					e.printStackTrace();
+			} catch (BrokerPolicyException | CompletenessException | ComplianceException e) {
+				okTriples++;
+			} catch (Exception e) {
+				// other exception with erroredT, this is a problem
+				if(okTriples > 0)
+				{
+					totalOK += okTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					okTriples = 0;
 				}
+				System.err.println(++problemNumber + ") " + e.getMessage() + " for " + t);
+				e.printStackTrace();
 			}
+		}
 
-			System.err.println("Total number of triples that caused problem: " + (totalOK + okTriples));
-			System.err.println("Total number of triples that did not cause problem: " + problemNumber);
-			System.err.println("Total number of triples ignored: " + totalIgnored);
-		
+		System.err.println("Total number of triples that caused problem: " + (totalOK + okTriples));
+		System.err.println("Total number of triples that did not cause problem: " + problemNumber);
+		System.err.println("Total number of triples ignored: " + totalIgnored);
+
 		/*// reset model
 		pc.modelMem.removeAll();
 
@@ -244,6 +235,14 @@ public class EvaluationStressTest {
 		int i=0;
 	}
 
+	private void nullifySystemOut() {
+		System.setOut(new PrintStream(new OutputStream() {
+			public void write(int b) {
+				//DO NOTHING
+			}
+		}));
+	}
+
 	private boolean tripleShouldBeIgnored(Triple t)
 	{
 		for(String element:elementsThatMakeTriplesIgnored)
@@ -253,7 +252,7 @@ public class EvaluationStressTest {
 				return true;				
 			}
 		}
-		
+
 		return false;
 	}
 
