@@ -102,23 +102,17 @@ public class EvaluationStressTest {
 
 		nullifySystemOut();
 
-		PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+		stressTestBP();
+	}
 
-		//loadTriples(triplesList, pc);
-
-		//InputStream is = convertTriplesToInputStream(pc);
-
-		// load BP first
-		try {
-			pc.addDataToJenaModel(bpResources);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+	private void stressTestBP() {
 		//get triples
-		List<Triple> bpTriplesList = pc.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
-		InputStream bpIs = null;
+		List<Triple> bpTriplesList = this.getTriples(bpResources);
+		
 		System.err.println("Total number of triples: " + bpTriplesList.size());
 		System.err.println("Triples changed that did not create problem:");
+		
+		PolicyCompletenessCompliance pc;
 		for(Triple t:bpTriplesList)
 		{
 			if(tripleShouldBeIgnored(t))
@@ -128,58 +122,15 @@ public class EvaluationStressTest {
 				continue;
 			}
 
-			Triple erroredT = null;
 			try {
-				// reset model
-				pc.modelMem.removeAll();
-				// add data
-				pc.addDataToJenaModel(bpResources);
-				// delete triple
-				pc.modelMem.getGraph().delete(t);
-				// create erroredSubjectT
-				erroredT = createErroredSubjectT(t);
-				// add erroredT
-				pc.modelMem.getGraph().add(erroredT);
-				// convert to InputStream
-				bpIs = convertTriplesToInputStream(pc);
-				// reset model
-				pc.modelMem.removeAll();
-				// validate broker policy
-				pc.validateBrokerPolicy(bpIs);
+				pc = createPcWithErroredSubjectT(bpResources, t);
+				pc.validateBrokerPolicy(convertTriplesToInputStream(pc));
 
-				// reset model
-				pc.modelMem.removeAll();
-				// add data
-				pc.addDataToJenaModel(bpResources);
-				// delete triple
-				pc.modelMem.getGraph().delete(t);
-				// create erroredPredicateT
-				erroredT = createErroredPredicateT(t);
-				// add erroredT
-				pc.modelMem.getGraph().add(erroredT);
-				// convert to InputStream
-				bpIs = convertTriplesToInputStream(pc);
-				// reset model
-				pc.modelMem.removeAll();
-				// validate broker policy
-				pc.validateBrokerPolicy(bpIs);
+				pc = createPcWithErroredPredicateT(bpResources, t);
+				pc.validateBrokerPolicy(convertTriplesToInputStream(pc));
 
-				// reset model
-				pc.modelMem.removeAll();
-				// add data
-				pc.addDataToJenaModel(bpResources);
-				// delete triple
-				pc.modelMem.getGraph().delete(t);
-				// create erroredObjectT
-				erroredT = createErroredObjectT(t);
-				// add erroredT
-				pc.modelMem.getGraph().add(erroredT);
-				// convert to InputStream
-				bpIs = convertTriplesToInputStream(pc);
-				// reset model
-				pc.modelMem.removeAll();
-				// validate broker policy
-				pc.validateBrokerPolicy(bpIs);
+				pc = createPcWithErroredObjectT(bpResources, t);
+				pc.validateBrokerPolicy(convertTriplesToInputStream(pc));
 
 				// no exception with erroredT, this is a problem
 				if(okTriples > 0)
@@ -213,28 +164,72 @@ public class EvaluationStressTest {
 		System.err.println("Total number of triples that caused problem: " + (totalOK + okTriples));
 		System.err.println("Total number of triples that did not cause problem: " + problemNumber);
 		System.err.println("Total number of triples ignored: " + totalIgnored);
-
-		/*// reset model
-		pc.modelMem.removeAll();
-
-		// now load SD
-		pc.addDataToJenaModel(serviceDescriptionStressTestResources);
-		//get triples
-		List<Triple> sdTriplesList = pc.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
-		// convert to InputStream
-		InputStream sdIs = convertTriplesToInputStream(pc);
-		// reset model
-		pc.modelMem.removeAll();
-
-		// reset and add the bpIs
-		bpIs.reset();
-		pc.addDataToJenaModel(bpIs);
-		// Perform completeness/compliance check
-		pc.validateSDForCompletenessCompliance(sdIs);*/
-
-		int i=0;
 	}
 
+	private PolicyCompletenessCompliance createPcWithErroredSubjectT(Object[] resources, Triple t) throws IOException {
+		PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+		
+		Triple erroredT;
+		// add data
+		pc.addDataToJenaModel(resources);
+		// delete triple
+		pc.modelMem.getGraph().delete(t);
+		// create erroredSubjectT
+		erroredT = createErroredSubjectT(t);
+		// add erroredT
+		pc.modelMem.getGraph().add(erroredT);
+		
+		return pc;
+	}
+
+	private PolicyCompletenessCompliance createPcWithErroredPredicateT(Object[] resources, Triple t) throws IOException {
+		PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+		
+		Triple erroredT;
+		// add data
+		pc.addDataToJenaModel(resources);
+		// delete triple
+		pc.modelMem.getGraph().delete(t);
+		// create erroredSubjectT
+		erroredT = createErroredPredicateT(t);
+		// add erroredT
+		pc.modelMem.getGraph().add(erroredT);
+		
+		return pc;
+	}
+
+	private PolicyCompletenessCompliance createPcWithErroredObjectT(Object[] resources, Triple t) throws IOException {
+		PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+		
+		Triple erroredT;
+		// add data
+		pc.addDataToJenaModel(resources);
+		// delete triple
+		pc.modelMem.getGraph().delete(t);
+		// create erroredSubjectT
+		erroredT = createErroredObjectT(t);
+		// add erroredT
+		pc.modelMem.getGraph().add(erroredT);
+		
+		return pc;
+	}
+
+	private List<Triple> getTriples(Object[] resources)
+	{
+		PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+
+		// load BP first
+		try {
+			pc.addDataToJenaModel(resources);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		//get triples
+		List<Triple> bpTriplesList = pc.modelMem.getGraph().find(Node.ANY, Node.ANY, Node.ANY).toList();
+		
+		return bpTriplesList;
+	}
+	
 	private void nullifySystemOut() {
 		System.setOut(new PrintStream(new OutputStream() {
 			public void write(int b) {
