@@ -553,7 +553,7 @@ public class PolicyCompletenessCompliance {
 	public void getBrokerPolicy(Object bpFileData) throws SecurityException,
 			IllegalArgumentException, NoSuchMethodException,
 			ClassNotFoundException, InstantiationException,
-			IllegalAccessException, InvocationTargetException, IOException {
+			IllegalAccessException, InvocationTargetException, IOException, ComplianceException {
 
 		// Initial Creation
 		//acquireMemoryForData(OntModelSpec.RDFS_MEM);
@@ -1085,7 +1085,7 @@ public class PolicyCompletenessCompliance {
 			throw new BrokerPolicyException("For " + subClassOf + " URI: " + classUri + " property " + relationToLookFor + " must be associated with a literal");
 		}
 		
-		if (!valueNode.asLiteral().getDatatype().equals(datatypeToLookFor))
+		if (valueNode.asLiteral().getDatatype() == null || !valueNode.asLiteral().getDatatype().equals(datatypeToLookFor))
 		{
 			writeMessageToComplianceReport("Error - For " + subClassOf + " URI: " + classUri + " property " + relationToLookFor + " must be associated with " + datatypeToLookFor.getURI() + " type");
 			throw new BrokerPolicyException("For " + subClassOf + " URI: " + classUri + " property " + relationToLookFor + " must be associated with " + datatypeToLookFor.getURI() + " type");
@@ -1174,7 +1174,7 @@ public class PolicyCompletenessCompliance {
 	// the QV subclass and
 	// value=the corresponding QuantitativeValue object
 	private Map<String, QuantitativeValue> getQuantitativeValueMap(
-			List<String> qvSubclassList) {
+			List<String> qvSubclassList) throws ComplianceException {
 
 		// Construct the Map containing the objects corresponding to subclasses
 		// of QuantitativeValue
@@ -1223,32 +1223,60 @@ public class PolicyCompletenessCompliance {
 						qvInstanceResource, hasMinValueIntegerProperty);
 				while (riInMinInt.hasNext()) {
 					RDFNode valueNode = riInMinInt.next();
-					// Set the minimum integer value
-					instance.setMinValue(valueNode.asLiteral().getInt());
+					try
+					{
+						// Set the minimum integer value
+						instance.setMinValue(valueNode.asLiteral().getInt());
+					}
+					catch (NumberFormatException e)
+					{
+						throw new ComplianceException(e.getMessage());
+					}
 				}
 
 				NodeIterator riInMaxInt = modelMem.listObjectsOfProperty(
 						qvInstanceResource, hasMaxValueIntegerProperty);
 				while (riInMaxInt.hasNext()) {
 					RDFNode valueNode = riInMaxInt.next();
-					// Set the maximum integer value
-					instance.setMaxValue(valueNode.asLiteral().getInt());
+					try
+					{
+						// Set the maximum integer value
+						instance.setMaxValue(valueNode.asLiteral().getInt());
+					}
+					catch (NumberFormatException e)
+					{
+						throw new ComplianceException(e.getMessage());
+					}
 				}
 
 				NodeIterator riInMinFl = modelMem.listObjectsOfProperty(
 						qvInstanceResource, hasMinValueFloatProperty);
 				while (riInMinFl.hasNext()) {
 					RDFNode valueNode = riInMinFl.next();
-					// Set the minimum float value
-					instance.setMinValue(valueNode.asLiteral().getFloat());
+					try
+					{
+						// Set the minimum float value
+						instance.setMinValue(valueNode.asLiteral().getFloat());
+					}
+					catch (NumberFormatException e)
+					{
+						throw new ComplianceException(e.getMessage());
+					}
 				}
 
 				NodeIterator riInMaxFl = modelMem.listObjectsOfProperty(
 						qvInstanceResource, hasMaxValueFloatProperty);
 				while (riInMaxFl.hasNext()) {
 					RDFNode valueNode = riInMaxFl.next();
-					// Set the maximum float value
-					instance.setMaxValue(valueNode.asLiteral().getFloat());
+					try
+					{
+						// Set the maximum float value
+						instance.setMaxValue(valueNode.asLiteral().getFloat());
+					}
+					catch (NumberFormatException e)
+					{
+						throw new ComplianceException(e.getMessage());
+					}
 				}
 
 				NodeIterator riInUOM = modelMem.listObjectsOfProperty(
