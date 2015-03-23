@@ -44,7 +44,11 @@ public class EvaluationStressTest {
 			"@http://www.w3.org/2004/02/skos/core#skos:prefLabel",
 			"@http://purl.org/dc/terms/publisher",
 			"@http://purl.org/dc/terms/creator",
-			"@http://www.w3.org/2004/02/skos/core#hasTopConcept"
+			"@http://www.w3.org/2004/02/skos/core#hasTopConcept",
+			"@http://www.linked-usdl.org/ns/usdl-core/cloud-broker#dependsOn",
+			"@http://purl.org/goodrelations/v1taxID",
+			"@http://purl.org/goodrelations/v1legalName",
+			"@owl:imports"
 		};
 
 	public static <T> T[] concat(T[] first, T[] second) {
@@ -260,8 +264,9 @@ public class EvaluationStressTest {
 		stressTestSDWithChangedBP();
 		
 		initCounters();
+		System.err.println();
 
-
+		stressTestSDWithChangedSD();
 	}
 
 	private void stressTestSDWithChangedBP() {
@@ -272,9 +277,6 @@ public class EvaluationStressTest {
 		System.err.println("Total number of triples: " + bpTriplesList.size());
 		System.err.println("Total number of elements in triples: " + bpTriplesList.size() * 3);
 		System.err.println("Elements changed that did not create problem:");
-		
-		//PolicyCompletenessCompliance pc;
-		//InputStream is;
 		
 		for(Triple t:bpTriplesList)
 		{
@@ -362,6 +364,135 @@ public class EvaluationStressTest {
 				InputStream is = createInputStreamWithErroredObjectT(bpResources, t);
 				pc.getBrokerPolicy(is);
 				pc.validateSDForCompletenessCompliance(sdResources);
+
+				// no exception with erroredT, this is a problem
+				if(okElementsInTriples > 0)
+				{
+					totalOK += okElementsInTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					okElementsInTriples = 0;
+				}
+				System.err.println(++problemNumber + " with changed object) " + t);
+				/*System.err.println(t);
+					System.err.println("to:");
+					System.err.println(erroredT);
+					System.err.println("did not cause a problem!");
+					System.err.println("-------------------------------------------------------------------");
+					System.err.println();*/
+			} catch (CompletenessException | ComplianceException e) {
+				okElementsInTriples++;
+			} catch (Exception e) {
+				// other exception with erroredT, this is a problem
+				if(okElementsInTriples > 0)
+				{
+					totalOK += okElementsInTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					okElementsInTriples = 0;
+				}
+				System.err.println(++problemNumber + ") " + e.getMessage() + " for " + t);
+				e.printStackTrace();
+			}
+			
+			System.err.println("-----------------------------------------------------------------");
+		}
+
+		System.err.println("Total number of elements in triples that caused problem: " + (totalOK + okElementsInTriples));
+		System.err.println("Total number of elements in triples that did not cause problem: " + problemNumber);
+		System.err.println("Total number of elements in triples ignored: " + totalIgnored*3);
+	}
+	
+	private void stressTestSDWithChangedSD() {
+		//get triples
+		List<Triple> sdTriplesList = this.getTriples(sdResources);
+		
+		System.err.println("Stress test SD with changed BP.");
+		System.err.println("Total number of triples: " + sdTriplesList.size());
+		System.err.println("Total number of elements in triples: " + sdTriplesList.size() * 3);
+		System.err.println("Elements changed that did not create problem:");
+		
+		for(Triple t:sdTriplesList)
+		{
+			if(tripleShouldBeIgnored(t))
+			{
+				//System.err.println("Ignoring " + t);
+				totalIgnored++;
+				continue;
+			}
+
+			try {
+				PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+				pc.getBrokerPolicy(bpResources);
+				pc.validateSDForCompletenessCompliance(createInputStreamWithErroredSubjectT(sdResources, t));
+
+				// no exception with erroredT, this is a problem
+				if(okElementsInTriples > 0)
+				{
+					totalOK += okElementsInTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					okElementsInTriples = 0;
+				}
+				System.err.println(++problemNumber + " with changed subject) " + t);
+				/*System.err.println(t);
+					System.err.println("to:");
+					System.err.println(erroredT);
+					System.err.println("did not cause a problem!");
+					System.err.println("-------------------------------------------------------------------");
+					System.err.println();*/
+			} catch (CompletenessException | ComplianceException e) {
+				okElementsInTriples++;
+			} catch (Exception e) {
+				// other exception with erroredT, this is a problem
+				if(okElementsInTriples > 0)
+				{
+					totalOK += okElementsInTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					System.err.println("Total number of elements in triples that caused problem: " + (totalOK + okElementsInTriples));
+					System.err.println("Total number of elements in triples that did not cause problem: " + problemNumber);
+					System.err.println("Total number of elements in triples ignored: " + totalIgnored*3);
+
+					okElementsInTriples = 0;
+				}
+				System.err.println(++problemNumber + ") " + e.getMessage() + " for " + t);
+				e.printStackTrace();
+			}
+			
+			try {
+				PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+				pc.getBrokerPolicy(bpResources);
+				pc.validateSDForCompletenessCompliance(createInputStreamWithErroredPredicateT(sdResources, t));
+
+				// no exception with erroredT, this is a problem
+				if(okElementsInTriples > 0)
+				{
+					totalOK += okElementsInTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					okElementsInTriples = 0;
+				}
+				System.err.println(++problemNumber + " with changed predicate) " + t);
+				/*System.err.println(t);
+					System.err.println("to:");
+					System.err.println(erroredT);
+					System.err.println("did not cause a problem!");
+					System.err.println("-------------------------------------------------------------------");
+					System.err.println();*/
+			} catch (CompletenessException | ComplianceException e) {
+				okElementsInTriples++;
+			} catch (Exception e) {
+				// other exception with erroredT, this is a problem
+				if(okElementsInTriples > 0)
+				{
+					totalOK += okElementsInTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					okElementsInTriples = 0;
+				}
+				System.err.println(++problemNumber + ") " + e.getMessage() + " for " + t);
+				e.printStackTrace();
+			}
+			
+			try {
+				PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+				pc.getBrokerPolicy(bpResources);
+				pc.validateSDForCompletenessCompliance(createInputStreamWithErroredObjectT(sdResources, t));
 
 				// no exception with erroredT, this is a problem
 				if(okElementsInTriples > 0)
