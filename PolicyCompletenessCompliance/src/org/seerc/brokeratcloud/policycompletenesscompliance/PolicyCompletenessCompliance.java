@@ -553,7 +553,7 @@ public class PolicyCompletenessCompliance {
 	public void getBrokerPolicy(Object bpFileData) throws SecurityException,
 			IllegalArgumentException, NoSuchMethodException,
 			ClassNotFoundException, InstantiationException,
-			IllegalAccessException, InvocationTargetException, IOException, ComplianceException {
+			IllegalAccessException, InvocationTargetException, IOException, ComplianceException, CompletenessException {
 
 		// Initial Creation
 		//acquireMemoryForData(OntModelSpec.RDFS_MEM);
@@ -995,9 +995,19 @@ public class PolicyCompletenessCompliance {
 	}
 
 	private void checkBpHasSLPInConnection()
-			throws IOException {
+			throws IOException, CompletenessException {
+		if(!bp.getServiceModelMap().keySet().iterator().hasNext())
+		{
+			throw new CompletenessException("Could not find Service Model instance in Broker Policy.");
+		}
+		
 		RDFNode smInstance = oneVarOneSolutionQuery("{?var rdf:type <" + bp.getServiceModelMap().keySet().iterator().next()
 				+ ">}");
+		if(smInstance == null)
+		{
+			throw new CompletenessException("Could not find Service Model instance in Broker Policy.");
+		}
+		
 		for(String slpClassUri:bp.getServiceLevelProfileMap().keySet())
 		{
 			for(BrokerPolicyClass smBpc:bp.getServiceModelMap().values())
@@ -1854,6 +1864,12 @@ public class PolicyCompletenessCompliance {
 		// get the relevant subproperties from the BP object
 		if(bpClassMap.get(classUri) == null)
 		{	// catch any typos which generate a NPE
+			if(!bpClassMap.keySet().iterator().hasNext())
+			{
+				writeMessageToCompletenessReport("A problem has been detected relating to " + classUri + ".");
+				throw new CompletenessException("A problem has been detected relating to " + classUri + ".");
+			}
+			
 			writeMessageToCompletenessReport("A problem has been detected around " + bpClassMap.keySet().iterator().next() + ".");
 			throw new CompletenessException("A problem has been detected around " + bpClassMap.keySet().iterator().next() + ".");
 		}

@@ -11,6 +11,7 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
+import org.seerc.brokeratcloud.policycompletenesscompliance.CompletenessException;
 import org.seerc.brokeratcloud.policycompletenesscompliance.ComplianceException;
 import org.seerc.brokeratcloud.policycompletenesscompliance.EvaluationReport;
 import org.seerc.brokeratcloud.policycompletenesscompliance.PolicyCompletenessCompliance;
@@ -31,7 +32,7 @@ public class OutOfRangeSLAViolationListener implements MessageListener {
 				| IllegalArgumentException | NoSuchMethodException
 				| ClassNotFoundException | InstantiationException
 				| IllegalAccessException | InvocationTargetException
-				| IOException | ComplianceException e) {
+				| IOException | ComplianceException | CompletenessException e) {
 			e.printStackTrace();
 		}
 	}
@@ -88,6 +89,8 @@ public class OutOfRangeSLAViolationListener implements MessageListener {
 			e.printStackTrace();
 		} catch (ComplianceException e) {
 			e.printStackTrace();
+		} catch (CompletenessException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -97,7 +100,7 @@ public class OutOfRangeSLAViolationListener implements MessageListener {
 		slaViolationReporter.publishStringToTopic(contents);
 	}
 
-	private boolean qvIsInRange(String qvToCheck, Float qvValue) throws RegistryException, SecurityException, IllegalArgumentException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException, ComplianceException
+	private boolean qvIsInRange(String qvToCheck, Float qvValue) throws RegistryException, SecurityException, IllegalArgumentException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException, ComplianceException, CompletenessException
 	{
 		// user greg client to fetch BPs
 		WSO2GREGClient greg = new WSO2GREGClient();
