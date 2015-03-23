@@ -73,7 +73,7 @@ public class EvaluationStressTest {
 			pc.getBrokerPolicy(bpResources);
 
 			// Perform completeness check
-			pc.validateSDForCompletenessCompliance(PolicyCompletenessCompliance.serviceDescriptionStressTestResources);
+			pc.validateSDForCompletenessCompliance(sdResources);
 
 			//pc.performStressTest();
 
