@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.List;
 
 import com.hp.hpl.jena.graph.Node;
@@ -46,9 +47,15 @@ public class EvaluationStressTest {
 			"@http://www.w3.org/2004/02/skos/core#hasTopConcept"
 		};
 
+	public static <T> T[] concat(T[] first, T[] second) {
+		  T[] result = Arrays.copyOf(first, first.length + second.length);
+		  System.arraycopy(second, 0, result, first.length, second.length);
+		  return result;
+		}
+
 	private static Object[] bpResources = PolicyCompletenessCompliance.brokerPolicyStressTestResources;
 	private static Object[] sdResources = PolicyCompletenessCompliance.serviceDescriptionStressTestResources;
-
+	
 	int problemNumber = 0;
 	int okElementsInTriples = 0;
 	int totalOK = 0;
@@ -102,7 +109,29 @@ public class EvaluationStressTest {
 
 		nullifySystemOut();
 
+		System.err.println();
+		System.err.println("Broker Policy harness test *****************************************************************************************************");
+		System.err.println();
 		stressTestBP();
+		
+		initCounters();
+
+		System.err.println("********************************************************************************************************************************");
+		System.err.println("********************************************************************************************************************************");
+		System.err.println("********************************************************************************************************************************");
+		
+		System.err.println();
+		System.err.println("Service Description harness test ***********************************************************************************************");
+		System.err.println();
+		stressTestSD();
+	}
+
+	private void initCounters()
+	{
+		problemNumber = 0;
+		okElementsInTriples = 0;
+		totalOK = 0;
+		totalIgnored = 0;
 	}
 
 	private void stressTestBP() {
@@ -225,6 +254,170 @@ public class EvaluationStressTest {
 		System.err.println("Total number of elements in triples that caused problem: " + (totalOK + okElementsInTriples));
 		System.err.println("Total number of elements in triples that did not cause problem: " + problemNumber);
 		System.err.println("Total number of elements in triples ignored: " + totalIgnored*3);
+	}
+
+	private void stressTestSD() {
+		stressTestSDWithChangedBP();
+		
+		initCounters();
+
+
+	}
+
+	private void stressTestSDWithChangedBP() {
+		//get triples
+		List<Triple> bpTriplesList = this.getTriples(bpResources);
+		
+		System.err.println("Stress test SD with changed BP.");
+		System.err.println("Total number of triples: " + bpTriplesList.size());
+		System.err.println("Total number of elements in triples: " + bpTriplesList.size() * 3);
+		System.err.println("Elements changed that did not create problem:");
+		
+		//PolicyCompletenessCompliance pc;
+		//InputStream is;
+		
+		for(Triple t:bpTriplesList)
+		{
+			if(tripleShouldBeIgnored(t))
+			{
+				//System.err.println("Ignoring " + t);
+				totalIgnored++;
+				continue;
+			}
+
+			try {
+				PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+				InputStream is = createInputStreamWithErroredSubjectT(bpResources, t);
+				pc.getBrokerPolicy(is);
+				pc.validateSDForCompletenessCompliance(sdResources);
+
+				// no exception with erroredT, this is a problem
+				if(okElementsInTriples > 0)
+				{
+					totalOK += okElementsInTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					okElementsInTriples = 0;
+				}
+				System.err.println(++problemNumber + " with changed subject) " + t);
+				/*System.err.println(t);
+					System.err.println("to:");
+					System.err.println(erroredT);
+					System.err.println("did not cause a problem!");
+					System.err.println("-------------------------------------------------------------------");
+					System.err.println();*/
+			} catch (CompletenessException | ComplianceException e) {
+				okElementsInTriples++;
+			} catch (Exception e) {
+				// other exception with erroredT, this is a problem
+				if(okElementsInTriples > 0)
+				{
+					totalOK += okElementsInTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					System.err.println("Total number of elements in triples that caused problem: " + (totalOK + okElementsInTriples));
+					System.err.println("Total number of elements in triples that did not cause problem: " + problemNumber);
+					System.err.println("Total number of elements in triples ignored: " + totalIgnored*3);
+
+					okElementsInTriples = 0;
+				}
+				System.err.println(++problemNumber + ") " + e.getMessage() + " for " + t);
+				e.printStackTrace();
+			}
+			
+			try {
+				PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+				InputStream is = createInputStreamWithErroredPredicateT(bpResources, t);
+				pc.getBrokerPolicy(is);
+				pc.validateSDForCompletenessCompliance(sdResources);
+
+				// no exception with erroredT, this is a problem
+				if(okElementsInTriples > 0)
+				{
+					totalOK += okElementsInTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					okElementsInTriples = 0;
+				}
+				System.err.println(++problemNumber + " with changed predicate) " + t);
+				/*System.err.println(t);
+					System.err.println("to:");
+					System.err.println(erroredT);
+					System.err.println("did not cause a problem!");
+					System.err.println("-------------------------------------------------------------------");
+					System.err.println();*/
+			} catch (CompletenessException | ComplianceException e) {
+				okElementsInTriples++;
+			} catch (Exception e) {
+				// other exception with erroredT, this is a problem
+				if(okElementsInTriples > 0)
+				{
+					totalOK += okElementsInTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					okElementsInTriples = 0;
+				}
+				System.err.println(++problemNumber + ") " + e.getMessage() + " for " + t);
+				e.printStackTrace();
+			}
+			
+			try {
+				PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
+				InputStream is = createInputStreamWithErroredObjectT(bpResources, t);
+				pc.getBrokerPolicy(is);
+				pc.validateSDForCompletenessCompliance(sdResources);
+
+				// no exception with erroredT, this is a problem
+				if(okElementsInTriples > 0)
+				{
+					totalOK += okElementsInTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					okElementsInTriples = 0;
+				}
+				System.err.println(++problemNumber + " with changed object) " + t);
+				/*System.err.println(t);
+					System.err.println("to:");
+					System.err.println(erroredT);
+					System.err.println("did not cause a problem!");
+					System.err.println("-------------------------------------------------------------------");
+					System.err.println();*/
+			} catch (CompletenessException | ComplianceException e) {
+				okElementsInTriples++;
+			} catch (Exception e) {
+				// other exception with erroredT, this is a problem
+				if(okElementsInTriples > 0)
+				{
+					totalOK += okElementsInTriples;
+					//System.err.println("... in the meantime " + okTriples + " OK ...");
+					okElementsInTriples = 0;
+				}
+				System.err.println(++problemNumber + ") " + e.getMessage() + " for " + t);
+				e.printStackTrace();
+			}
+			
+			System.err.println("-----------------------------------------------------------------");
+		}
+
+		System.err.println("Total number of elements in triples that caused problem: " + (totalOK + okElementsInTriples));
+		System.err.println("Total number of elements in triples that did not cause problem: " + problemNumber);
+		System.err.println("Total number of elements in triples ignored: " + totalIgnored*3);
+	}
+	
+	private InputStream createInputStreamWithErroredSubjectT(Object[] resources, Triple t) throws IOException {
+		PolicyCompletenessCompliance pc = createPcWithErroredSubjectT(resources, t);
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		pc.modelMem.write(os, "TTL");
+		return new ByteArrayInputStream(os.toByteArray());
+	}
+
+	private InputStream createInputStreamWithErroredPredicateT(Object[] resources, Triple t) throws IOException {
+		PolicyCompletenessCompliance pc = createPcWithErroredPredicateT(resources, t);
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		pc.modelMem.write(os, "TTL");
+		return new ByteArrayInputStream(os.toByteArray());
+	}
+
+	private InputStream createInputStreamWithErroredObjectT(Object[] resources, Triple t) throws IOException {
+		PolicyCompletenessCompliance pc = createPcWithErroredObjectT(resources, t);
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		pc.modelMem.write(os, "TTL");
+		return new ByteArrayInputStream(os.toByteArray());
 	}
 
 	private PolicyCompletenessCompliance createPcWithErroredSubjectT(Object[] resources, Triple t) throws IOException {
