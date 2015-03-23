@@ -290,6 +290,7 @@ public class EvaluationStressTest {
 			try {
 				PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 				InputStream is = createInputStreamWithErroredSubjectT(bpResources, t);
+				pc.validateBrokerPolicy(is);
 				pc.getBrokerPolicy(is);
 				pc.validateSDForCompletenessCompliance(sdResources);
 
@@ -307,7 +308,7 @@ public class EvaluationStressTest {
 					System.err.println("did not cause a problem!");
 					System.err.println("-------------------------------------------------------------------");
 					System.err.println();*/
-			} catch (CompletenessException | ComplianceException e) {
+			} catch (BrokerPolicyException | CompletenessException | ComplianceException e) {
 				okElementsInTriples++;
 			} catch (Exception e) {
 				// other exception with erroredT, this is a problem
@@ -328,6 +329,7 @@ public class EvaluationStressTest {
 			try {
 				PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 				InputStream is = createInputStreamWithErroredPredicateT(bpResources, t);
+				pc.validateBrokerPolicy(is);
 				pc.getBrokerPolicy(is);
 				pc.validateSDForCompletenessCompliance(sdResources);
 
@@ -345,7 +347,7 @@ public class EvaluationStressTest {
 					System.err.println("did not cause a problem!");
 					System.err.println("-------------------------------------------------------------------");
 					System.err.println();*/
-			} catch (CompletenessException | ComplianceException e) {
+			} catch (BrokerPolicyException | CompletenessException | ComplianceException e) {
 				okElementsInTriples++;
 			} catch (Exception e) {
 				// other exception with erroredT, this is a problem
@@ -362,6 +364,7 @@ public class EvaluationStressTest {
 			try {
 				PolicyCompletenessCompliance pc = new PolicyCompletenessCompliance();
 				InputStream is = createInputStreamWithErroredObjectT(bpResources, t);
+				pc.validateBrokerPolicy(is);
 				pc.getBrokerPolicy(is);
 				pc.validateSDForCompletenessCompliance(sdResources);
 
@@ -379,7 +382,7 @@ public class EvaluationStressTest {
 					System.err.println("did not cause a problem!");
 					System.err.println("-------------------------------------------------------------------");
 					System.err.println();*/
-			} catch (CompletenessException | ComplianceException e) {
+			} catch (BrokerPolicyException | CompletenessException | ComplianceException e) {
 				okElementsInTriples++;
 			} catch (Exception e) {
 				// other exception with erroredT, this is a problem
@@ -405,7 +408,7 @@ public class EvaluationStressTest {
 		//get triples
 		List<Triple> sdTriplesList = this.getTriples(sdResources);
 		
-		System.err.println("Stress test SD with changed BP.");
+		System.err.println("Stress test SD with changed SD.");
 		System.err.println("Total number of triples: " + sdTriplesList.size());
 		System.err.println("Total number of elements in triples: " + sdTriplesList.size() * 3);
 		System.err.println("Elements changed that did not create problem:");
