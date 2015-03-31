@@ -176,6 +176,7 @@ public class EvaluationStressTest {
 					System.err.println();*/
 			} catch (BrokerPolicyException | CompletenessException | ComplianceException e) {
 				okElementsInTriples++;
+				printReasonOfFailureInTriple(t, e, "subject");
 			} catch (Exception e) {
 				// other exception with erroredT, this is a problem
 				if(okElementsInTriples > 0)
@@ -208,6 +209,7 @@ public class EvaluationStressTest {
 					System.err.println();*/
 			} catch (BrokerPolicyException | CompletenessException | ComplianceException e) {
 				okElementsInTriples++;
+				printReasonOfFailureInTriple(t, e, "predicate");
 			} catch (Exception e) {
 				// other exception with erroredT, this is a problem
 				if(okElementsInTriples > 0)
@@ -240,6 +242,7 @@ public class EvaluationStressTest {
 					System.err.println();*/
 			} catch (BrokerPolicyException | CompletenessException | ComplianceException e) {
 				okElementsInTriples++;
+				printReasonOfFailureInTriple(t, e, "object");
 			} catch (Exception e) {
 				// other exception with erroredT, this is a problem
 				if(okElementsInTriples > 0)
@@ -258,6 +261,14 @@ public class EvaluationStressTest {
 		System.err.println("Total number of elements in triples that caused problem: " + (totalOK + okElementsInTriples));
 		System.err.println("Total number of elements in triples that did not cause problem: " + problemNumber);
 		System.err.println("Total number of elements in triples ignored: " + totalIgnored*3);
+	}
+
+	private void printReasonOfFailureInTriple(Triple t, Exception e, String element) {
+		System.err.println("\t Changing " + element + " of:");
+		System.err.println("\t " + t);
+		System.err.println("\t caused:");
+		System.err.println("\t " + e.getMessage());
+		System.err.println("\t ");
 	}
 
 	private void stressTestSD() {
@@ -310,6 +321,7 @@ public class EvaluationStressTest {
 					System.err.println();*/
 			} catch (BrokerPolicyException | CompletenessException | ComplianceException e) {
 				okElementsInTriples++;
+				printReasonOfFailureInTriple(t, e, "subject");
 			} catch (Exception e) {
 				// other exception with erroredT, this is a problem
 				if(okElementsInTriples > 0)
@@ -349,6 +361,7 @@ public class EvaluationStressTest {
 					System.err.println();*/
 			} catch (BrokerPolicyException | CompletenessException | ComplianceException e) {
 				okElementsInTriples++;
+				printReasonOfFailureInTriple(t, e, "predicate");
 			} catch (Exception e) {
 				// other exception with erroredT, this is a problem
 				if(okElementsInTriples > 0)
@@ -384,6 +397,7 @@ public class EvaluationStressTest {
 					System.err.println();*/
 			} catch (BrokerPolicyException | CompletenessException | ComplianceException e) {
 				okElementsInTriples++;
+				printReasonOfFailureInTriple(t, e, "object");
 			} catch (Exception e) {
 				// other exception with erroredT, this is a problem
 				if(okElementsInTriples > 0)
@@ -443,6 +457,7 @@ public class EvaluationStressTest {
 					System.err.println();*/
 			} catch (CompletenessException | ComplianceException e) {
 				okElementsInTriples++;
+				printReasonOfFailureInTriple(t, e, "subject");
 			} catch (Exception e) {
 				// other exception with erroredT, this is a problem
 				if(okElementsInTriples > 0)
@@ -480,6 +495,7 @@ public class EvaluationStressTest {
 					System.err.println();*/
 			} catch (CompletenessException | ComplianceException e) {
 				okElementsInTriples++;
+				printReasonOfFailureInTriple(t, e, "predicate");
 			} catch (Exception e) {
 				// other exception with erroredT, this is a problem
 				if(okElementsInTriples > 0)
@@ -513,6 +529,7 @@ public class EvaluationStressTest {
 					System.err.println();*/
 			} catch (CompletenessException | ComplianceException e) {
 				okElementsInTriples++;
+				printReasonOfFailureInTriple(t, e, "object");
 			} catch (Exception e) {
 				// other exception with erroredT, this is a problem
 				if(okElementsInTriples > 0)
