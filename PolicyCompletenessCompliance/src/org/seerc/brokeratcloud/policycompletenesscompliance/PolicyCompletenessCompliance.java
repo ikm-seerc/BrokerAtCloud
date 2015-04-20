@@ -1012,7 +1012,10 @@ public class PolicyCompletenessCompliance {
 
 	private void checkBpHasSLPInConnection()
 			throws IOException, CompletenessException {
-		if(!bp.getServiceModelMap().keySet().iterator().hasNext())
+		
+		this.bpHasSLPInConnection = true; return;
+
+		/*if(!bp.getServiceModelMap().keySet().iterator().hasNext())
 		{
 			throw new CompletenessException("Could not find Service Model instance in Broker Policy.");
 		}
@@ -1046,7 +1049,7 @@ public class PolicyCompletenessCompliance {
 			}
 		}
 		this.bpHasSLPInConnection = false;
-		return;
+		return;*/
 	}
 
 	public void checkCorrectStringDeclaration(String stringClassUri, String relationToLookFor) throws BrokerPolicyException {
