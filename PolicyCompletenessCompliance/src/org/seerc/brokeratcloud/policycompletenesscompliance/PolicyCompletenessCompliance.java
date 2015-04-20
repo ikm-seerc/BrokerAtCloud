@@ -76,6 +76,14 @@ public class PolicyCompletenessCompliance {
 	
 	// indicates whether the loaded BP has SLP in Connection (denoting that we should go for minimal SD check)
 	private boolean bpHasSLPInConnection = false;
+	private String[] subpropertyOfLevel = {
+		"usdl-sla:hasServiceLevelProfile",
+		"usdl-sla:hasServiceLevel",
+		"usdl-sla:hasServiceLevelExpression",
+		"usdl-sla:hasVariable",
+		"usdl-sla-cb:hasDefaultQuantitativeValue",
+		"usdl-sla-cb:hasDefaultQualitativeValue"
+	};
 	
 	public PolicyCompletenessCompliance()
 	{
@@ -1918,6 +1926,9 @@ public class PolicyCompletenessCompliance {
 				writeMessageToCompletenessReport("is correctly connected to more than 1 instances via the appropriate property");
 				writeMessageToCompletenessReport(prop.getUri());
 
+				// check that prop.getUri() is subclass of the correct property
+				checkCorrectSubproperty(startClassIndex, prop);
+
 				RDFNode[] nodes = oneVarManySolutionsQuery("{<" + instanceUri
 						+ "> <" + prop.getUri() + "> ?var}");
 				for(RDFNode node:nodes)
@@ -1984,7 +1995,10 @@ public class PolicyCompletenessCompliance {
 				writeMessageToCompletenessReport(instanceUri);
 				writeMessageToCompletenessReport("is correctly connected to exactly 1 instance via the appropriate property");
 				writeMessageToCompletenessReport(prop.getUri());
-
+				
+				// check that prop.getUri() is subclass of the correct property
+				checkCorrectSubproperty(startClassIndex, prop);
+				
 				RDFNode node = oneVarOneSolutionQuery("{<" + instanceUri
 						+ "> <" + prop.getUri() + "> ?var}");
 				nli_uri = node.toString(); // Next level instance
@@ -2062,6 +2076,34 @@ public class PolicyCompletenessCompliance {
 			}
 		}
 		return nlPairList;
+	}
+
+	private void checkCorrectSubproperty(int startClassIndex, Subproperty prop)
+			throws CompletenessException {
+		if(startClassIndex != 4)
+		{
+			int countSubproperty = countQuery("{<" + prop.getUri() + "> rdfs:subPropertyOf " + subpropertyOfLevel[startClassIndex] + "}");
+			if(countSubproperty == 0)
+			{
+				writeMessageToCompletenessReport("Error - Property:");
+				writeMessageToCompletenessReport(prop.getUri());
+				writeMessageToCompletenessReport(" should be declared as subclass of " + subpropertyOfLevel[startClassIndex]);
+				throw new CompletenessException("Property: " + prop.getUri() + " should be declared as subclass of " + subpropertyOfLevel[startClassIndex]);					
+			}
+		}
+		else
+		{	// values can be qualitative or quantitative
+			int countSubproperty = countQuery("{<" + prop.getUri() + "> rdfs:subPropertyOf " + subpropertyOfLevel[startClassIndex] + "}");
+			countSubproperty += countQuery("{<" + prop.getUri() + "> rdfs:subPropertyOf " + subpropertyOfLevel[startClassIndex+1] + "}");
+			if(countSubproperty == 0)
+			{
+				writeMessageToCompletenessReport("Error - Property:");
+				writeMessageToCompletenessReport(prop.getUri());
+				writeMessageToCompletenessReport(" should be declared as subclass of " + subpropertyOfLevel[startClassIndex] + " or " + " subpropertyOfLevel[startClassIndex+1]");
+				throw new CompletenessException("Property: " + prop.getUri() + " should be declared as subclass of " + subpropertyOfLevel[startClassIndex] + " or " + " subpropertyOfLevel[startClassIndex+1]");					
+			}
+			
+		}
 	}
 
 	// a BP service model instance does not declare gr:isVariantOf
@@ -2703,6 +2745,7 @@ public class PolicyCompletenessCompliance {
 		queryStr.append("PREFIX usdl-core: <http://www.linked-usdl.org/ns/usdl-core#>");
 		queryStr.append("PREFIX usdl-sla: <http://www.linked-usdl.org/ns/usdl-sla#>");
 		queryStr.append("PREFIX usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#>");
+		queryStr.append("PREFIX usdl-sla-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#>");
 		//queryStr.append("PREFIX brokerpolicy: <http://www.broker-cloud.eu/d043567/linked-usdl-ontologies/SAP-HANA-Cloud-Apps-Broker/2014/01/brokerpolicy#>");
 		//queryStr.append("PREFIX cas: <http://www.broker-cloud.eu/service-descriptions/CAS/broker#>");
 		queryStr.append("PREFIX gr: <http://purl.org/goodrelations/v1#>");
