@@ -264,11 +264,11 @@ public class EvaluationStressTest {
 	}
 
 	private void printReasonOfFailureInTriple(Triple t, Exception e, String element) {
-		System.err.println("\t Changing " + element + " of:");
+		/*System.err.println("\t Changing " + element + " of:");
 		System.err.println("\t " + t);
 		System.err.println("\t caused:");
 		System.err.println("\t " + e.getMessage());
-		System.err.println("\t ");
+		System.err.println("\t ");*/
 	}
 
 	private void stressTestSD() {
