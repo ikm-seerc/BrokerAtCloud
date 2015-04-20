@@ -1890,7 +1890,7 @@ public class PolicyCompletenessCompliance {
 			if(domainNodes.length == 0)
 			{
 				writeMessageToCompletenessReport("Error - Property + " + subproperty + " does not declare any domains.");
-				throw new CompletenessException("Property + " + subproperty + " does not declare any domains.");					
+				throw new CompletenessException("Property " + subproperty + " does not declare any domains.");					
 			}
 			for(RDFNode domainNode:domainNodes)
 			{
