@@ -48,7 +48,8 @@ public class EvaluationStressTest {
 			"@http://www.linked-usdl.org/ns/usdl-core/cloud-broker#dependsOn",
 			"@http://purl.org/goodrelations/v1taxID",
 			"@http://purl.org/goodrelations/v1legalName",
-			"@owl:imports"
+			"@owl:imports",
+			"http://www.linked-usdl.org/ns/usdl-core/cloud-broker#isRange"
 		};
 
 	public static <T> T[] concat(T[] first, T[] second) {
