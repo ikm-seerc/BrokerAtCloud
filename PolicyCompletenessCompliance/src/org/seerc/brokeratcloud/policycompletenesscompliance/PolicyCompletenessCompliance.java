@@ -77,14 +77,22 @@ public class PolicyCompletenessCompliance {
 	// indicates whether the loaded BP has SLP in Connection (denoting that we should go for minimal SD check)
 	private boolean bpHasSLPInConnection = false;
 	private String[] subpropertyOfLevel = {
-		"usdl-sla:hasServiceLevelProfile",
-		"usdl-sla:hasServiceLevel",
-		"usdl-sla:hasServiceLevelExpression",
-		"usdl-sla:hasVariable",
-		"usdl-sla-cb:hasDefaultQuantitativeValue",
-		"usdl-sla-cb:hasDefaultQualitativeValue"
-	};
-	
+			"usdl-sla:hasServiceLevelProfile",
+			"usdl-sla:hasServiceLevel",
+			"usdl-sla:hasServiceLevelExpression",
+			"usdl-sla:hasVariable",
+			"usdl-sla-cb:hasDefaultQuantitativeValue",
+			"usdl-sla-cb:hasDefaultQualitativeValue"
+		};
+		
+	private String[] subclassOfLevelInDomain = {
+			"usdl-core:ServiceModel",
+			"usdl-sla:ServiceLevelProfile",
+			"usdl-sla:ServiceLevel",
+			"usdl-sla:ServiceLevelExpression",
+			"usdl-sla:Variable"
+		};
+		
 	public PolicyCompletenessCompliance()
 	{
 		try {
@@ -1868,6 +1876,34 @@ public class PolicyCompletenessCompliance {
 
 		classUri = cip.getClassUri();
 		instanceUri = cip.getInstanceUri();
+		
+		// get all subproperties
+		RDFNode[] subproperties = oneVarManySolutionsQuery("{?var rdfs:subPropertyOf " + subpropertyOfLevel[startClassIndex] + "}");
+		if(subproperties.length == 0)
+		{
+			writeMessageToCompletenessReport("Error - No subproperties of " + subpropertyOfLevel[startClassIndex] + " were found.");
+			throw new CompletenessException("No subproperties of " + subpropertyOfLevel[startClassIndex] + " were found.");					
+		}
+		for(RDFNode subproperty:subproperties)
+		{
+			RDFNode[] domainNodes = oneVarManySolutionsQuery("{<" + subproperty + "> rdfs:domain ?var}");
+			if(domainNodes.length == 0)
+			{
+				writeMessageToCompletenessReport("Error - Property + " + subproperty + " does not declare any domains.");
+				throw new CompletenessException("Property + " + subproperty + " does not declare any domains.");					
+			}
+			for(RDFNode domainNode:domainNodes)
+			{
+				int countSubclass = countQuery("{<" + domainNode.toString() + "> rdfs:subClassOf " + subclassOfLevelInDomain[startClassIndex] + "}");
+				if(countSubclass == 0)
+				{
+					writeMessageToCompletenessReport("Error - Property's:");
+					writeMessageToCompletenessReport(subproperty.toString());
+					writeMessageToCompletenessReport(" domain should be declared as subclass of " + subclassOfLevelInDomain[startClassIndex]);
+					throw new CompletenessException(" Property's: " + subproperty.toString() + " domain should be declared as subclass of " + subclassOfLevelInDomain[startClassIndex]);					
+				}
+			}
+		}
 
 		// get the relevant subproperties from the BP object
 		if(bpClassMap.get(classUri) == null)
