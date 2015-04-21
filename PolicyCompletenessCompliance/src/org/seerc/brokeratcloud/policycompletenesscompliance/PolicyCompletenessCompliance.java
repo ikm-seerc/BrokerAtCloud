@@ -529,6 +529,33 @@ public class PolicyCompletenessCompliance {
 				}
 			}
 		}
+		
+		/*
+		 * All spec sub-properties should be attached to the service model instance
+		 */
+		for(BrokerPolicyClass bpc:bp.getServiceModelMap().values())
+		{
+			for(Subproperty sp:bpc.getPropertyMap().values())
+			{
+				// if it's the SLP connection continue
+				int countSLP = countQuery("{<" + sp.getUri() + "> rdfs:subPropertyOf usdl-sla:hasServiceLevelProfile}");
+				if(countSLP != 0) continue;
+				
+				RDFNode smConnectionNode = oneVarOneSolutionQuery("{?var <" + sp.getUri() + "> ?someValue;}");
+				if(smConnectionNode != null)
+				{	// there is a connection
+					if(!smConnectionNode.toString().equals(smi_uri))
+					{	// not attached to SM instance
+						writeMessageToCompletenessReport("Error - SD's Service model instance's connection from " + smConnectionNode + " should be connected to the service model instance " + smi_uri);
+						throw new CompletenessException("SD's Service model instance's connection from " + smConnectionNode + " should be connected to the service model instance " + smi_uri);						
+					}
+				}
+				else
+				{	// TODO: Having no connection in the SD with a spec sub-property... should it raise an exception? 
+					
+				}
+			}
+		}
 	}
 	
 	private void runCompletenessCompliance(Object... dataToCheck) throws IOException, CompletenessException, ComplianceException {
