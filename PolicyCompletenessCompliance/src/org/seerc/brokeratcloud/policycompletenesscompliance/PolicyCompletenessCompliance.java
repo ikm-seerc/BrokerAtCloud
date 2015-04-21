@@ -973,6 +973,13 @@ public class PolicyCompletenessCompliance {
 				{	// this iterates the subproperties that hold domain/range where the Service Model is domain
 					if(rangeR.equals(spOfSm.getRangeUri()))
 					{	// success!
+						if((countQuery("{<" + spOfSm.getUri() + "> rdfs:subPropertyOf gr:quantitativeProductOrServiceProperty}") == 0) && (countQuery("{<" + spOfSm.getUri() + "> rdfs:subPropertyOf gr:qualitativeProductOrServiceProperty}") == 0))
+						// check that spOfSm is subclass of gr:quantitativeProductOrServiceProperty or gr:qualitativeProductOrServiceProperty
+						{
+							writeMessageToBrokerPolicyReport("Error - Framework spec " + spOfSm.getUri() + " must be a subclass of gr:quantitativeProductOrServiceProperty or gr:qualitativeProductOrServiceProperty.");
+							throw new BrokerPolicyException("Framework spec " + spOfSm.getUri() + " must be a subclass of gr:quantitativeProductOrServiceProperty or gr:qualitativeProductOrServiceProperty.");							
+						}
+						
 						if(variableExistsInFramework)
 						{	// we have found the value class second time, throw exception
 							writeMessageToBrokerPolicyReport("Error - Value class " + variableV.getPropertyMap().values().iterator().next().getRangeUri() + " is declared second time in properties of framework declaration.");
