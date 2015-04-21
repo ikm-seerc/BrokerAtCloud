@@ -510,6 +510,25 @@ public class PolicyCompletenessCompliance {
 				}
 			}
 		}
+		
+		/*
+		 * All connections to SM instance with QVs should have domain the service model.
+		 */
+		RDFNode[] smiConnections = oneVarManySolutionsQuery("{<" + smi_uri + "> ?var ?someValue}");
+		for(RDFNode smiConnection:smiConnections)
+		{
+			int countQV = countQuery("{<" + smiConnection.toString() + "> rdfs:subPropertyOf gr:quantitativeProductOrServiceProperty}");
+			countQV += countQuery("{<" + smiConnection.toString() + "> rdfs:subPropertyOf gr:qualitativeProductOrServiceProperty}");
+			if(countQV != 0)
+			{	// it's a spec property, should have the service model as domain
+				int countSmDomain = countQuery("{<" + smiConnection.toString() + "> rdfs:domain <" + bp.getServiceModelMap().values().iterator().next().getUri() + ">}");
+				if(countSmDomain == 0)
+				{
+					writeMessageToCompletenessReport("Error - SD's Service model instance's connection " + smiConnection + " should have as domain the service model class " + bp.getServiceModelMap().values().iterator().next().getUri());
+					throw new CompletenessException("SD's Service model instance's connection " + smiConnection + " should have as domain the service model class " + bp.getServiceModelMap().values().iterator().next().getUri());						
+				}
+			}
+		}
 	}
 	
 	private void runCompletenessCompliance(Object... dataToCheck) throws IOException, CompletenessException, ComplianceException {
