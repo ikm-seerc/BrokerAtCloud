@@ -999,6 +999,43 @@ public class PolicyCompletenessCompliance {
 		}
 		
 		/*
+		 *	All declarations where SM instance is the domain and a QV is the range
+		 *	should be subclasses of quant(l)itativeProductOrServiceProperty 
+		 */
+		RDFNode[] specs = oneVarManySolutionsQuery("{?var rdfs:domain " + "<" + bp.getServiceModelMap().values().iterator().next().getUri() + ">" + "}");
+		for(RDFNode spec:specs)
+		{
+			RDFNode rangeNode = oneVarOneSolutionQuery("{<" + spec + "> rdfs:range ?var}");
+			
+			// quantitative case
+			int countrange = countQuery("{<" + rangeNode + "> rdfs:subClassOf gr:QuantitativeValue}");
+			countrange += countQuery("{<" + rangeNode + "> rdfs:subClassOf gr:QuantitativeValueFloat}");
+			countrange += countQuery("{<" + rangeNode + "> rdfs:subClassOf gr:QuantitativeValueInteger}");
+			if(countrange != 0)
+			{
+				int countqposp = countQuery("{<" + spec + "> rdfs:subPropertyOf gr:quantitativeProductOrServiceProperty}");
+				if(countqposp == 0)
+				{
+					writeMessageToBrokerPolicyReport("Error - Spec " + spec + " should be a subproperty of gr:quantitativeProductOrServiceProperty.");
+					throw new BrokerPolicyException("Spec " + spec + " should be a subproperty of gr:quantitativeProductOrServiceProperty.");
+				}
+			}
+
+			// qualitative case
+			countrange = countQuery("{<" + rangeNode + "> rdfs:subClassOf gr:QualitativeValue}");
+			if(countrange != 0)
+			{
+				int countqposp = countQuery("{<" + spec + "> rdfs:subPropertyOf gr:qualitativeProductOrServiceProperty}");
+				if(countqposp == 0)
+				{
+					writeMessageToBrokerPolicyReport("Error - Spec " + spec + " should be a subproperty of gr:qualitativeProductOrServiceProperty.");
+					throw new BrokerPolicyException("Spec " + spec + " should be a subproperty of gr:qualitativeProductOrServiceProperty.");
+				}
+			}
+
+		}
+		
+		/*
 		 * if a Service Level Profile has been created and is bound to the Broker Policy instance,
 		 * then we should check BP for completeness/compliance too
 		 */
