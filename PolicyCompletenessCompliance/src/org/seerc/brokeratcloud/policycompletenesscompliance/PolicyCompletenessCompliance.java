@@ -377,7 +377,12 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport("Error - No Service instance with usdl-core-cb:hasServiceModel association was found with a Service Model.");
 			throw new CompletenessException("No Service instance with usdl-core-cb:hasServiceModel association was found with a Service Model.");
 		}
-		writeMessageToCompletenessReport("Service instance usdl-core-cb:hasServiceModel association was found with the Service Model: " + smInstance.toString());		
+		RDFNode smType = oneVarOneSolutionQuery("{<" + smInstance.toString() + "> rdf:type ?var}");
+		if(smType == null)
+		{
+			writeMessageToCompletenessReport("Error - Service Model instance does not declare a type.");
+			throw new CompletenessException("Service Model instance does not declare a type.");
+		}
 		
 		// check that instance of Entity Involvement exists
 		RDFNode eiInstance = oneVarOneSolutionQuery("{?var a usdl-core:EntityInvolvement}");
@@ -477,6 +482,15 @@ public class PolicyCompletenessCompliance {
 		
 		// now bring back the cached model with BP inside in order to use it for relations with instances checks
 		modelMem = cachedModel;
+
+		// we need the BP for this check
+		int smTypeSubclassCount = countQuery("{<" + smType.toString() + "> rdfs:subClassOf usdl-core:ServiceModel}");
+		if(smTypeSubclassCount == 0)
+		{
+			writeMessageToCompletenessReport("Error - Service instance has usdl-core-cb:hasServiceModel association with a non Service Model.");
+			throw new CompletenessException("Service instance has usdl-core-cb:hasServiceModel association with a non Service Model.");
+		}
+		writeMessageToCompletenessReport("Service instance usdl-core-cb:hasServiceModel association was found with the Service Model: " + smInstance.toString());		
 
 		this.checkClassificationDimensionsInSD(smi_uri);
 
