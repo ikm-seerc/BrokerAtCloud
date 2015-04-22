@@ -483,7 +483,7 @@ public class PolicyCompletenessCompliance {
 		// now bring back the cached model with BP inside in order to use it for relations with instances checks
 		modelMem = cachedModel;
 
-		// we need the BP for this check
+		// we need the BP for these checks
 		int smTypeSubclassCount = countQuery("{<" + smType.toString() + "> rdfs:subClassOf usdl-core:ServiceModel}");
 		if(smTypeSubclassCount == 0)
 		{
@@ -491,6 +491,22 @@ public class PolicyCompletenessCompliance {
 			throw new CompletenessException("Service instance has usdl-core-cb:hasServiceModel association with a non Service Model.");
 		}
 		writeMessageToCompletenessReport("Service instance usdl-core-cb:hasServiceModel association was found with the Service Model: " + smInstance.toString());		
+
+		// we know there is exactly one isVariantOf declaration. Is it a BP service model instance? 
+		RDFNode isVariantOfNode = oneVarOneSolutionQuery("{<" + smi_uri + "> gr:isVariantOf ?var}");
+		RDFNode ivoType = oneVarOneSolutionQuery("{<" + isVariantOfNode.toString() + "> rdf:type ?var}");
+		if(ivoType == null)
+		{
+			writeMessageToCompletenessReport("Error - Service Model instance isVariantOf declaration does not declare a type.");
+			throw new CompletenessException("Service Model instance isVariantOf declaration does not declare a type.");
+		}
+		int ivoTypeSubclassCount = countQuery("{<" + ivoType.toString() + "> rdfs:subClassOf usdl-core:ServiceModel}");
+		if(ivoTypeSubclassCount == 0)
+		{
+			writeMessageToCompletenessReport("Error - Service instance has gr:isVariantOf association with a non Service Model.");
+			throw new CompletenessException("Service instance has gr:isVariantOf association with a non Service Model.");
+		}
+		writeMessageToCompletenessReport("OK - Service Model gr:isVariantOf: " + isVariantOfNode);
 
 		this.checkClassificationDimensionsInSD(smi_uri);
 
