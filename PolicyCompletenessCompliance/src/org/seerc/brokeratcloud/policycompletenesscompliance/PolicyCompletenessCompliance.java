@@ -541,18 +541,21 @@ public class PolicyCompletenessCompliance {
 				int countSLP = countQuery("{<" + sp.getUri() + "> rdfs:subPropertyOf usdl-sla:hasServiceLevelProfile}");
 				if(countSLP != 0) continue;
 				
-				RDFNode smConnectionNode = oneVarOneSolutionQuery("{?var <" + sp.getUri() + "> ?someValue;}");
-				if(smConnectionNode != null)
-				{	// there is a connection
-					if(!smConnectionNode.toString().equals(smi_uri))
-					{	// not attached to SM instance
-						writeMessageToCompletenessReport("Error - SD's Service model instance's connection from " + smConnectionNode + " should be connected to the service model instance " + smi_uri);
-						throw new CompletenessException("SD's Service model instance's connection from " + smConnectionNode + " should be connected to the service model instance " + smi_uri);						
+				RDFNode[] smConnectionNodes = oneVarManySolutionsQuery("{?var <" + sp.getUri() + "> ?someValue;}");
+				for(RDFNode smConnectionNode:smConnectionNodes)
+				{
+					if(smConnectionNode != null)
+					{	// there is a connection
+						if(!smConnectionNode.toString().equals(smi_uri))
+						{	// not attached to SM instance
+							writeMessageToCompletenessReport("Error - SD's Service model instance's connection from " + smConnectionNode + " should be connected to the service model instance " + smi_uri);
+							throw new CompletenessException("SD's Service model instance's connection from " + smConnectionNode + " should be connected to the service model instance " + smi_uri);						
+						}
 					}
-				}
-				else
-				{	// TODO: Having no connection in the SD with a spec sub-property... should it raise an exception? 
-					
+					else
+					{	// TODO: Having no connection in the SD with a spec sub-property... should it raise an exception? 
+						
+					}
 				}
 			}
 		}

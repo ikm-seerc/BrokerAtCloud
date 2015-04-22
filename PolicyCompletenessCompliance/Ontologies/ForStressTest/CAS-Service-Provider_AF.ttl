@@ -47,7 +47,6 @@ sp:CAS_Software_AG a gr:BusinessEntity ;
 foaf:homepage <http://www.cas.de> ;
 foaf:logo <http://www.cas.de/typo3temp/pics/C_f1652c8982.gif> ;
 gr:legalName "CAS Software AG"^^xsd:string ;
-cas:hasProviderCertifications cas:APCVgold;
 gr:taxID "DE143593148"^^xsd:string.
 
 ### Business Entity Some Partner  
@@ -56,5 +55,4 @@ sp:somePartner a gr:BusinessEntity ;
 foaf:homepage <http://www.somepartner.de> ;
 foaf:logo <http://www.somepartner.de/image.gif> ;
 gr:legalName "Some Partner"^^xsd:string ;
-cas:hasProviderCertifications cas:APCVpremium; 
 gr:taxID "DE123456789"^^xsd:string.
