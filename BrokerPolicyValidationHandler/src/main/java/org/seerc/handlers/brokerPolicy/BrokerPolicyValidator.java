@@ -15,6 +15,8 @@ import org.seerc.brokeratcloud.messagebroker.OutOfRangeSLAViolationSubscriber;
 import org.seerc.brokeratcloud.messagebroker.WSO2MBClient;
 import org.seerc.brokeratcloud.policycompletenesscompliance.BrokerPolicy;
 import org.seerc.brokeratcloud.policycompletenesscompliance.BrokerPolicyClass;
+import org.seerc.brokeratcloud.policycompletenesscompliance.CompletenessException;
+import org.seerc.brokeratcloud.policycompletenesscompliance.ComplianceException;
 import org.seerc.brokeratcloud.policycompletenesscompliance.PolicyCompletenessCompliance;
 import org.seerc.brokeratcloud.policycompletenesscompliance.Subproperty;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -39,7 +41,7 @@ public class BrokerPolicyValidator extends Handler {
 			PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
 			pcc.getBrokerPolicy(targetStream);
 			bpv.createMonitoringTopics(pcc.getBP());
-		} catch (SecurityException | IllegalArgumentException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException | IOException e) {
+		} catch (SecurityException | IllegalArgumentException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException | IOException | ComplianceException | CompletenessException e) {
 			e.printStackTrace();
 		}
 	}
