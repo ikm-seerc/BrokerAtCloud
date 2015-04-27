@@ -224,7 +224,7 @@ public class SDEvaluationListener implements MessageListener {
 	 * This BP should have the same URI as the SD's gr:hasMakeAndModel association's target.
 	 * Will throw a CompletenessException if it doesn't find any.
 	 */
-	private InputStream getBpForSd(InputStream sdis) throws IOException, RegistryException, CompletenessException {
+	public InputStream getBpForSd(InputStream sdis) throws IOException, RegistryException, CompletenessException {
 		// get the broker policy URI defined in this SD
 		String brokerPolicyUri = gregEvaluator.getPcc().getSDIsVariantOfURI(sdis);
 		// find BP in GREG that has the same URI 
@@ -266,7 +266,7 @@ public class SDEvaluationListener implements MessageListener {
 		throw new CompletenessException("Could not find Broker Policy file with URI " + brokerPolicyUri);
 	}
 
-	private void evaluateCompletenessCompliance(InputStream sdis) throws IOException, CompletenessException, ComplianceException 
+	public void evaluateCompletenessCompliance(InputStream sdis) throws IOException, CompletenessException, ComplianceException 
 	{
 		gregEvaluator.getPcc().validateSDForCompletenessCompliance(sdis);
 		ep.getCompletenessReport().setStatus("OK");
