@@ -61,7 +61,7 @@ public class ServiceDescriptionValidator {
 			pcc.getBrokerPolicy(bpInputStream);
 			
 			// perform evaluation
-			sdEval.evaluateCompletenessCompliance(stream);
+			pcc.validateSDForCompletenessCompliance(stream);
 		} catch (Exception e) {
 			e.printStackTrace();
 			
