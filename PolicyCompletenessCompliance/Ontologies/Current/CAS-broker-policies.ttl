@@ -7,7 +7,7 @@
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix time:  <http://www.w3.org/2006/time#> .
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker> .
+@prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#> .
 @prefix cpp-profile: <http://www.brokeratcloud.eu/v1/opt/CONSUMER-PREFERENCE-PROFILE#> .
 @prefix dc:    <http://purl.org/dc/elements/1.1/> .
 @prefix usdl-sla: <http://www.linked-usdl.org/ns/usdl-sla#> .
@@ -23,7 +23,7 @@
 @prefix cpp-fld-expr: <http://www.brokeratcloud.eu/v1/opt/CONSUMER-PREFERENCE-EXPRESSION/> .
 @prefix s:     <http://schema.org/> .
 @prefix cpp-fld-pref: <http://www.brokeratcloud.eu/v1/opt/CONSUMER-PREFERENCE/> .
-@prefix usdl-sla-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#> .
+@prefix usdl-sla-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker-sla#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl:   <http://www.w3.org/2002/07/owl#> .
 @prefix pulsar: <http://www.brokeratcloud.eu/persist/types#> .
@@ -287,8 +287,8 @@ cas:AllowedCostValue  rdfs:subClassOf  gr:QuantitativeValueFloat ;
         gr:hasMaxValueFloat         "1000.0"^^xsd:float ;
         gr:hasMinValueFloat         "0.1"^^xsd:float ;
         gr:hasUnitOfMeasurement     ""^^xsd:string ;
-        usdl-sla-cb:higherIsBetter  true ;
-        usdl-sla-cb:isRange         false .
+        usdl-core-cb:higherIsBetter  true ;
+        usdl-core-cb:isRange         false .
 
 cas-pref-att:EncryptionTypePreferenceVariable
         rdfs:subClassOf      usdl-pref:QualitativeVariable ;
@@ -518,8 +518,8 @@ cas:AllowedScalabilityValue
         gr:hasMinValueFloat         "1.0"^^xsd:float ;
         gr:hasUnitOfMeasurement     "P1"^^xsd:string ;
         cas:measuredBy              cas:Monitoring ;
-        usdl-sla-cb:higherIsBetter  true ;
-        usdl-sla-cb:isRange         false .
+        usdl-core-cb:higherIsBetter  true ;
+        usdl-core-cb:isRange         false .
 
 cas:AllowedMaximumValue
         rdfs:subClassOf             gr:QuantitativeValueFloat ;
@@ -527,8 +527,8 @@ cas:AllowedMaximumValue
         gr:hasMinValueFloat         "50.0"^^xsd:float ;
         gr:hasUnitOfMeasurement     "C26"^^xsd:string ;
         cas:measuredBy              cas:Monitoring ;
-        usdl-sla-cb:higherIsBetter  false ;
-        usdl-sla-cb:isRange         true .
+        usdl-core-cb:higherIsBetter  false ;
+        usdl-core-cb:isRange         true .
 
 cas-pref-att:ContractingExperiencePreferenceVariable
         rdfs:subClassOf      usdl-pref:QualitativeVariable ;
@@ -679,8 +679,8 @@ cas:AllowedMinimumValue
         gr:hasMinValueFloat         "2.0"^^xsd:float ;
         gr:hasUnitOfMeasurement     "C26"^^xsd:string ;
         cas:measuredBy              cas:Monitoring ;
-        usdl-sla-cb:higherIsBetter  false ;
-        usdl-sla-cb:isRange         true .
+        usdl-core-cb:higherIsBetter  false ;
+        usdl-core-cb:isRange         true .
 
 cas:hasManagement  rdfs:comment  "Sichere Kanäle (Verschlüsselung) bei Zugriff auf externe Dienste"^^xsd:string ;
         rdfs:domain         cas:CASServiceModel ;
@@ -758,8 +758,8 @@ cas:AllowedAvailabilityValue
         gr:hasMinValueFloat         "95.0"^^xsd:float ;
         gr:hasUnitOfMeasurement     "P1"^^xsd:string ;
         cas:measuredBy              cas:Monitoring ;
-        usdl-sla-cb:higherIsBetter  true ;
-        usdl-sla-cb:isRange         false .
+        usdl-core-cb:higherIsBetter  true ;
+        usdl-core-cb:isRange         false .
 
 cas:hasSupportSatisfaction
         rdfs:comment        "Auswahl verschiedenen Kanäle für Support. Zusatzkosten für Support. Supportreaktionszeiten"^^xsd:string ;
@@ -895,7 +895,7 @@ cas:Measuring  a  rdfs:Class .
 
 cas:CASBrokerPolicy  a                  cas:CASServiceModel ;
         usdl-core:hasEntityInvolvement  cas:CASEntitiyInvolvement ;
-        usdl-sla-cb:hasClassificationDimension
+        usdl-core-cb:hasClassificationDimension
                 fc:rootConcept .
 
 cas:Management_MEDIUM

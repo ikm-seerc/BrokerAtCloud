@@ -2907,7 +2907,7 @@ public class PolicyCompletenessCompliance {
 		queryStr.append("PREFIX usdl-core: <http://www.linked-usdl.org/ns/usdl-core#>");
 		queryStr.append("PREFIX usdl-sla: <http://www.linked-usdl.org/ns/usdl-sla#>");
 		queryStr.append("PREFIX usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#>");
-		queryStr.append("PREFIX usdl-sla-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#>");
+		queryStr.append("PREFIX usdl-sla-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker-sla#>");
 		//queryStr.append("PREFIX brokerpolicy: <http://www.broker-cloud.eu/d043567/linked-usdl-ontologies/SAP-HANA-Cloud-Apps-Broker/2014/01/brokerpolicy#>");
 		//queryStr.append("PREFIX cas: <http://www.broker-cloud.eu/service-descriptions/CAS/broker#>");
 		queryStr.append("PREFIX gr: <http://purl.org/goodrelations/v1#>");

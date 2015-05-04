@@ -4,7 +4,7 @@
 @prefix sp: <http://www.broker-cloud.eu/service-descriptions/CAS/service-provider#> . 
 @prefix fc: <http://www.broker-cloud.eu/service-descriptions/CAS/categories#>.
 @prefix usdl-sla: <http://www.linked-usdl.org/ns/usdl-sla#> .
-@prefix usdl-sla-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#> .
+@prefix usdl-sla-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker-sla#> .
 @prefix usdl-core: <http://www.linked-usdl.org/ns/usdl-core#> .
 @prefix usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#>.
 @prefix usdl-business-roles: <http://www.linked-usdl.org/ns/usdl-business-roles#> .
