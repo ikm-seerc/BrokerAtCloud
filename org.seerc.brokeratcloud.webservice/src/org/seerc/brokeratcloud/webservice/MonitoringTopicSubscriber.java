@@ -18,6 +18,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import org.seerc.brokeratcloud.messagebroker.HttpPostClient;
 import org.seerc.brokeratcloud.messagebroker.MessageBrokerSubscriber;
 import org.wso2.carbon.event.client.broker.BrokerClientException;
 
@@ -41,7 +42,7 @@ public class MonitoringTopicSubscriber extends TopicSubscriber {
 					TextMessage textMessage = (TextMessage) message; 
 					String msg = textMessage.getText();
 					
-					postMessageToWsCallbackEndpoint(wsCallbackEndpoint, msg);
+					HttpPostClient.postMessageToEndpoint(wsCallbackEndpoint, msg);
 				} catch (JMSException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
