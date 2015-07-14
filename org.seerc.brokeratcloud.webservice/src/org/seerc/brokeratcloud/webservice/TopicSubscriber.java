@@ -17,6 +17,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import org.seerc.brokeratcloud.messagebroker.HttpPostClient;
 import org.seerc.brokeratcloud.messagebroker.MessageBrokerSubscriber;
 import org.wso2.carbon.event.client.broker.BrokerClientException;
 
@@ -45,7 +46,7 @@ public class TopicSubscriber {
 						msg += (char)i;
 					}
 					
-					postMessageToWsCallbackEndpoint(wsCallbackEndpoint, msg);
+					HttpPostClient.postMessageToEndpoint(wsCallbackEndpoint, msg);
 				} catch (JMSException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -56,35 +57,6 @@ public class TopicSubscriber {
 		mbs.subscribeToTopic();
 	}
 	
-	protected void postMessageToWsCallbackEndpoint(String wsCallbackEndpoint, String msg) throws IOException
-	{
-		URL targetUrl = new URL(wsCallbackEndpoint);
-
-		HttpURLConnection httpConnection = (HttpURLConnection) targetUrl.openConnection();
-		httpConnection.setDoOutput(true);
-		httpConnection.setRequestMethod("POST");
-
-		OutputStream outputStream = httpConnection.getOutputStream();
-		outputStream.write(msg.getBytes());
-		outputStream.flush();
-
-		if (httpConnection.getResponseCode() != 200) {
-			throw new RuntimeException("Failed : HTTP error code : "
-					+ httpConnection.getResponseCode());
-		}
-
-		BufferedReader responseBuffer = new BufferedReader(
-				new InputStreamReader((httpConnection.getInputStream())));
-
-		String output;
-		System.out.println("Output from wsCallbackEndpoint:\n");
-		while ((output = responseBuffer.readLine()) != null) {
-			System.out.println(output);
-		}
-
-		httpConnection.disconnect();
-	}
-
 	@POST
 	@Path("/receive")
 	public String receive(String message)
