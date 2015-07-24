@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><handlerartifact>
+    <handler class="org.seerc.handlers.brokerPolicyDeprecation.BrokerPolicyDeprecator" methods="DELETE">
+        <filter class="org.wso2.carbon.registry.core.jdbc.handlers.filters.URLMatcher">
+            <property name="getTagsPattern" type="string"/>
+            <property name="rateResourcePattern" type="string"/>
+            <property name="dumpPattern" type="string"/>
+            <property name="movePattern" type="string"/>
+            <property name="restoreVersionPattern" type="string"/>
+            <property name="getAssociationsPattern" type="string"/>
+            <property name="renamePattern" type="string"/>
+            <property name="getCommentsPattern" type="string"/>
+            <property name="putPattern" type="string"/>
+            <property name="editCommentPattern" type="string"/>
+            <property name="addAssociationPattern" type="string"/>
+            <property name="getVersionsPattern" type="string"/>
+            <property name="restorePattern" type="string"/>
+            <property name="getAllAssociationsPattern" type="string"/>
+            <property name="createLinkPattern" type="string"/>
+            <property name="copyPattern" type="string"/>
+            <property name="putChildPattern" type="string"/>
+            <property name="getPattern" type="string"/>
+            <property name="getAverageRatingPattern" type="string"/>
+            <property name="resourceExistsPattern" type="string"/>
+            <property name="deletePattern" type="string">/brokerAtCloud/brokerPolicies/.*</property>
+            <property name="removeTagPattern" type="string"/>
+            <property name="invokeAspectPattern" type="string"/>
+            <property name="applyTagPattern" type="string"/>
+            <property name="removeAssociationPattern" type="string"/>
+            <property name="importPattern" type="string"/>
+            <property name="removeLinkPattern" type="string"/>
+            <property name="getRatingPattern" type="string"/>
+            <property name="removeCommentPattern" type="string"/>
+            <property name="importChildPattern" type="string"/>
+            <property name="addCommentPattern" type="string"/>
+            <property name="createVersionPattern" type="string"/>
+        </filter>
+    </handler>
+</handlerartifact>
