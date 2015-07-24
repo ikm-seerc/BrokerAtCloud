@@ -9,9 +9,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.seerc.brokeratcloud.messagebroker.FusekiClient;
 import org.seerc.brokeratcloud.messagebroker.MessageBrokerSubscriber;
 import org.seerc.brokeratcloud.messagebroker.OutOfRangeSLAViolationListener;
 import org.seerc.brokeratcloud.messagebroker.OutOfRangeSLAViolationSubscriber;
+import org.seerc.brokeratcloud.messagebroker.WSO2GREGClient;
 import org.seerc.brokeratcloud.messagebroker.WSO2MBClient;
 import org.seerc.brokeratcloud.policycompletenesscompliance.BrokerPolicy;
 import org.seerc.brokeratcloud.policycompletenesscompliance.BrokerPolicyClass;
@@ -27,9 +29,16 @@ public class BrokerPolicyValidator extends Handler {
 
 	WSO2MBClient mb;
 	
+	// The Fuseki client
+	FusekiClient fc;
+	
+	WSO2GREGClient wso2gregClient;
+
 	public BrokerPolicyValidator()
 	{
 		this.mb = new WSO2MBClient();
+		this.fc = new FusekiClient();
+		this.wso2gregClient = new WSO2GREGClient();
 	}
 	
 	public static void main(String[] args) 
@@ -47,10 +56,35 @@ public class BrokerPolicyValidator extends Handler {
 	}
 	
 	public void put(RequestContext requestContext) throws RegistryException{
-		InputStream resourceIS = requestContext.getResource().getContentStream();
+		InputStream newBpIS = requestContext.getResource().getContentStream();
 		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
 		try {
-			pcc.validateBrokerPolicy(resourceIS);
+			pcc.validateBrokerPolicy(newBpIS);
+			
+			// flag to indicate whether this is an update or a creation of a BP
+			boolean bpUpdated = false;
+			
+			InputStream currentBP = null;
+			
+			if(this.wso2gregClient.getRemote_registry().resourceExists(requestContext.getResourcePath().getPath()))
+			{	// BP exists
+				currentBP = this.wso2gregClient.getRemote_registry().get(requestContext.getResourcePath().getPath()).getContentStream();
+
+				// this is a service update
+				bpUpdated = true;
+			}
+
+			// reuse stream
+			newBpIS.reset();
+
+			// send to Fuseki
+			System.out.println("Evaluation went OK, sending received BP to Fuseki.");
+			if(bpUpdated)
+			{
+				// delete old from Fuseki
+				fc.deleteInputStreamFromFuseki(currentBP);
+			}
+			fc.addInputStreamToFuseki(newBpIS);
 			
 			System.out.println("Broker Policy went OK. Create Monitoring Topics for Quantitative Values.");
 			this.createMonitoringTopics(pcc.getBP());
