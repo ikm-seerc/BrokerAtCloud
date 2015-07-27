@@ -109,7 +109,7 @@ public class BrokerPolicyValidator extends Handler {
 				if(bp.getQuantitativeValueMap().keySet().contains(candidateQV))
 				{ // it is QuantitativeValue, create topic
 					try {
-						String topicName = WSO2MBClient.monitoringTopicPrefix + new URI(candidateQV).getFragment();
+						String topicName = WSO2MBClient.monitoringTopicPrefix + WSO2GREGClient.createNameFromUri(new URI(candidateQV));
 						// new topic create it and create new out-of-range subscriber
 						WSO2MBClient.createTopic(topicName);
 						// also create a OutOfRangeSLAViolationListener for the new QV monitoring topic
