@@ -168,3 +168,30 @@ fc:PointOfSales a usdl-core-cb:ClassificationDimension ;
 	skos:inScheme fc:BrokerAtCloudESOCC2015TutorialScheme .
 
 ## Manually added declarations ###
+
+<http://yourbrokernamespace.com/MySLP> a <http://yourbrokernamespace.com/SomeServiceLevelProfile> .
+
+<http://yourbrokernamespace.com/MySec> a <http://yourbrokernamespace.com/VarSecurity> .
+<http://yourbrokernamespace.com/MySec> <http://yourbrokernamespace.com/hasDefaultSecurity> <http://yourbrokernamespace.com/Low_Security> .
+<http://yourbrokernamespace.com/MySLESec> a <http://yourbrokernamespace.com/SLESecurity> .
+<http://yourbrokernamespace.com/MySLESec> <http://yourbrokernamespace.com/hasVarSecurity> <http://yourbrokernamespace.com/MySec> .
+<http://yourbrokernamespace.com/MySLSec> a <http://yourbrokernamespace.com/SLSecurity> .
+<http://yourbrokernamespace.com/MySLSec> <http://yourbrokernamespace.com/hasSLESecurity> <http://yourbrokernamespace.com/MySLESec> .
+
+<http://yourbrokernamespace.com/MySLP> <http://yourbrokernamespace.com/hasSLSecurity> <http://yourbrokernamespace.com/MySLSec> .
+
+
+<http://yourbrokernamespace.com/High_Availability> a <http://yourbrokernamespace.com/AllowedAvailabilityValue>;
+  gr:hasMinValueInteger "91"^^xsd:integer ; 
+  gr:hasMaxValueInteger "99"^^xsd:integer .
+
+<http://yourbrokernamespace.com/MyAvail> a <http://yourbrokernamespace.com/VarAvailability> .
+<http://yourbrokernamespace.com/MyAvail> <http://yourbrokernamespace.com/hasDefaultAvailability> <http://yourbrokernamespace.com/High_Availability> .
+<http://yourbrokernamespace.com/MySLEAvail> a <http://yourbrokernamespace.com/SLEAvailability> .
+<http://yourbrokernamespace.com/MySLEAvail> <http://yourbrokernamespace.com/hasVarAvailability> <http://yourbrokernamespace.com/MyAvail> .
+<http://yourbrokernamespace.com/MySLAvail> a <http://yourbrokernamespace.com/SLAvailability> .
+<http://yourbrokernamespace.com/MySLAvail> <http://yourbrokernamespace.com/hasSLEAvailability> <http://yourbrokernamespace.com/MySLEAvail> .
+
+<http://yourbrokernamespace.com/MySLP> <http://yourbrokernamespace.com/hasSLAvailability> <http://yourbrokernamespace.com/MySLAvail> .
+
+<http://yourbrokernamespace.com/YourBrokerPolicyTitle> <http://yourbrokernamespace.com/hasSomeServiceLevelProfile> <http://yourbrokernamespace.com/MySLP> . 
