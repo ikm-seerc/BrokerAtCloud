@@ -11,7 +11,9 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -2004,12 +2006,31 @@ public class PolicyCompletenessCompliance {
 		instanceUri = cip.getInstanceUri();
 		
 		// get all subproperties
-		RDFNode[] subproperties = oneVarManySolutionsQuery("{?var rdfs:subPropertyOf " + subpropertyOfLevel[startClassIndex] + "}");
-		if(subproperties.length == 0)
-		{
-			writeMessageToCompletenessReport("Error - No subproperties of " + subpropertyOfLevel[startClassIndex] + " were found.");
-			throw new CompletenessException("No subproperties of " + subpropertyOfLevel[startClassIndex] + " were found.");					
+		RDFNode[] subproperties = null;
+		if(startClassIndex != 4)
+		{	// non-QV case
+			subproperties = oneVarManySolutionsQuery("{?var rdfs:subPropertyOf " + subpropertyOfLevel[startClassIndex] + "}");
+			if(subproperties.length == 0)
+			{
+				writeMessageToCompletenessReport("Error - No subproperties of " + subpropertyOfLevel[startClassIndex] + " were found.");
+				throw new CompletenessException("No subproperties of " + subpropertyOfLevel[startClassIndex] + " were found.");					
+			}
 		}
+		else
+		{	// QV case, get both quantitative and qualitative
+			RDFNode[] subpropertiesQuantitative = oneVarManySolutionsQuery("{?var rdfs:subPropertyOf " + subpropertyOfLevel[startClassIndex] + "}");
+			RDFNode[] subpropertiesQualitative = oneVarManySolutionsQuery("{?var rdfs:subPropertyOf " + subpropertyOfLevel[startClassIndex+1] + "}");
+			List<RDFNode> subpropertiesList = new ArrayList<RDFNode>();
+			Collections.addAll(subpropertiesList, subpropertiesQuantitative);
+			Collections.addAll(subpropertiesList, subpropertiesQualitative);
+			subproperties = subpropertiesList.toArray(new RDFNode[0]);
+			if(subproperties.length == 0)
+			{
+				writeMessageToCompletenessReport("Error - No subproperties of " + subpropertyOfLevel[startClassIndex] + " or " + subpropertyOfLevel[startClassIndex+1] + " were found.");
+				throw new CompletenessException("No subproperties of " + subpropertyOfLevel[startClassIndex] + " or " + subpropertyOfLevel[startClassIndex+1] + " were found.");					
+			}
+		}
+		
 		for(RDFNode subproperty:subproperties)
 		{
 			RDFNode[] domainNodes = oneVarManySolutionsQuery("{<" + subproperty + "> rdfs:domain ?var}");
