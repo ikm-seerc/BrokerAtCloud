@@ -55,7 +55,20 @@ public class BrokerPolicyValidator {
 			Resource resourceForName = this.greg.getRemote_registry().newResource();
 			resourceForName.setMediaType("text/plain");
 			resourceForName.setContent(bpContents);
-			String bpName = new URI(pcc.getBPInstanceUri(resourceForName.getContentStream())).getFragment() + ".ttl";
+			String bpName = null;
+			String bpInstanceUri = pcc.getBPInstanceUri(resourceForName.getContentStream());
+			String bpNameFragment = new URI(bpInstanceUri).getFragment();
+			if(bpNameFragment == null || bpNameFragment.equals(""))
+			{	// no fragment, take the last part of the URI
+				String[] bpUriParts = bpInstanceUri.split("/");
+				String bpLastPart = bpUriParts[bpUriParts.length-1];
+				bpName = bpLastPart + ".ttl";
+			}
+			else
+			{	// found fragment, add it in bp name
+				bpName = bpNameFragment + ".ttl";				
+			}
+
 			//resource.getContentStream().reset();
 			Resource resource = this.greg.getRemote_registry().newResource();
 			resource.setMediaType("text/plain");
