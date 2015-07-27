@@ -3,6 +3,7 @@ package org.seerc.brokeratcloud.messagebroker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -181,5 +182,23 @@ public class WSO2GREGClient {
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static String createNameFromUri(URI uri)
+	{
+		String name = "";
+		String nameFragment = uri.getFragment();
+		if(nameFragment == null || nameFragment.equals(""))
+		{	// no fragment, take the last part of the URI
+			String[] uriParts = uri.toString().split("/");
+			String uriLastPart = uriParts[uriParts.length-1];
+			name = uriLastPart;
+		}
+		else
+		{	// found fragment, add it in name
+			name = nameFragment;				
+		}
+		
+		return name;
 	}
 }
