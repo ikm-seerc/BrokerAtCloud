@@ -100,8 +100,8 @@ public class SDEvaluationListener implements MessageListener {
 			}
 			
 			// Path to put the SD resource
-			// That is serviceDescriptionsFolder + URI fragment (part after #) + .ttl
-			String pathToPutSiUri = WSO2GREGClient.getServiceDescriptionsFolder() + siUri.getFragment() + ".ttl";
+			// That is serviceDescriptionsFolder + name from URI + .ttl
+			String pathToPutSiUri = WSO2GREGClient.getServiceDescriptionsFolder() + WSO2GREGClient.createNameFromUri(siUri) + ".ttl";
 			
 			// reset stream to reuse it
 			sdis.reset();
@@ -133,7 +133,7 @@ public class SDEvaluationListener implements MessageListener {
 			sdis.reset();
 
 			// The service instance URI
-			String si = new URI(gregEvaluator.getPcc().getSDServiceInstanceURI(sdis)).getFragment();
+			String si = WSO2GREGClient.createNameFromUri(new URI(gregEvaluator.getPcc().getSDServiceInstanceURI(sdis)));
 			
 			// reuse stream
 			sdis.reset();

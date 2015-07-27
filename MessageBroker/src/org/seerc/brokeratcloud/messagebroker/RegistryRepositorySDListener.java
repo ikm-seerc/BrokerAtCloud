@@ -57,8 +57,8 @@ public class RegistryRepositorySDListener implements MessageListener {
 			}
 			
 			// Path to put the SD resource
-			// That is serviceDescriptionsFolder + URI fragment (part after #) + .ttl
-			String pathToPutSiUri = WSO2GREGClient.getServiceDescriptionsFolder() + siUri.getFragment() + ".ttl";
+			// That is serviceDescriptionsFolder + name from URI + .ttl
+			String pathToPutSiUri = WSO2GREGClient.getServiceDescriptionsFolder() + WSO2GREGClient.createNameFromUri(siUri) + ".ttl";
 			
 			// reset stream to reuse it
 			sdis.reset();
