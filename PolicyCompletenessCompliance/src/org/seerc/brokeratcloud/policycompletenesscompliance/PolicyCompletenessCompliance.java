@@ -63,7 +63,7 @@ public class PolicyCompletenessCompliance {
 	private static final String RDFS = "http://www.w3.org/2000/01/rdf-schema#";
 	private static final String GR = "http://purl.org/goodrelations/v1#";
 	private static final String RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-	private static final String FC = "http://www.broker-cloud.eu/service-descriptions/CAS/categories#";
+	//private static final String FC = "http://www.broker-cloud.eu/service-descriptions/CAS/categories#";
 
 	// The tee output stream that will output broker policy report messages both to System.out and file.
 	TeeOutputStream brokerPolicyReportTos;
@@ -776,12 +776,12 @@ public class PolicyCompletenessCompliance {
 		writeMessageToBrokerPolicyReport("Service Model instance was found in the Broker Policy: " + smInstance.toString());
 		
 		// check that SM instance is connected to fc:rootConcept via the usdl-core-cb:hasClassificationDimension
-		Integer rcHasClassificationDimensionCount = countQuery("{<"+ smInstance.toString() + "> usdl-core-cb:hasClassificationDimension <" + FC + "rootConcept>}");
+		/*Integer rcHasClassificationDimensionCount = countQuery("{<"+ smInstance.toString() + "> usdl-core-cb:hasClassificationDimension <" + FC + "rootConcept>}");
 		if(rcHasClassificationDimensionCount == 0)
 		{	// more than one instances of service model, throw exception
 			writeMessageToBrokerPolicyReport("Error - Service Model instance is not connected to fc:rootConcept via the usdl-core-cb:hasClassificationDimension.");
 			throw new BrokerPolicyException("Service Model instance is not connected to fc:rootConcept via the usdl-core-cb:hasClassificationDimension.");
-		}
+		}*/
 		
 		
 		// check that single instance of usdl-core:EntityInvolvement class exists.
@@ -2911,7 +2911,7 @@ public class PolicyCompletenessCompliance {
 		//queryStr.append("PREFIX brokerpolicy: <http://www.broker-cloud.eu/d043567/linked-usdl-ontologies/SAP-HANA-Cloud-Apps-Broker/2014/01/brokerpolicy#>");
 		//queryStr.append("PREFIX cas: <http://www.broker-cloud.eu/service-descriptions/CAS/broker#>");
 		queryStr.append("PREFIX gr: <http://purl.org/goodrelations/v1#>");
-		queryStr.append("PREFIX fc: <http://www.broker-cloud.eu/service-descriptions/CAS/categories#>");
+		//queryStr.append("PREFIX fc: <http://www.broker-cloud.eu/service-descriptions/CAS/categories#>");
 
 		queryStr.append(coreQuery);
 
