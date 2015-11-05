@@ -692,12 +692,6 @@ cas:AllowedEncryptionTypeValue
         rdfs:subClassOf  gr:QualitativeValue ;
         cas:measuredBy   cas:QS .
 
-cas:AllowedRemovalTimescaleValue
-        rdfs:subClassOf  gr:QualitativeValue .
-
-cas:AllowedDeprecationTimescaleValue
-        rdfs:subClassOf  gr:QualitativeValue .
-
 cas-pref-att:ManagementPreferenceVariable
         rdfs:subClassOf      usdl-pref:QualitativeVariable ;
         usdl-pref:belongsTo  fc:rootConcept ;
@@ -767,6 +761,24 @@ cas:AllowedAvailabilityValue
         usdl-core-cb:higherIsBetter  true ;
         usdl-core-cb:isRange         false .
 
+cas:AllowedRemovalTimescaleValue
+        rdfs:subClassOf             gr:QuantitativeValueFloat ;
+        gr:hasMaxValueFloat         "100"^^xsd:float ;
+        gr:hasMinValueFloat         "10"^^xsd:float ;
+        gr:hasUnitOfMeasurement     "days"^^xsd:string ;
+        cas:measuredBy              cas:Monitoring ;
+        usdl-core-cb:higherIsBetter  true ;
+        usdl-core-cb:isRange         false .
+
+cas:AllowedDeprecationTimescaleValue
+        rdfs:subClassOf             gr:QuantitativeValueFloat ;
+        gr:hasMaxValueFloat         "100"^^xsd:float ;
+        gr:hasMinValueFloat         "10"^^xsd:float ;
+        gr:hasUnitOfMeasurement     "days"^^xsd:string ;
+        cas:measuredBy              cas:Monitoring ;
+        usdl-core-cb:higherIsBetter  true ;
+        usdl-core-cb:isRange         false .
+
 cas:hasSupportSatisfaction
         rdfs:comment        "Auswahl verschiedenen Kan?le f?r Support. Zusatzkosten f?r Support. Supportreaktionszeiten"^^xsd:string ;
         rdfs:domain         cas:CASServiceModel ;
@@ -785,13 +797,13 @@ cas:hasRemovalTimescale
         rdfs:domain         cas:CASServiceModel ;
         rdfs:label          "Removal timescale"@en ;
         rdfs:range          cas:AllowedRemovalTimescaleValue ;
-        rdfs:subPropertyOf  gr:qualitativeProductOrServiceProperty .
+        rdfs:subPropertyOf  gr:quantitativeProductOrServiceProperty .
 
 cas:hasDeprecationTimescale
         rdfs:domain         cas:CASServiceModel ;
         rdfs:label          "Deprecation timescale"@en ;
         rdfs:range          cas:AllowedDeprecationTimescaleValue ;
-        rdfs:subPropertyOf  gr:qualitativeProductOrServiceProperty .
+        rdfs:subPropertyOf  gr:quantitativeProductOrServiceProperty .
 
 cas-pref-att:hasDefaultMaximum
         rdfs:domain         cas-pref-att:MaximumPreferenceVariable ;
@@ -1050,11 +1062,11 @@ cas:hasDefaultSecurity  rdfs:subPropertyOf usdl-sla-cb:hasDefaultQualitativeValu
 	rdfs:domain cas:VarSecurity ;
 	rdfs:range cas:AllowedEncryptionTypeValue.
 
-cas:hasDefaultDeprecationTimescale  rdfs:subPropertyOf usdl-sla-cb:hasDefaultQualitativeValue;
+cas:hasDefaultDeprecationTimescale  rdfs:subPropertyOf usdl-sla-cb:hasDefaultQuantitativeValue;
 	rdfs:domain cas:VarDeprecationTimescale ;
 	rdfs:range cas:AllowedDeprecationTimescaleValue.
 
-cas:hasDefaultRemovalTimescale  rdfs:subPropertyOf usdl-sla-cb:hasDefaultQualitativeValue;
+cas:hasDefaultRemovalTimescale  rdfs:subPropertyOf usdl-sla-cb:hasDefaultQuantitativeValue;
 	rdfs:domain cas:VarRemovalTimescale ;
 	rdfs:range cas:AllowedRemovalTimescaleValue.
 
@@ -1080,40 +1092,34 @@ cas:AvailabilityLow rdf:type cas:AllowedAvailabilityValue;
 	gr:hasMaxValueFloat "100"^^xsd:float. 
 	
 cas:DeprecationLong rdf:type cas:AllowedDeprecationTimescaleValue;
-	rdfs:label "Long deprecation timescale for apps is between 40 and 100 days";
+	rdfs:label "Long deprecation timescale for apps is 40 days";
 	gr:hasUnitOfMeasurement "days"^^xsd:string;
-	gr:hasMinValueFloat "40"^^xsd:float;
-	gr:hasMaxValueFloat "100"^^xsd:float. 
+	gr:hasValueFloat "40"^^xsd:float. 
 
 cas:DeprecationMedium rdf:type cas:AllowedDeprecationTimescaleValue;
-	rdfs:label "Medium deprecation timescale for apps is between 20 and 40 days";
+	rdfs:label "Medium deprecation timescale for apps is 20 days";
 	gr:hasUnitOfMeasurement "days"^^xsd:string;
-	gr:hasMinValueFloat "20"^^xsd:float;
-	gr:hasMaxValueFloat "40"^^xsd:float. 
+	gr:hasValueFloat "20"^^xsd:float. 
 
 cas:DeprecationShort rdf:type cas:AllowedDeprecationTimescaleValue;
-	rdfs:label "Short deprecation timescale for apps is between 10 and 20 days";
+	rdfs:label "Short deprecation timescale for apps is 10 days";
 	gr:hasUnitOfMeasurement "days"^^xsd:string;
-	gr:hasMinValueFloat "10"^^xsd:float;
-	gr:hasMaxValueFloat "20"^^xsd:float. 
+	gr:hasMaxValueFloat "10"^^xsd:float. 
 
 cas:RemovalLong rdf:type cas:AllowedRemovalTimescaleValue;
-	rdfs:label "Long removal timescale for apps is between 40 and 100 days";
+	rdfs:label "Long removal timescale for apps is between 40 days";
 	gr:hasUnitOfMeasurement "days"^^xsd:string;
-	gr:hasMinValueFloat "40"^^xsd:float;
-	gr:hasMaxValueFloat "100"^^xsd:float. 
+	gr:hasValueFloat "40"^^xsd:float. 
 
 cas:RemovalMedium rdf:type cas:AllowedRemovalTimescaleValue;
-	rdfs:label "Medium removal timescale for apps is between 20 and 40 days";
+	rdfs:label "Medium removal timescale for apps is 20 days";
 	gr:hasUnitOfMeasurement "days"^^xsd:string;
-	gr:hasMinValueFloat "20"^^xsd:float;
-	gr:hasMaxValueFloat "40"^^xsd:float. 
+	gr:hasValueFloat "20"^^xsd:float;. 
 
 cas:RemovalShort rdf:type cas:AllowedRemovalTimescaleValue;
-	rdfs:label "Short removal timescale for apps is between 10 and 20 days";
+	rdfs:label "Short removal timescale for apps is 10 days";
 	gr:hasUnitOfMeasurement "days"^^xsd:string;
-	gr:hasMinValueFloat "10"^^xsd:float;
-	gr:hasMaxValueFloat "20"^^xsd:float. 
+	gr:hasValueFloat "10"^^xsd:float. 
 
 	
 ####################################################################################
