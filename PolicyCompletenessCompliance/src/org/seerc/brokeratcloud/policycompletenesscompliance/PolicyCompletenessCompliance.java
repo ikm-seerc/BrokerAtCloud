@@ -46,9 +46,9 @@ import com.hp.hpl.jena.util.FileManager;
 public class PolicyCompletenessCompliance {
 
 	//private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
-	protected static final Object[] brokerPolicyResources = {"Ontologies/Current/CASBrokerPolicyWithTimescales.ttl"};
+	protected static final Object[] brokerPolicyResources = {"Ontologies/Current/20150904_BP_ESOCC2015_tutorial_v4_withTimescales.ttl"};
 	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
-	protected static final Object[] serviceDescriptionResources = {"Ontologies/Current/CASAddressApp1WithTimescales.ttl"};
+	protected static final Object[] serviceDescriptionResources = {"Ontologies/Current/20150904_BP_ESOCC2015_tutorial_v4_sd_withTimescales.ttl"};
 	
 	protected static final Object[] brokerPolicyStressTestResources = {"Ontologies/ForStressTest/CAS-broker-policies-minimal-final_AF.ttl", "Ontologies/ForStressTest/CAS-Service-Level-Profile-silver_AF.ttl", "Ontologies/ForStressTest/CAS-functional-categories-v2_AF.ttl"};
 	protected static final Object[] serviceDescriptionStressTestResources = {"Ontologies/ForStressTest/CAS-AddressAppSM-minimal-final_AF.ttl"};
@@ -3195,17 +3195,17 @@ public class PolicyCompletenessCompliance {
 		
 		if(this.bp.getQuantitativeValueIntegerMap().containsKey(qvToCheck))
 		{	// it's integer
-			String minInteger = oneVarOneSolutionQuery("{<" + qvToCheck + "> gr:hasMinValueInteger ?var}").toString();
-			String maxInteger = oneVarOneSolutionQuery("{<" + qvToCheck + "> gr:hasMaxValueInteger ?var}").toString();
-			minValueRange = Float.parseFloat(minInteger);
-			maxValueRange = Float.parseFloat(maxInteger);
+			RDFNode minInteger = oneVarOneSolutionQuery("{<" + qvToCheck + "> gr:hasMinValueInteger ?var}");
+			RDFNode maxInteger = oneVarOneSolutionQuery("{<" + qvToCheck + "> gr:hasMaxValueInteger ?var}");
+			minValueRange = (float) minInteger.asLiteral().getInt();
+			maxValueRange = (float) maxInteger.asLiteral().getInt();
 		}
 		else
 		{	// it's float
-			String minFloat = oneVarOneSolutionQuery("{<" + qvToCheck + "> gr:hasMinValueFloat ?var}").toString();
-			String maxFloat = oneVarOneSolutionQuery("{<" + qvToCheck + "> gr:hasMaxValueFloat ?var}").toString();
-			minValueRange = Float.parseFloat(minFloat.substring(0, minFloat.indexOf("^^")));
-			maxValueRange = Float.parseFloat(maxFloat.substring(0, maxFloat.indexOf("^^")));
+			RDFNode minFloat = oneVarOneSolutionQuery("{<" + qvToCheck + "> gr:hasMinValueFloat ?var}");
+			RDFNode maxFloat = oneVarOneSolutionQuery("{<" + qvToCheck + "> gr:hasMaxValueFloat ?var}");
+			minValueRange = minFloat.asLiteral().getFloat();
+			maxValueRange = maxFloat.asLiteral().getFloat();
 		}
 		
 		if(qvValue.floatValue() >= minValueRange && qvValue.floatValue() <= maxValueRange)
