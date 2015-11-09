@@ -58,7 +58,9 @@ sd:MyFirstHCPServiceLevelProfile
   bp:hasSLDisc sd:SLDiscInstance ; 
   bp:hasSLFloatingIPs sd:SLFloatingIPsInstance ; 
   bp:hasSLEphemeralDisc sd:SLEphemeralDiscInstance ; 
-  bp:hasSLSwapDisc sd:SLSwapDiscInstance . 
+  bp:hasSLSwapDisc sd:SLSwapDiscInstance ;
+  bp:hasServiceLevelDeprecation sd:SLDeprecationInstance ;
+  bp:hasServiceLevelRemoval sd:SLRemovalInstance . 
 
 sd:SLSecurityLevelInstance 
   a bp:SLSecurityLevel ; 
@@ -262,3 +264,31 @@ sd:swap
   gr:hasMinValueInteger "0"^^xsd:integer ; 
   gr:hasMaxValueInteger "1024"^^xsd:integer . 
   
+sd:SLDeprecationInstance a bp:ServiceLevelDeprecation;
+bp:hasSLE-Deprecation sd:SLE-DeprecationInstance . 
+
+sd:SLRemovalInstance a bp:ServiceLevelRemoval;
+bp:hasSLE-Removal sd:SLE-RemovalInstance . 
+
+sd:SLE-DeprecationInstance a bp:SLE-Deprecation;
+bp:hasVariableDeprecation sd:VarDeprecationInstance .  
+
+sd:SLE-RemovalInstance a bp:SLE-Removal;
+bp:hasVariableRemoval sd:VarRemovalInstance .  
+
+sd:VarDeprecationInstance a bp:VarDeprecationTimescale;
+bp:hasDefaultDeprecationTimescale sd:DeprecationInstanceValue. 
+
+sd:VarRemovalInstance a bp:VarRemovalTimescale;
+bp:hasDefaultRemovalTimescale sd:RemovalInstanceValue. 
+
+sd:DeprecationInstanceValue rdf:type bp:AllowedDeprecationTimescaleValue;
+	rdfs:label "Deprecation timescale for this SD is 30 days";
+	gr:hasUnitOfMeasurement "days"^^xsd:string;
+	gr:hasValueFloat "30"^^xsd:float. 
+
+sd:RemovalInstanceValue rdf:type bp:AllowedRemovalTimescaleValue;
+	rdfs:label "Removal timescale for this SD is 50 days";
+	gr:hasUnitOfMeasurement "days"^^xsd:string;
+	gr:hasValueFloat "50"^^xsd:float. 
+

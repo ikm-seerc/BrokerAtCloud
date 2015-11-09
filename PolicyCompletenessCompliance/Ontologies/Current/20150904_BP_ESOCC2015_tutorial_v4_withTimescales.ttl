@@ -808,3 +808,103 @@ bp:Full_Accessibility
   a bp:Accessibility ; 
   rdfs:label "All accessibility features are supported."@en . 
   
+bp:AllowedRemovalTimescaleValue
+        rdfs:subClassOf             gr:QuantitativeValueFloat ;
+        gr:hasMaxValueFloat         "100"^^xsd:float ;
+        gr:hasMinValueFloat         "10"^^xsd:float ;
+        gr:hasUnitOfMeasurement     "days"^^xsd:string ;
+        usdl-core-cb:higherIsBetter  true ;
+        usdl-core-cb:isRange         false .
+
+bp:AllowedDeprecationTimescaleValue
+        rdfs:subClassOf             gr:QuantitativeValueFloat ;
+        gr:hasMaxValueFloat         "100"^^xsd:float ;
+        gr:hasMinValueFloat         "10"^^xsd:float ;
+        gr:hasUnitOfMeasurement     "days"^^xsd:string ;
+        usdl-core-cb:higherIsBetter  true ;
+        usdl-core-cb:isRange         false .
+
+bp:AllowedRemovalTimescaleValueRange 
+  a bp:AllowedRemovalTimescaleValue ; 
+  rdfs:label "Amount of working containers able to handle execution load of the service"@en ; 
+  gr:hasMaxValueFloat         "100"^^xsd:float ;
+  gr:hasMinValueFloat         "10"^^xsd:float ;
+  gr:hasValueFloat            "10"^^xsd:float ;		# default
+  gr:hasUnitOfMeasurement     "days"^^xsd:string .
+
+bp:AllowedDeprecationTimescaleValueRange 
+  a bp:AllowedDeprecationTimescaleValue ; 
+  rdfs:label "Amount of working containers able to handle execution load of the service"@en ; 
+  gr:hasMaxValueFloat         "100"^^xsd:float ;
+  gr:hasMinValueFloat         "10"^^xsd:float ;
+  gr:hasValueFloat            "10"^^xsd:float ;		# default
+  gr:hasUnitOfMeasurement     "days"^^xsd:string .
+
+bp:hasRemovalTimescale
+        rdfs:domain         bp:BrokerAtCloudESOCC2015TutorialBrokerPolicyModel ;
+        rdfs:label          "Removal timescale"@en ;
+        rdfs:range          bp:AllowedRemovalTimescaleValue ;
+        rdfs:subPropertyOf  gr:quantitativeProductOrServiceProperty .
+
+bp:hasDeprecationTimescale
+        rdfs:domain         bp:BrokerAtCloudESOCC2015TutorialBrokerPolicyModel ;
+        rdfs:label          "Deprecation timescale"@en ;
+        rdfs:range          bp:AllowedDeprecationTimescaleValue ;
+        rdfs:subPropertyOf  gr:quantitativeProductOrServiceProperty .
+
+bp:VarDeprecationTimescale rdfs:subClassOf usdl-sla:Variable .
+
+bp:VarRemovalTimescale rdfs:subClassOf usdl-sla:Variable .
+
+bp:hasVariableDeprecation rdfs:subPropertyOf usdl-sla:hasVariable; 
+	rdfs:domain bp:SLE-Deprecation;
+	rdfs:range bp:VarDeprecationTimescale.
+	
+bp:hasVariableRemoval rdfs:subPropertyOf usdl-sla:hasVariable; 
+	rdfs:domain bp:SLE-Removal;
+	rdfs:range bp:VarRemovalTimescale.
+	
+bp:hasDefaultDeprecationTimescale  rdfs:subPropertyOf usdl-sla-cb:hasDefaultQuantitativeValue;
+	rdfs:domain bp:VarDeprecationTimescale ;
+	rdfs:range bp:AllowedDeprecationTimescaleValue.
+
+bp:hasDefaultRemovalTimescale  rdfs:subPropertyOf usdl-sla-cb:hasDefaultQuantitativeValue;
+	rdfs:domain bp:VarRemovalTimescale ;
+	rdfs:range bp:AllowedRemovalTimescaleValue.
+
+bp:ServiceLevelDeprecation rdfs:subClassOf usdl-sla:ServiceLevel .
+
+bp:ServiceLevelRemoval rdfs:subClassOf usdl-sla:ServiceLevel .
+
+bp:SLE-Deprecation rdfs:subClassOf usdl-sla:ServiceLevelExpression . 
+
+bp:SLE-Removal rdfs:subClassOf usdl-sla:ServiceLevelExpression . 
+
+bp:VarDeprecationTimescale rdfs:subClassOf usdl-sla:Variable .
+
+bp:VarRemovalTimescale rdfs:subClassOf usdl-sla:Variable .
+
+bp:hasServiceLevelDeprecation rdfs:subPropertyOf usdl-sla:hasServiceLevel;
+	rdfs:domain bp:BrokerAtCloudESOCC2015TutorialServiceLevelProfile;
+	rdfs:range bp:ServiceLevelDeprecation.
+	
+bp:hasServiceLevelRemoval rdfs:subPropertyOf usdl-sla:hasServiceLevel;
+	rdfs:domain bp:BrokerAtCloudESOCC2015TutorialServiceLevelProfile;
+	rdfs:range bp:ServiceLevelRemoval.
+	
+bp:hasSLE-Deprecation rdfs:subPropertyOf usdl-sla:hasServiceLevelExpression;
+	rdfs:domain bp:ServiceLevelDeprecation;
+	rdfs:range bp:SLE-Deprecation.
+	
+bp:hasSLE-Removal rdfs:subPropertyOf usdl-sla:hasServiceLevelExpression;
+	rdfs:domain bp:ServiceLevelRemoval;
+	rdfs:range bp:SLE-Removal.
+
+bp:hasVariableDeprecation rdfs:subPropertyOf usdl-sla:hasVariable; 
+	rdfs:domain bp:SLE-Deprecation;
+	rdfs:range bp:VarDeprecationTimescale.
+	
+bp:hasVariableRemoval rdfs:subPropertyOf usdl-sla:hasVariable; 
+	rdfs:domain bp:SLE-Removal;
+	rdfs:range bp:VarRemovalTimescale.
+	
