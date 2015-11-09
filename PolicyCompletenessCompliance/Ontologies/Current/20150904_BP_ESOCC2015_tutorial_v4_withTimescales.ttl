@@ -829,7 +829,7 @@ bp:AllowedRemovalTimescaleValueRange
   rdfs:label "Amount of working containers able to handle execution load of the service"@en ; 
   gr:hasMaxValueFloat         "100"^^xsd:float ;
   gr:hasMinValueFloat         "10"^^xsd:float ;
-  gr:hasValueFloat            "10"^^xsd:float ;		# default
+  gr:hasValueFloat            "10"^^xsd:float ;
   gr:hasUnitOfMeasurement     "days"^^xsd:string .
 
 bp:AllowedDeprecationTimescaleValueRange 
@@ -837,7 +837,7 @@ bp:AllowedDeprecationTimescaleValueRange
   rdfs:label "Amount of working containers able to handle execution load of the service"@en ; 
   gr:hasMaxValueFloat         "100"^^xsd:float ;
   gr:hasMinValueFloat         "10"^^xsd:float ;
-  gr:hasValueFloat            "10"^^xsd:float ;		# default
+  gr:hasValueFloat            "10"^^xsd:float ;
   gr:hasUnitOfMeasurement     "days"^^xsd:string .
 
 bp:hasRemovalTimescale
