@@ -46,9 +46,9 @@ import com.hp.hpl.jena.util.FileManager;
 public class PolicyCompletenessCompliance {
 
 	//private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
-	protected static final Object[] brokerPolicyResources = {"Ontologies/Current/20150904_BP_ESOCC2015_tutorial_v3.ttl"};
+	protected static final Object[] brokerPolicyResources = {"Ontologies/Current/CASBrokerPolicyWithTimescales.ttl"};
 	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
-	protected static final Object[] serviceDescriptionResources = {"Ontologies/Current/20150904_BP_ESOCC2015_tutorial_v3_SD_example.ttl"};
+	protected static final Object[] serviceDescriptionResources = {"Ontologies/Current/CASAddressApp1WithTimescales.ttl"};
 	
 	protected static final Object[] brokerPolicyStressTestResources = {"Ontologies/ForStressTest/CAS-broker-policies-minimal-final_AF.ttl", "Ontologies/ForStressTest/CAS-Service-Level-Profile-silver_AF.ttl", "Ontologies/ForStressTest/CAS-functional-categories-v2_AF.ttl"};
 	protected static final Object[] serviceDescriptionStressTestResources = {"Ontologies/ForStressTest/CAS-AddressAppSM-minimal-final_AF.ttl"};
@@ -1827,10 +1827,10 @@ public class PolicyCompletenessCompliance {
 			// get all instances of this QV, including those in SD
 			RDFNode[] qvInstances = oneVarManySolutionsQuery("{?var rdf:type <" + qv.getUri() + ">}");
 			// is this QV a range?
-			Integer isRangeCount = countQuery("{<" + qv.getUri() + "> <" + USDL_CORE_CB + "isRange> ?var}");
+			RDFNode isRange = oneVarOneSolutionQuery("{<" + qv.getUri() + "> <" + USDL_CORE_CB + "isRange> ?var}");
 			for(RDFNode qvInstance:qvInstances)
 			{	// for every QV instance
-				if(isRangeCount !=0)
+				if(isRange != null && Boolean.valueOf(isRange.asLiteral().getBoolean()))
 				{	// it's range
 					if(this.bp.getQuantitativeValueIntegerMap().containsKey(qv.getUri()))
 					{	// integer range

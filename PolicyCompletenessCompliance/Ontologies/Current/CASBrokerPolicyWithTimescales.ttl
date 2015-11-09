@@ -759,7 +759,7 @@ cas:AllowedAvailabilityValue
         gr:hasUnitOfMeasurement     "P1"^^xsd:string ;
         cas:measuredBy              cas:Monitoring ;
         usdl-core-cb:higherIsBetter  true ;
-        usdl-core-cb:isRange         false .
+        usdl-core-cb:isRange         true .
 
 cas:AllowedRemovalTimescaleValue
         rdfs:subClassOf             gr:QuantitativeValueFloat ;
@@ -1104,7 +1104,7 @@ cas:DeprecationMedium rdf:type cas:AllowedDeprecationTimescaleValue;
 cas:DeprecationShort rdf:type cas:AllowedDeprecationTimescaleValue;
 	rdfs:label "Short deprecation timescale for apps is 10 days";
 	gr:hasUnitOfMeasurement "days"^^xsd:string;
-	gr:hasMaxValueFloat "10"^^xsd:float. 
+	gr:hasValueFloat "10"^^xsd:float. 
 
 cas:RemovalLong rdf:type cas:AllowedRemovalTimescaleValue;
 	rdfs:label "Long removal timescale for apps is between 40 days";
