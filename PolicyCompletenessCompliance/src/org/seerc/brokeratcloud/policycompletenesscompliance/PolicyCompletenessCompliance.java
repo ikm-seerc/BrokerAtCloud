@@ -46,9 +46,9 @@ import com.hp.hpl.jena.util.FileManager;
 public class PolicyCompletenessCompliance {
 
 	//private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
-	protected static final Object[] brokerPolicyResources = {"Ontologies/Current/20150904_BP_ESOCC2015_tutorial_v4.ttl"};
+	protected static final Object[] brokerPolicyResources = {"Ontologies/Current/20150904_BP_ESOCC2015_tutorial_v4_withTimescales.ttl"};
 	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
-	protected static final Object[] serviceDescriptionResources = {"Ontologies/Current/20150904_BP_ESOCC2015_tutorial_v4_sd_example.ttl"};
+	protected static final Object[] serviceDescriptionResources = {"Ontologies/Current/20150904_BP_ESOCC2015_tutorial_v4_sd_withTimescales.ttl"};
 	
 	protected static final Object[] brokerPolicyStressTestResources = {"Ontologies/ForStressTest/CAS-broker-policies-minimal-final_AF.ttl", "Ontologies/ForStressTest/CAS-Service-Level-Profile-silver_AF.ttl", "Ontologies/ForStressTest/CAS-functional-categories-v2_AF.ttl"};
 	protected static final Object[] serviceDescriptionStressTestResources = {"Ontologies/ForStressTest/CAS-AddressAppSM-minimal-final_AF.ttl"};
