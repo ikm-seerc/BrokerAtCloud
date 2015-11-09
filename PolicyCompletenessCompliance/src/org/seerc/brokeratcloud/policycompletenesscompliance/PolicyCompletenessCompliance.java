@@ -46,9 +46,9 @@ import com.hp.hpl.jena.util.FileManager;
 public class PolicyCompletenessCompliance {
 
 	//private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
-	protected static final Object[] brokerPolicyResources = {"Ontologies/Current/20150904_BP_ESOCC2015_tutorial_v4_withTimescales.ttl"};
+	protected static final Object[] brokerPolicyResources = {"Ontologies/Current/CASBrokerPolicyWithTimescales.ttl"};
 	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
-	protected static final Object[] serviceDescriptionResources = {"Ontologies/Current/20150904_BP_ESOCC2015_tutorial_v4_sd_withTimescales.ttl"};
+	protected static final Object[] serviceDescriptionResources = {"Ontologies/Current/CASAddressApp1WithTimescales.ttl"};
 	
 	protected static final Object[] brokerPolicyStressTestResources = {"Ontologies/ForStressTest/CAS-broker-policies-minimal-final_AF.ttl", "Ontologies/ForStressTest/CAS-Service-Level-Profile-silver_AF.ttl", "Ontologies/ForStressTest/CAS-functional-categories-v2_AF.ttl"};
 	protected static final Object[] serviceDescriptionStressTestResources = {"Ontologies/ForStressTest/CAS-AddressAppSM-minimal-final_AF.ttl"};
@@ -1192,7 +1192,7 @@ public class PolicyCompletenessCompliance {
 		}
 	}
 	
-	public void checkCorrectIntegerDeclaration(String integerClassUri, String relationToLookFor) throws BrokerPolicyException {
+	public int checkCorrectIntegerDeclaration(String integerClassUri, String relationToLookFor) throws BrokerPolicyException {
 		String subClassOf = "gr:QuantitativeValueInteger";
 		XSDDatatype datatypeToLookFor = XSDDatatype.XSDinteger;
 		
@@ -1200,14 +1200,14 @@ public class PolicyCompletenessCompliance {
 				relationToLookFor, subClassOf, datatypeToLookFor);
 		
 		try {
-			valueNode.asLiteral().getInt();
+			return valueNode.asLiteral().getInt();
 		} catch (DatatypeFormatException e) {
 			writeMessageToComplianceReport("For " + subClassOf + " URI: " + integerClassUri + " property " + relationToLookFor + " must be associated with " + datatypeToLookFor.getURI() + " value");
 			throw new BrokerPolicyException("For " + subClassOf + " URI: " + integerClassUri + " property " + relationToLookFor + " must be associated with " + datatypeToLookFor.getURI() + " value");
 		}
 	}
 	
-	public void checkCorrectFloatDeclaration(String floatClassUri, String relationToLookFor) throws BrokerPolicyException {
+	public float checkCorrectFloatDeclaration(String floatClassUri, String relationToLookFor) throws BrokerPolicyException {
 		String subClassOf = "gr:QuantitativeValueFloat";
 		XSDDatatype datatypeToLookFor = XSDDatatype.XSDfloat;
 		
@@ -1215,7 +1215,7 @@ public class PolicyCompletenessCompliance {
 				relationToLookFor, subClassOf, datatypeToLookFor);
 		
 		try {
-			valueNode.asLiteral().getFloat();
+			return valueNode.asLiteral().getFloat();
 		} catch (DatatypeFormatException e) {
 			writeMessageToComplianceReport("For " + subClassOf + " URI: " + floatClassUri + " property " + relationToLookFor + " must be associated with " + datatypeToLookFor.getURI() + " value");
 			throw new BrokerPolicyException("For " + subClassOf + " URI: " + floatClassUri + " property " + relationToLookFor + " must be associated with " + datatypeToLookFor.getURI() + " value");
@@ -1841,14 +1841,26 @@ public class PolicyCompletenessCompliance {
 							throw new CompletenessException("QV instance " + qvInstance.toString() + " is integer range and does not declare hasMinValueInteger.");
 						}
 						
+						Integer declaredInteger = null;
+						
 						try {
-							checkCorrectIntegerDeclaration(qvInstance.toString(), "gr:hasMinValueInteger");
+							declaredInteger = checkCorrectIntegerDeclaration(qvInstance.toString(), "gr:hasMinValueInteger");
 						} catch (BrokerPolicyException e) {
 							e.printStackTrace();
 							throw new CompletenessException(e.getMessage());
 						}
 						writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " is integer range and declares hasMinValueInteger " + hasMinValueInteger.toString() + ".");
 						
+						if(this.qvIsInRange(qv.getUri(), Float.valueOf(declaredInteger)))
+						{
+							writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " declares value " + declaredInteger.toString() + " which is within range.");
+						}
+						else
+						{
+							writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " declares value " + declaredInteger.toString() + " which is outside range.");												
+							throw new CompletenessException("QV instance " + qvInstance.toString() + " declares value " + declaredInteger.toString() + " which is outside range.");
+						}
+
 						RDFNode hasMaxValueInteger = oneVarOneSolutionQuery("{<" + qvInstance.toString() + "> <" + GR + "hasMaxValueInteger> ?var}");
 						if(hasMaxValueInteger == null)
 						{
@@ -1857,13 +1869,22 @@ public class PolicyCompletenessCompliance {
 						}
 						
 						try {
-							checkCorrectIntegerDeclaration(qvInstance.toString(), "gr:hasMaxValueInteger");
+							declaredInteger = checkCorrectIntegerDeclaration(qvInstance.toString(), "gr:hasMaxValueInteger");
 						} catch (BrokerPolicyException e) {
 							e.printStackTrace();
 							throw new CompletenessException(e.getMessage());
 						}
 						writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " is integer range and declares hasMaxValueInteger " + hasMaxValueInteger.toString() + ".");
 
+						if(this.qvIsInRange(qv.getUri(), Float.valueOf(declaredInteger)))
+						{
+							writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " declares value " + declaredInteger.toString() + " which is within range.");
+						}
+						else
+						{
+							writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " declares value " + declaredInteger.toString() + " which is outside range.");												
+							throw new CompletenessException("QV instance " + qvInstance.toString() + " declares value " + declaredInteger.toString() + " which is outside range.");
+						}
 					}
 					else
 					{	// float range
@@ -1874,14 +1895,26 @@ public class PolicyCompletenessCompliance {
 							throw new CompletenessException("QV instance " + qvInstance.toString() + " is float range and does not declare hasMinValueFloat.");
 						}
 						
+						Float declaredFloat = null;
+						
 						try {
-							checkCorrectFloatDeclaration(qvInstance.toString(), "gr:hasMinValueFloat");
+							declaredFloat = checkCorrectFloatDeclaration(qvInstance.toString(), "gr:hasMinValueFloat");
 						} catch (BrokerPolicyException e) {
 							e.printStackTrace();
 							throw new CompletenessException(e.getMessage());
 						}
 						writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " is float range and declares hasMinValueFloat " + hasMinValueFloat.toString() + ".");
 						
+						if(this.qvIsInRange(qv.getUri(), declaredFloat))
+						{
+							writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " declares value " + declaredFloat.toString() + " which is within range.");
+						}
+						else
+						{
+							writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " declares value " + declaredFloat.toString() + " which is outside range.");												
+							throw new CompletenessException("QV instance " + qvInstance.toString() + " declares value " + declaredFloat.toString() + " which is outside range.");
+						}
+
 						RDFNode hasMaxValueFloat = oneVarOneSolutionQuery("{<" + qvInstance.toString() + "> <" + GR + "hasMaxValueFloat> ?var}");
 						if(hasMaxValueFloat == null)
 						{
@@ -1890,13 +1923,22 @@ public class PolicyCompletenessCompliance {
 						}
 						
 						try {
-							checkCorrectFloatDeclaration(qvInstance.toString(), "gr:hasMaxValueFloat");
+							declaredFloat = checkCorrectFloatDeclaration(qvInstance.toString(), "gr:hasMaxValueFloat");
 						} catch (BrokerPolicyException e) {
 							e.printStackTrace();
 							throw new CompletenessException(e.getMessage());
 						}
 						writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " is float range and declares hasMaxValueFloat " + hasMaxValueFloat.toString() + ".");
 						
+						if(this.qvIsInRange(qv.getUri(), declaredFloat))
+						{
+							writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " declares value " + declaredFloat.toString() + " which is within range.");
+						}
+						else
+						{
+							writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " declares value " + declaredFloat.toString() + " which is outside range.");												
+							throw new CompletenessException("QV instance " + qvInstance.toString() + " declares value " + declaredFloat.toString() + " which is outside range.");
+						}
 					}
 				}
 				else
@@ -1910,13 +1952,25 @@ public class PolicyCompletenessCompliance {
 							throw new CompletenessException("QV instance " + qvInstance.toString() + " is integer value and does not declare hasValueInteger.");
 						}
 						
+						Integer declaredInteger = null;
+						
 						try {
-							checkCorrectIntegerDeclaration(qvInstance.toString(), "gr:hasValueInteger");
+							declaredInteger = checkCorrectIntegerDeclaration(qvInstance.toString(), "gr:hasValueInteger");
 						} catch (BrokerPolicyException e) {
 							e.printStackTrace();
 							throw new CompletenessException(e.getMessage());
 						}
-						writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " is integer value and declares hasValueInteger " + hasValueInteger.toString() + ".");						
+						writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " is integer value and declares hasValueInteger " + hasValueInteger.toString() + ".");
+						
+						if(this.qvIsInRange(qv.getUri(), Float.valueOf(declaredInteger)))
+						{
+							writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " declares value " + declaredInteger.toString() + " which is within range.");
+						}
+						else
+						{
+							writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " declares value " + declaredInteger.toString() + " which is outside range.");												
+							throw new CompletenessException("QV instance " + qvInstance.toString() + " declares value " + declaredInteger.toString() + " which is outside range.");
+						}
 					}
 					else
 					{	// float value
@@ -1927,13 +1981,25 @@ public class PolicyCompletenessCompliance {
 							throw new CompletenessException("QV instance " + qvInstance.toString() + " is float value and does not declare hasValueFloat.");
 						}
 						
+						Float declaredFloat = null;
+						
 						try {
-							checkCorrectFloatDeclaration(qvInstance.toString(), "gr:hasValueFloat");
+							declaredFloat = checkCorrectFloatDeclaration(qvInstance.toString(), "gr:hasValueFloat");
 						} catch (BrokerPolicyException e) {
 							e.printStackTrace();
 							throw new CompletenessException(e.getMessage());
 						}
 						writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " is float value and declares hasValueFloat " + hasValueFloat.toString() + ".");												
+						
+						if(this.qvIsInRange(qv.getUri(), declaredFloat))
+						{
+							writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " declares value " + declaredFloat.toString() + " which is within range.");
+						}
+						else
+						{
+							writeMessageToCompletenessReport("QV instance " + qvInstance.toString() + " declares value " + declaredFloat.toString() + " which is outside range.");												
+							throw new CompletenessException("QV instance " + qvInstance.toString() + " declares value " + declaredFloat.toString() + " which is outside range.");
+						}
 					}
 				}				
 			}
