@@ -23,13 +23,13 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 import com.google.gson.Gson;
 
-public class SDEvaluationListener extends AbstractSDEvaluationListener {
-	
+public class SDUpdateListener extends AbstractSDEvaluationListener{
+
 	@Override
 	public void onMessage(Message message) {
 		try {
 			// message received from PubSub
-			System.out.println("SDEvaluationListener received the message with ID==> "
+			System.out.println("SDUpdateListener received the message with ID==> "
 					+ message.getJMSMessageID());
 			
 			// (re)instantiate evaluation report object
@@ -47,7 +47,6 @@ public class SDEvaluationListener extends AbstractSDEvaluationListener {
 			// The SD as an InpuStream
 			InputStream sdis=new ByteArrayInputStream(((ByteArrayOutputStream) bOutput).toByteArray());
 			
-			// First send the SD to Registry using the RegistryRepositorySDListener
 			// the service instance URI
 			URI siUri = null;
 			try {
@@ -63,26 +62,18 @@ public class SDEvaluationListener extends AbstractSDEvaluationListener {
 			// reset stream to reuse it
 			sdis.reset();
 			
-			// flag to indicate whether this is an update or a creation of service
-			//boolean serviceUpdated = false;
-			
 			InputStream currentSD = null;
 			
-			if(this.wso2gregClient.getRemote_registry().resourceExists(pathToPutSiUri))
-			{	// resource exists, throw CompletenessException
-				System.out.println("An SD with namespace " + siUri + " already exists.");
-				throw new CompletenessException("An SD with namespace " + siUri + " already exists.");
-				
-				//this.wso2gregClient.getRemote_registry().delete(pathToPutSiUri);
-				
-				//currentSD = this.wso2gregClient.getRemote_registry().get(pathToPutSiUri).getContentStream();
-
-				// this is a service update
-				//serviceUpdated = true;
+			if(!this.wso2gregClient.getRemote_registry().resourceExists(pathToPutSiUri))
+			{	// resource does not exist, throw CompletenessException
+				System.out.println("An SD with namespace " + siUri + " does not exist.");
+				throw new CompletenessException("An SD with namespace " + siUri + " does not exist.");
 			}
 			
+			currentSD = this.wso2gregClient.getRemote_registry().get(pathToPutSiUri).getContentStream();
+
 			// send SD to Registry Repository
-			System.out.println("Sending received SD to repository at " + pathToPutSiUri);
+			System.out.println("Sending updated SD to repository at " + pathToPutSiUri);
 			
 			Resource sdResource = this.wso2gregClient.getRemote_registry().newResource();
 			sdResource.setContentStream(sdis);
@@ -119,22 +110,15 @@ public class SDEvaluationListener extends AbstractSDEvaluationListener {
 			sdis.reset();
 
 			// send to Fuseki
-			System.out.println("Evaluation went OK, sending received SD to Fuseki and generating lifecycle events.");
-			/*if(serviceUpdated)
-			{
-				// delete old from Fuseki
-				fc.deleteInputStreamFromFuseki(currentSD);
-			}*/
+			System.out.println("Evaluation went OK, sending updated SD to Fuseki and generating lifecycle events.");
+			// delete old from Fuseki
+			fc.deleteInputStreamFromFuseki(currentSD);
+
+			// add current to Fuseki
 			fc.addInputStreamToFuseki(sdis);
 			
-			/*if(serviceUpdated)
-			{	// update of service
-				this.slp.serviceUpdated(siUri.toString());
-			}
-			else
-			{*/	// creation of service
-				this.slp.serviceOnboarded(siUri.toString());
-			//}
+			// update of service
+			this.slp.serviceUpdated(siUri.toString());
 			
 			bOutput.close(); // close ByteArrayOutputStream
 		} catch (JMSException e) {

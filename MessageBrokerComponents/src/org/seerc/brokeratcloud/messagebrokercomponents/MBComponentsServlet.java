@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServlet;
 import org.seerc.brokeratcloud.messagebroker.EvaluationComponentSDSubscriber;
 import org.seerc.brokeratcloud.messagebroker.OutOfRangeSLAViolationChecker;
 import org.seerc.brokeratcloud.messagebroker.RegistryRepositoryTopicSubscriber;
+import org.seerc.brokeratcloud.messagebroker.SDUpdateSubscriber;
 import org.seerc.brokeratcloud.messagebroker.VttsPubSubBridge;
 import org.seerc.brokeratcloud.messagebroker.WSO2GREGClient;
 import org.wso2.carbon.registry.core.Collection;
@@ -38,6 +39,7 @@ public class MBComponentsServlet extends HttpServlet {
 		}
 		RegistryRepositoryTopicSubscriber.main(null);
 		EvaluationComponentSDSubscriber.main(null);
+		SDUpdateSubscriber.main(null);
 		OutOfRangeSLAViolationChecker.main(null);
 		
         try {
