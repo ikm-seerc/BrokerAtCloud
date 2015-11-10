@@ -1,9 +1,9 @@
 package org.seerc.brokeratcloud.messagebroker;
 
-public class SDDeprecateListener extends AbstractSDLifecycleListener {
+public class SDRemoveListener extends AbstractSDLifecycleListener {
 
 	@Override
 	protected void performLifecycleEventForService(String serviceID) {
-		slp.serviceDeprecated(serviceID);
+		slp.serviceRemoved(serviceID);
 	}
 }
