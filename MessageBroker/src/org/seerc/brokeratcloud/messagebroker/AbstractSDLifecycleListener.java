@@ -53,6 +53,7 @@ public abstract class AbstractSDLifecycleListener implements MessageListener{
 			
 			// TODO: Convert InputStream to String and use the service instance URI to inform about deprecation event
 			String serviceID = "";
+			// TODO: first check if service exists, if not inform who?
 			performLifecycleEventForService(serviceID);
 			
 			bOutput.close(); // close ByteArrayOutputStream
