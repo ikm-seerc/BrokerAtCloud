@@ -106,23 +106,26 @@ public class SDEvaluationListener implements MessageListener {
 			// reset stream to reuse it
 			sdis.reset();
 			
-			// send SD to Registry Repository
-			System.out.println("Sending received SD to repository at " + pathToPutSiUri);
-			
 			// flag to indicate whether this is an update or a creation of service
-			boolean serviceUpdated = false;
+			//boolean serviceUpdated = false;
 			
 			InputStream currentSD = null;
 			
 			if(this.wso2gregClient.getRemote_registry().resourceExists(pathToPutSiUri))
-			{	// resource exists, do not delete it from GReg, putWithRetryHack() should overcome this
+			{	// resource exists, throw CompletenessException
+				System.out.println("An SD with namespace " + siUri + " already exists.");
+				throw new CompletenessException("An SD with namespace " + siUri + " already exists.");
+				
 				//this.wso2gregClient.getRemote_registry().delete(pathToPutSiUri);
 				
-				currentSD = this.wso2gregClient.getRemote_registry().get(pathToPutSiUri).getContentStream();
+				//currentSD = this.wso2gregClient.getRemote_registry().get(pathToPutSiUri).getContentStream();
 
 				// this is a service update
-				serviceUpdated = true;
+				//serviceUpdated = true;
 			}
+			
+			// send SD to Registry Repository
+			System.out.println("Sending received SD to repository at " + pathToPutSiUri);
 			
 			Resource sdResource = this.wso2gregClient.getRemote_registry().newResource();
 			sdResource.setContentStream(sdis);
@@ -160,21 +163,21 @@ public class SDEvaluationListener implements MessageListener {
 
 			// send to Fuseki
 			System.out.println("Evaluation went OK, sending received SD to Fuseki and generating lifecycle events.");
-			if(serviceUpdated)
+			/*if(serviceUpdated)
 			{
 				// delete old from Fuseki
 				fc.deleteInputStreamFromFuseki(currentSD);
-			}
+			}*/
 			fc.addInputStreamToFuseki(sdis);
 			
-			if(serviceUpdated)
+			/*if(serviceUpdated)
 			{	// update of service
 				this.slp.serviceUpdated(siUri.toString());
 			}
 			else
-			{	// creation of service
+			{*/	// creation of service
 				this.slp.serviceOnboarded(siUri.toString());
-			}
+			//}
 			
 			bOutput.close(); // close ByteArrayOutputStream
 		} catch (JMSException e) {
