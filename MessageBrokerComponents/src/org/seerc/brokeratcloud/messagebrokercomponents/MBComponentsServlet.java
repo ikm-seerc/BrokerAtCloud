@@ -41,9 +41,9 @@ public class MBComponentsServlet extends HttpServlet {
 		}
 		RegistryRepositoryTopicSubscriber.main(null);
 		EvaluationComponentSDSubscriber.main(null);
-		SDUpdateSubscriber.main(null);
-		SDDeprecateSubscriber.main(null);
-		SDRemoveSubscriber.main(null);
+		//SDUpdateSubscriber.main(null);
+		//SDDeprecateSubscriber.main(null);
+		//SDRemoveSubscriber.main(null);
 		OutOfRangeSLAViolationChecker.main(null);
 		
         try {

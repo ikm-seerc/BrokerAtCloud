@@ -79,7 +79,7 @@ public class BrokerPolicyValidator {
 		}
 	}
 	
-	@PUT
+	/*@PUT
 	@Path("/update")
 	public String updateBP(String bpContents) throws RegistryException, URISyntaxException, IOException, BrokerPolicyException
 	{
@@ -112,6 +112,6 @@ public class BrokerPolicyValidator {
 		{
 			return validationResult;
 		}
-	}
+	}*/
 	
 }
