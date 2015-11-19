@@ -61,7 +61,50 @@ public class BrokerPolicyValidator {
 			Resource resource = this.greg.getRemote_registry().newResource();
 			resource.setMediaType("text/plain");
 			resource.setContent(bpContents);
-			this.greg.putWithRetryHack(WSO2GREGClient.getBrokerPoliciesFolder() + WSO2GREGClient.createNameFromUri(new URI(bpInstanceUri)) + ".ttl", resource);
+			String pathToPutBP = WSO2GREGClient.getBrokerPoliciesFolder() + WSO2GREGClient.createNameFromUri(new URI(bpInstanceUri)) + ".ttl";
+			if(greg.getRemote_registry().resourceExists(pathToPutBP))
+			{	// BP exists, throw exception
+				throw new BrokerPolicyException("A Broker Policy with instance URI " + bpInstanceUri + " already exists.");
+			}
+			else
+			{
+				this.greg.putWithRetryHack(pathToPutBP, resource);
+			}
+
+			return "OK";
+		}
+		else 
+		{
+			return validationResult;
+		}
+	}
+	
+	@PUT
+	@Path("/update")
+	public String updateBP(String bpContents) throws RegistryException, URISyntaxException, IOException, BrokerPolicyException
+	{
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+		String validationResult = this.validateBP(bpContents);
+		if(validationResult.equals("OK"))
+		{
+			Resource resourceForName = this.greg.getRemote_registry().newResource();
+			resourceForName.setMediaType("text/plain");
+			resourceForName.setContent(bpContents);
+			String bpInstanceUri = pcc.getBPInstanceUri(resourceForName.getContentStream());
+
+			//resource.getContentStream().reset();
+			Resource resource = this.greg.getRemote_registry().newResource();
+			resource.setMediaType("text/plain");
+			resource.setContent(bpContents);
+			String pathToPutBP = WSO2GREGClient.getBrokerPoliciesFolder() + WSO2GREGClient.createNameFromUri(new URI(bpInstanceUri)) + ".ttl";
+			if(!greg.getRemote_registry().resourceExists(pathToPutBP))
+			{	// BP exists, throw exception
+				throw new BrokerPolicyException("A Broker Policy with instance URI " + bpInstanceUri + " could not be found.");
+			}
+			else
+			{
+				this.greg.putWithRetryHack(pathToPutBP, resource);
+			}
 
 			return "OK";
 		}
