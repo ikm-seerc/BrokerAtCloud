@@ -1241,12 +1241,48 @@ public class PolicyCompletenessCompliance {
 					throw new BrokerPolicyException(bpInstance + " declares a validFrom property (" + validFrom + ") which is not after validFrom of succeeded BP (" + validFromOfSucceeded + ").");
 				}
 				
+				/*
+				 For any k > 1, if both validThrough(BP k−1 ) and validThrough(BP k ) are
+				 defined, then validThrough(BP k )> validThrough(BP k−1 ) (i.e. the
+				 validThrough date of a successor BP must be greater than the validThrough
+				 date of the BP it succeeds).
+				 */
+				// reset it to get a new, open stream
+				succeededBP = this.getBPByInstance(succeeddedBPInstance);
+				validThroughOfSucceeded = this.getValidThrough(succeededBP, succeeddedBPInstance);
+				if(validThrough != null && validThroughOfSucceeded != null && !validThrough.after(validThroughOfSucceeded))
+				{
+					writeMessageToBrokerPolicyReport(bpInstance + " declares a validThrough property (" + validThrough + ") which is not after validThrough of succeeded BP (" + validThroughOfSucceeded + ").");
+					throw new BrokerPolicyException(bpInstance + " declares a validThrough property (" + validThrough + ") which is not after validThrough of succeeded BP (" + validThroughOfSucceeded + ").");
+				}
+
 				int i=0;
 			}
 			
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private Date getValidThrough(InputStream stream, String instance) throws IOException 
+	{
+		// Find this in a new PolicyCompletenessCompliance object in order to not pollute current model with the added triples
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+		
+		// Initial Creation
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
+
+		// Add the BP into the Jena model
+		pcc.addDataToJenaModel(stream);
+
+		RDFNode validThrough = pcc.oneVarOneSolutionQuery("{<" + instance + "> usdl-core-cb:validThrough ?var}");
+		if(validThrough != null)
+		{
+			XSDDateTime date = (XSDDateTime) validThrough.asLiteral().getValue();
+			return date.asCalendar().getTime();
+		}
+		
+		return null;
 	}
 
 	private Date getValidFrom(InputStream stream, String instance) throws IOException 
