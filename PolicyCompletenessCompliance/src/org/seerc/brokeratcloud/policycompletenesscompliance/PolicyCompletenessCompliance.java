@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.output.TeeOutputStream;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -1134,11 +1135,50 @@ public class PolicyCompletenessCompliance {
 		writeMessageToBrokerPolicyReport("");
 	}
 
-	private void performBPLifecycleValidations()
+	private void performBPLifecycleValidations() throws BrokerPolicyException
 	{
+		RDFNode bpInstance = oneVarOneSolutionQuery("{?var a <" + bp.getServiceModelMap().keySet().iterator().next() + ">}");
 		boolean isTheFirstBP = false;
 		
 		WSO2GREGClient greg = new WSO2GREGClient();
+		
+		try {
+			// successorOf checks
+			int numberOfBPs = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(WSO2GREGClient.brokerPoliciesFolder)).getChildCount();
+			if(numberOfBPs == 0)
+			{
+				isTheFirstBP = true;
+			}
+			
+			if(isTheFirstBP)
+			{	// First BP should not have successorOf
+				if(this.hasSuccessorOf(bpInstance.toString()))
+				{
+					writeMessageToBrokerPolicyReport("Error - " + bpInstance + " is the first BP and it should not declare a successorOf property.");
+					throw new BrokerPolicyException(bpInstance + " is the first BP and it should not declare a successorOf property.");
+				}
+			}
+			else
+			{	// not first BP
+				
+			}
+			
+		} catch (RegistryException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private boolean hasSuccessorOf(String instance) 
+	{
+		int numOfSuccessors = countQuery("{<" + instance + "> gr:successorOf ?var}");
+		if(numOfSuccessors == 0)
+		{
+			return false;
+		}
+		else
+		{
+			return true;			
+		}
 	}
 
 	public boolean bpHasSLPInConnection() {
