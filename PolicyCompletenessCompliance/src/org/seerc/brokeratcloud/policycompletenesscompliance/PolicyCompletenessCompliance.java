@@ -1184,12 +1184,55 @@ public class PolicyCompletenessCompliance {
 					throw new BrokerPolicyException(bpInstance + " declares a successorOf " + successorBP + " but a BP with such an instance declared could not be found.");
 				}
 				
+				// No BP can be the object of a successorOf property of two or more BPs.
+				if(this.successorBPAlreadyExists(successorBP))
+				{
+					writeMessageToBrokerPolicyReport(bpInstance + " declares a successorOf " + successorBP + " but this is already declared as successor in another BP.");
+					throw new BrokerPolicyException(bpInstance + " declares a successorOf " + successorBP + " but this is already declared as successor in another BP.");
+				}
+				
 				int i=0;
 			}
 			
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean successorBPAlreadyExists(String successorBP) throws RegistryException, IOException, BrokerPolicyException
+	{
+		String[] bps = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(greg.brokerPoliciesFolder)).getChildren();
+		for(int i=0;i<bps.length;i++)
+		{
+			InputStream bp = greg.getRemote_registry().get(bps[i]).getContentStream();
+			String successorOf = this.getSuccessorOf(bp);
+			if(successorOf != null && successorOf.equals(successorBP))
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	private String getSuccessorOf(InputStream stream) throws IOException
+	{
+		// Find this in a new PolicyCompletenessCompliance object in order to not pollute current model with the added triples
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+		
+		// Initial Creation
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
+
+		// Add the BP into the Jena model
+		pcc.addDataToJenaModel(stream);
+
+		RDFNode successorOf = pcc.oneVarOneSolutionQuery("{?anyvalue gr:successorOf ?var}");
+		if(successorOf != null)
+		{
+			return successorOf.toString();
+		}
+		
+		return null;
 	}
 
 	private boolean checkBPInstanceExists(String successorBP) throws RegistryException, IOException, BrokerPolicyException
@@ -3187,19 +3230,19 @@ public class PolicyCompletenessCompliance {
 	/*
 	 * Returns the Service Model class URI from a BP
 	 */
-	public String getBPServiceModelURI(Object bpFileData) throws IOException, BrokerPolicyException 
+	private String getBPServiceModelURI(Object bpFileData, PolicyCompletenessCompliance pcc) throws IOException, BrokerPolicyException 
 	{
 		// Initial Creation
-		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
 
 		// Add the BP into the Jena model
-		addDataToJenaModel(bpFileData);
+		pcc.addDataToJenaModel(bpFileData);
 
 		String smc_uri;
 		
 		try
 		{
-			smc_uri = oneVarOneSolutionQuery("{?var rdfs:subClassOf usdl-core:ServiceModel}").toString(); // Service model class URI
+			smc_uri = pcc.oneVarOneSolutionQuery("{?var rdfs:subClassOf usdl-core:ServiceModel}").toString(); // Service model class URI
 		}
 		catch (Exception e) 
 		{
@@ -3241,15 +3284,19 @@ public class PolicyCompletenessCompliance {
 	 * Returns the URI of a BP instance
 	 */
 	public String getBPInstanceUri(InputStream bpFileData) throws IOException, BrokerPolicyException {
-		String bpServiceModelClassUri = this.getBPServiceModelURI(bpFileData);
 
-		// Data is already added to Jena Model from getBPServiceModelURI call
+		// Find this in a new PolicyCompletenessCompliance object in order to not pollute current model with the added triples
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+
+		String bpServiceModelClassUri = this.getBPServiceModelURI(bpFileData, pcc);
+		
+		// bpFileData are already added by getBPServiceModelURI
 
 		String bpi_uri;
 		
 		try
 		{
-			bpi_uri = oneVarOneSolutionQuery("{?var a <" + bpServiceModelClassUri + ">}").toString(); // BP instance URI
+			bpi_uri = pcc.oneVarOneSolutionQuery("{?var a <" + bpServiceModelClassUri + ">}").toString(); // BP instance URI
 		}
 		catch (Exception e) 
 		{
