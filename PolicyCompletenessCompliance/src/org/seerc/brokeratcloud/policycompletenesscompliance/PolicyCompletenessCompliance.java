@@ -1295,7 +1295,20 @@ public class PolicyCompletenessCompliance {
 			}
 			else
 			{	// not the first BP
-				
+				/*
+				For any k > 1, if validThrough(BP k−1 ) is defined and
+				validThrough(BP k−1 )>=validFrom(BP k ), then
+				deprecationOnBoardingTimePoint(BP k ) <= validThrough(BP k−1 ).
+				 */
+				deprecationOnBoardingTimePoint = this.getDeprecationOnBoardingTimePoint(bpInstance);
+				if((validThroughOfSucceeded != null) && (validThroughOfSucceeded.after(validFrom) || validThroughOfSucceeded.equals(validFrom)))
+				{
+					if(deprecationOnBoardingTimePoint.after(validThroughOfSucceeded))
+					{
+						writeMessageToBrokerPolicyReport(bpInstance + " declares a deprecationOnBoardingTimePoint ( " + deprecationOnBoardingTimePoint + ") which exceeds the expiration date of the succeeded BP (" + validThroughOfSucceeded + ") and the succeeded BP is due to expire at some point in the future that this BP will still be valid.");
+						throw new BrokerPolicyException(bpInstance + " declares a deprecationOnBoardingTimePoint ( " + deprecationOnBoardingTimePoint + ") which exceeds the expiration date of the succeeded BP (" + validThroughOfSucceeded + ") and the succeeded BP is due to expire at some point in the future that this BP will still be valid.");
+					}
+				}
 			}
 			
 			int i=0;
@@ -1303,6 +1316,18 @@ public class PolicyCompletenessCompliance {
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private Date getDeprecationOnBoardingTimePoint(RDFNode instance)
+	{
+		RDFNode deprecationOnboardingTimePoint = oneVarOneSolutionQuery("{<" + instance + "> usdl-core-cb:deprecationOnboardingTimePoint ?var}");
+		if(deprecationOnboardingTimePoint != null)
+		{
+			XSDDateTime date = (XSDDateTime) deprecationOnboardingTimePoint.asLiteral().getValue();
+			return date.asCalendar().getTime();
+		}
+
+		return null;
 	}
 
 	private boolean hasDeprecationOnBoardingTimePoint(RDFNode instance)

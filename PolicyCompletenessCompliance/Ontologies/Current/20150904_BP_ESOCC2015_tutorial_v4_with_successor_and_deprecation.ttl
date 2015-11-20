@@ -38,7 +38,7 @@ bp:BrokerAtCloudESOCC2015TutorialBrokerPolicy
   usdl-core-cb:validFrom "2015-11-30"^^xsd:date ; 
   usdl-core-cb:validThrough "2016-11-12"^^xsd:date ; 
   gr:successorOf <http://broker-cloud.eu/policies#MyFirstPolicy> ; 
-  usdl-core-cb:deprecationOnboardingTimePoint "2015-11-31"^^xsd:date ; 
+  usdl-core-cb:deprecationOnboardingTimePoint "2015-11-30"^^xsd:date ; 
   usdl-core-cb:deprecationRecommendationTimePointBP "2015-12-31"^^xsd:date . 
 
 bp:BrokerAtCloudESOCC2015TutorialBrokerPolicyModel 
