@@ -1212,10 +1212,37 @@ public class PolicyCompletenessCompliance {
 				throw new BrokerPolicyException(bpInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
 			}
 			
+			/*
+			 For any k >= 1, if validThrough(BP k ) is defined, then validThrough(BP k ) >
+			 validFrom(BP k )
+			 */
+			validThrough = this.getValidThrough(bpInstance);
+			if(!this.checkValidThroughAfterValidFrom(validFrom, validThrough))
+			{
+				writeMessageToBrokerPolicyReport(bpInstance + " declares a validThrough property (" + validThrough + ") which is after validFrom (" + validFrom + ").");
+				throw new BrokerPolicyException(bpInstance + " declares a validThrough property (" + validThrough + ") which is after validFrom (" + validFrom + ").");
+			}
+			
 			int i=0;
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean checkValidThroughAfterValidFrom(Date validFrom, Date validThrough) {
+		return (validThrough != null && (validThrough.after(validFrom)));
+	}
+
+	private Date getValidThrough(RDFNode instance) 
+	{
+		RDFNode validThrough = oneVarOneSolutionQuery("{<" + instance + "> usdl-core-cb:validThrough ?var}");
+		if(validThrough != null)
+		{
+			XSDDateTime date = (XSDDateTime) validThrough.asLiteral().getValue();
+			return date.asCalendar().getTime();
+		}
+
+		return null;
 	}
 
 	private boolean dateIsBeforeNow(Date date) {
