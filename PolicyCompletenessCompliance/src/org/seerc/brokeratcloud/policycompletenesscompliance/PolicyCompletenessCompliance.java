@@ -1128,7 +1128,17 @@ public class PolicyCompletenessCompliance {
 			this.runCompletenessCompliance(bpFileData);			
 		}
 
+		// perform BP lifecycle validations
+		this.performBPLifecycleValidations();
+		
 		writeMessageToBrokerPolicyReport("");
+	}
+
+	private void performBPLifecycleValidations()
+	{
+		boolean isTheFirstBP = false;
+		
+		WSO2GREGClient greg = new WSO2GREGClient();
 	}
 
 	public boolean bpHasSLPInConnection() {

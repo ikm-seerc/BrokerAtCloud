@@ -13,7 +13,7 @@ import org.seerc.brokeratcloud.messagebroker.FusekiClient;
 import org.seerc.brokeratcloud.messagebroker.MessageBrokerSubscriber;
 import org.seerc.brokeratcloud.messagebroker.OutOfRangeSLAViolationListener;
 import org.seerc.brokeratcloud.messagebroker.OutOfRangeSLAViolationSubscriber;
-import org.seerc.brokeratcloud.messagebroker.WSO2GREGClient;
+import org.seerc.brokeratcloud.policycompletenesscompliance.WSO2GREGClient;
 import org.seerc.brokeratcloud.messagebroker.WSO2MBClient;
 import org.seerc.brokeratcloud.policycompletenesscompliance.BrokerPolicy;
 import org.seerc.brokeratcloud.policycompletenesscompliance.BrokerPolicyClass;
