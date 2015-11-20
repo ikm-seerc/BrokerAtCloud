@@ -95,7 +95,10 @@ public class PolicyCompletenessCompliance {
 			"usdl-sla:ServiceLevelExpression",
 			"usdl-sla:Variable"
 		};
-		
+
+	// the GREG client used during validation
+	WSO2GREGClient greg = new WSO2GREGClient();
+
 	public PolicyCompletenessCompliance()
 	{
 		try {
@@ -1130,29 +1133,33 @@ public class PolicyCompletenessCompliance {
 		}
 
 		// perform BP lifecycle validations
-		this.performBPLifecycleValidations();
+		this.performBPLifecycleValidations(bpFileData);
 		
 		writeMessageToBrokerPolicyReport("");
 	}
 
-	private void performBPLifecycleValidations() throws BrokerPolicyException
+	private void performBPLifecycleValidations(Object... bpFileData) throws BrokerPolicyException, IOException
 	{
-		RDFNode bpInstance = oneVarOneSolutionQuery("{?var a <" + bp.getServiceModelMap().keySet().iterator().next() + ">}");
-		boolean isTheFirstBP = false;
-		
-		WSO2GREGClient greg = new WSO2GREGClient();
+		resetStream(bpFileData);
 		
 		try {
-			// successorOf checks
+			// variables used
+			RDFNode bpInstance = oneVarOneSolutionQuery("{?var a <" + bp.getServiceModelMap().keySet().iterator().next() + ">}");
+			boolean isTheFirstBP = false;
+			boolean hasSuccessorOf = this.hasSuccessorOf(bpInstance.toString());
 			int numberOfBPs = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(WSO2GREGClient.brokerPoliciesFolder)).getChildCount();
+			String successorBP = null;
+			
+			// successorOf checks
 			if(numberOfBPs == 0)
 			{
 				isTheFirstBP = true;
 			}
 			
 			if(isTheFirstBP)
-			{	// First BP should not have successorOf
-				if(this.hasSuccessorOf(bpInstance.toString()))
+			{	// first BP
+				// BP 1 should have no successorOf property attached to it.
+				if(hasSuccessorOf)
 				{
 					writeMessageToBrokerPolicyReport("Error - " + bpInstance + " is the first BP and it should not declare a successorOf property.");
 					throw new BrokerPolicyException(bpInstance + " is the first BP and it should not declare a successorOf property.");
@@ -1160,12 +1167,55 @@ public class PolicyCompletenessCompliance {
 			}
 			else
 			{	// not first BP
+				/*
+				For any k > 1, BP k should have a successorOf property with exactly 1 BP other
+				than itself (i.e. with BP k−1 ).
+				*/
+				successorBP = this.getSuccessorOf(bpInstance.toString());
+				if(successorBP.equals(bpInstance))
+				{
+					writeMessageToBrokerPolicyReport(bpInstance + " declares as successorOf itself.");
+					throw new BrokerPolicyException(bpInstance + " declares as successorOf itself.");
+				}
 				
+				if(!this.checkBPInstanceExists(successorBP))
+				{
+					writeMessageToBrokerPolicyReport(bpInstance + " declares a successorOf " + successorBP + " but a BP with such an instance declared could not be found.");
+					throw new BrokerPolicyException(bpInstance + " declares a successorOf " + successorBP + " but a BP with such an instance declared could not be found.");
+				}
+				
+				int i=0;
 			}
 			
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean checkBPInstanceExists(String successorBP) throws RegistryException, IOException, BrokerPolicyException
+	{
+		String[] bps = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(greg.brokerPoliciesFolder)).getChildren();
+		for(int i=0;i<bps.length;i++)
+		{
+			InputStream bp = greg.getRemote_registry().get(bps[i]).getContentStream();
+			if(this.getBPInstanceUri(bp).equals(successorBP))
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	private String getSuccessorOf(String instance)
+	{
+		RDFNode successorOf = oneVarOneSolutionQuery("{<" + instance + "> gr:successorOf ?var}");
+		if(successorOf != null)
+		{
+			return successorOf.toString();
+		}
+		
+		return null;
 	}
 
 	private boolean hasSuccessorOf(String instance) 
@@ -3265,6 +3315,21 @@ public class PolicyCompletenessCompliance {
 		else
 		{	// out of range
 			return false;
+		}
+	}
+	
+	private void resetStream(Object... stream)
+	{
+		for(int i=0;i<stream.length;i++)
+		{
+			if(stream[i] instanceof InputStream)
+			{
+				try {
+					((InputStream) stream[i]).reset();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 }
