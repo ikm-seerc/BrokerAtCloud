@@ -1219,8 +1219,8 @@ public class PolicyCompletenessCompliance {
 			validThrough = this.getValidThrough(bpInstance);
 			if(!this.checkValidThroughAfterValidFrom(validFrom, validThrough))
 			{
-				writeMessageToBrokerPolicyReport(bpInstance + " declares a validThrough property (" + validThrough + ") which is after validFrom (" + validFrom + ").");
-				throw new BrokerPolicyException(bpInstance + " declares a validThrough property (" + validThrough + ") which is after validFrom (" + validFrom + ").");
+				writeMessageToBrokerPolicyReport(bpInstance + " declares a validThrough property (" + validThrough + ") which is not after validFrom (" + validFrom + ").");
+				throw new BrokerPolicyException(bpInstance + " declares a validThrough property (" + validThrough + ") which is not after validFrom (" + validFrom + ").");
 			}
 			
 			int i=0;
@@ -1230,7 +1230,7 @@ public class PolicyCompletenessCompliance {
 	}
 
 	private boolean checkValidThroughAfterValidFrom(Date validFrom, Date validThrough) {
-		return (validThrough != null && (validThrough.after(validFrom)));
+		return (validThrough == null || (validFrom.before(validThrough)));
 	}
 
 	private Date getValidThrough(RDFNode instance) 
