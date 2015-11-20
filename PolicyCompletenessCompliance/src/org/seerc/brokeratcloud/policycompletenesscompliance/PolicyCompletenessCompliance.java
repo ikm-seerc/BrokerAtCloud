@@ -1323,10 +1323,38 @@ public class PolicyCompletenessCompliance {
 				}
 			}
 			
+			// deprecationRecommendationTimePoint checks
+			if(isTheFirstBP)
+			{	// the first BP
+				// BP 1 should have no deprecationRecommendationTimePoint property attached to it.
+				if(this.hasDeprecationRecommendationTimePoint(bpInstance))
+				{
+					writeMessageToBrokerPolicyReport(bpInstance + " is the first BP and should not declare a deprecationRecommendationTimePoint.");
+					throw new BrokerPolicyException(bpInstance + " is the first BP and should not declare a deprecationRecommendationTimePoint.");
+				}				
+			}
+			else
+			{	// not the first BP
+				
+			}
+			
 			int i=0;
 			
 		} catch (RegistryException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private boolean hasDeprecationRecommendationTimePoint(RDFNode instance)
+	{
+		int numOfDeprecationRecommendationTimePoints = countQuery("{<" + instance + "> usdl-core-cb:deprecationRecommendationTimePoint ?var}");
+		if(numOfDeprecationRecommendationTimePoints == 0)
+		{
+			return false;
+		}
+		else
+		{
+			return true;			
 		}
 	}
 
