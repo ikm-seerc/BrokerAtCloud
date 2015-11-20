@@ -1160,6 +1160,7 @@ public class PolicyCompletenessCompliance {
 			InputStream succeededBP = null;
 			boolean succeededBPHasExpired = false;
 			Date deprecationOnBoardingTimePoint = null;
+			Date deprecationRecommendationTimePoint = null;
 			
 			// successorOf checks
 			if(numberOfBPs == 0)
@@ -1295,31 +1296,34 @@ public class PolicyCompletenessCompliance {
 			}
 			else
 			{	// not the first BP
-				/*
-				For any k > 1, if validThrough(BP k−1 ) is defined and
-				validThrough(BP k−1 )>=validFrom(BP k ), then
-				deprecationOnBoardingTimePoint(BP k ) <= validThrough(BP k−1 ).
-				 */
 				deprecationOnBoardingTimePoint = this.getDeprecationOnBoardingTimePoint(bpInstance);
-				if((validThroughOfSucceeded != null) && (validThroughOfSucceeded.after(validFrom) || validThroughOfSucceeded.equals(validFrom)))
-				{
-					if(deprecationOnBoardingTimePoint.after(validThroughOfSucceeded))
+				if(deprecationOnBoardingTimePoint != null)
+				{	// deprecationOnBoardingTimePoint has been defined
+					/*
+					For any k > 1, if validThrough(BP k−1 ) is defined and
+					validThrough(BP k−1 )>=validFrom(BP k ), then
+					deprecationOnBoardingTimePoint(BP k ) <= validThrough(BP k−1 ).
+					 */
+					if((validThroughOfSucceeded != null) && (validThroughOfSucceeded.after(validFrom) || validThroughOfSucceeded.equals(validFrom)))
 					{
-						writeMessageToBrokerPolicyReport(bpInstance + " declares a deprecationOnBoardingTimePoint ( " + deprecationOnBoardingTimePoint + ") which exceeds the expiration date of the succeeded BP (" + validThroughOfSucceeded + ") and the succeeded BP is due to expire at some point in the future that this BP will still be valid.");
-						throw new BrokerPolicyException(bpInstance + " declares a deprecationOnBoardingTimePoint ( " + deprecationOnBoardingTimePoint + ") which exceeds the expiration date of the succeeded BP (" + validThroughOfSucceeded + ") and the succeeded BP is due to expire at some point in the future that this BP will still be valid.");
+						if(deprecationOnBoardingTimePoint.after(validThroughOfSucceeded))
+						{
+							writeMessageToBrokerPolicyReport(bpInstance + " declares a deprecationOnBoardingTimePoint ( " + deprecationOnBoardingTimePoint + ") which exceeds the expiration date of the succeeded BP (" + validThroughOfSucceeded + ") and the succeeded BP is due to expire at some point in the future that this BP will still be valid.");
+							throw new BrokerPolicyException(bpInstance + " declares a deprecationOnBoardingTimePoint ( " + deprecationOnBoardingTimePoint + ") which exceeds the expiration date of the succeeded BP (" + validThroughOfSucceeded + ") and the succeeded BP is due to expire at some point in the future that this BP will still be valid.");
+						}
 					}
-				}
-				
-				/*
-				For any k > 1, deprecationOnBoardingTimePoint(BP k ) >=
-				validFrom(BP k ) (i.e. the time point for on-boarding deprecation declared in a
-				successor BP should be greater or equal than the validFrom date of the successor
-				BP).
-				 */
-				if(deprecationOnBoardingTimePoint.before(validFrom))
-				{
-					writeMessageToBrokerPolicyReport(bpInstance + " declares a deprecationOnBoardingTimePoint (" + deprecationOnBoardingTimePoint + ") which is before its validFrom (" + validFrom + ").");
-					throw new BrokerPolicyException(bpInstance + " declares a deprecationOnBoardingTimePoint (" + deprecationOnBoardingTimePoint + ") which is before its validFrom (" + validFrom + ").");
+					
+					/*
+					For any k > 1, deprecationOnBoardingTimePoint(BP k ) >=
+					validFrom(BP k ) (i.e. the time point for on-boarding deprecation declared in a
+					successor BP should be greater or equal than the validFrom date of the successor
+					BP).
+					 */
+					if(deprecationOnBoardingTimePoint.before(validFrom))
+					{
+						writeMessageToBrokerPolicyReport(bpInstance + " declares a deprecationOnBoardingTimePoint (" + deprecationOnBoardingTimePoint + ") which is before its validFrom (" + validFrom + ").");
+						throw new BrokerPolicyException(bpInstance + " declares a deprecationOnBoardingTimePoint (" + deprecationOnBoardingTimePoint + ") which is before its validFrom (" + validFrom + ").");
+					}
 				}
 			}
 			
@@ -1327,7 +1331,7 @@ public class PolicyCompletenessCompliance {
 			if(isTheFirstBP)
 			{	// the first BP
 				// BP 1 should have no deprecationRecommendationTimePoint property attached to it.
-				if(this.hasDeprecationRecommendationTimePoint(bpInstance))
+				if(this.hasDeprecationRecommendationTimePointBP(bpInstance))
 				{
 					writeMessageToBrokerPolicyReport(bpInstance + " is the first BP and should not declare a deprecationRecommendationTimePoint.");
 					throw new BrokerPolicyException(bpInstance + " is the first BP and should not declare a deprecationRecommendationTimePoint.");
@@ -1335,7 +1339,23 @@ public class PolicyCompletenessCompliance {
 			}
 			else
 			{	// not the first BP
-				
+				deprecationRecommendationTimePoint = this.getDeprecationRecommendationTimePointBP(bpInstance);
+				if(deprecationRecommendationTimePoint != null)
+				{	// deprecationRecommendationTimePoint has been defined
+					/*
+					For any k > 1, if validThrough(BP k−1 ) is defined and
+					validThrough(BP k−1 )>=validFrom(BP k ), then
+					deprecationRecommendationTimePoint(BP k ) <= validThrough(BP k−1 )
+					 */
+					if(validThroughOfSucceeded != null && (validThroughOfSucceeded.after(validFrom) || validThroughOfSucceeded.equals(validFrom)))
+					{
+						if(deprecationRecommendationTimePoint.after(validThroughOfSucceeded))
+						{
+							writeMessageToBrokerPolicyReport(bpInstance + " declares a deprecationRecommendationTimePoint ( " + deprecationRecommendationTimePoint + ") which exceeds the expiration date of the succeeded BP (" + validThroughOfSucceeded + ") and the succeeded BP is due to expire at some point in the future that this BP will still be valid.");
+							throw new BrokerPolicyException(bpInstance + " declares a deprecationRecommendationTimePoint ( " + deprecationRecommendationTimePoint + ") which exceeds the expiration date of the succeeded BP (" + validThroughOfSucceeded + ") and the succeeded BP is due to expire at some point in the future that this BP will still be valid.");
+						}
+					}
+				}
 			}
 			
 			int i=0;
@@ -1344,10 +1364,22 @@ public class PolicyCompletenessCompliance {
 			e.printStackTrace();
 		}
 	}
-
-	private boolean hasDeprecationRecommendationTimePoint(RDFNode instance)
+	
+	private Date getDeprecationRecommendationTimePointBP(RDFNode instance)
 	{
-		int numOfDeprecationRecommendationTimePoints = countQuery("{<" + instance + "> usdl-core-cb:deprecationRecommendationTimePoint ?var}");
+		RDFNode deprecationRecommendationTimePoint = oneVarOneSolutionQuery("{<" + instance + "> usdl-core-cb:deprecationRecommendationTimePointBP ?var}");
+		if(deprecationRecommendationTimePoint != null)
+		{
+			XSDDateTime date = (XSDDateTime) deprecationRecommendationTimePoint.asLiteral().getValue();
+			return date.asCalendar().getTime();
+		}
+
+		return null;
+	}
+
+	private boolean hasDeprecationRecommendationTimePointBP(RDFNode instance)
+	{
+		int numOfDeprecationRecommendationTimePoints = countQuery("{<" + instance + "> usdl-core-cb:deprecationRecommendationTimePointBP ?var}");
 		if(numOfDeprecationRecommendationTimePoints == 0)
 		{
 			return false;
