@@ -2,6 +2,8 @@ package org.seerc.brokeratcloud.messagebroker;
 
 import javax.jms.MessageListener;
 
+import org.seerc.brokeratcloud.policycompletenesscompliance.WSO2GREGClient;
+
 /*
  * This class will subscribe to PubSub for "SDReport" - will get report and set a report property of the resource at serviceDescriptionPath
  */

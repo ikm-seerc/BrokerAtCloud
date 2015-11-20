@@ -9,6 +9,7 @@ import java.util.UUID;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 
+import org.seerc.brokeratcloud.policycompletenesscompliance.WSO2GREGClient;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 

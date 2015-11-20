@@ -26,7 +26,7 @@ import org.seerc.brokeratcloud.messagebroker.SDDeprecateSubscriber;
 import org.seerc.brokeratcloud.messagebroker.SDRemoveSubscriber;
 import org.seerc.brokeratcloud.messagebroker.SDUpdateSubscriber;
 import org.seerc.brokeratcloud.messagebroker.VttsPubSubBridge;
-import org.seerc.brokeratcloud.messagebroker.WSO2GREGClient;
+import org.seerc.brokeratcloud.policycompletenesscompliance.WSO2GREGClient;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 

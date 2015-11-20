@@ -11,6 +11,7 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 
 import org.seerc.brokeratcloud.policycompletenesscompliance.EvaluationReport;
+import org.seerc.brokeratcloud.policycompletenesscompliance.WSO2GREGClient;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 

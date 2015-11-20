@@ -17,6 +17,7 @@ import org.seerc.brokeratcloud.policycompletenesscompliance.EvaluationReport;
 import org.seerc.brokeratcloud.policycompletenesscompliance.PolicyCompletenessCompliance;
 import org.seerc.brokeratcloud.policycompletenesscompliance.QuantitativeValue;
 import org.seerc.brokeratcloud.policycompletenesscompliance.QuantitativeValueInstance;
+import org.seerc.brokeratcloud.policycompletenesscompliance.WSO2GREGClient;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;

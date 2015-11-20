@@ -13,9 +13,9 @@ import javax.ws.rs.Path;
 
 import org.apache.commons.io.FileUtils;
 import org.seerc.brokeratcloud.messagebroker.SDEvaluationListener;
-import org.seerc.brokeratcloud.messagebroker.WSO2GREGClient;
 import org.seerc.brokeratcloud.policycompletenesscompliance.BrokerPolicyException;
 import org.seerc.brokeratcloud.policycompletenesscompliance.PolicyCompletenessCompliance;
+import org.seerc.brokeratcloud.policycompletenesscompliance.WSO2GREGClient;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 

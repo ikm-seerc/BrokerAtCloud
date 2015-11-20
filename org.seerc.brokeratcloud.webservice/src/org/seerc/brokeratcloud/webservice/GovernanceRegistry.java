@@ -17,9 +17,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.seerc.brokeratcloud.messagebroker.WSO2GREGClient;
 import org.seerc.brokeratcloud.policycompletenesscompliance.CompletenessException;
 import org.seerc.brokeratcloud.policycompletenesscompliance.PolicyCompletenessCompliance;
+import org.seerc.brokeratcloud.policycompletenesscompliance.WSO2GREGClient;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
