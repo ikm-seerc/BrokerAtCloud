@@ -1205,10 +1205,21 @@ public class PolicyCompletenessCompliance {
 				throw new BrokerPolicyException(bpInstance + " does not declare a validFrom property.");
 			}
 			
+			// For any k >= 1, validFrom(BP k ) must be greater or equal than the current date
+			if(this.dateIsBeforeNow(validFrom))
+			{
+				writeMessageToBrokerPolicyReport(bpInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
+				throw new BrokerPolicyException(bpInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
+			}
+			
 			int i=0;
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean dateIsBeforeNow(Date date) {
+		return date.before(new Date());
 	}
 
 	private Date getValidFrom(RDFNode instance) 
