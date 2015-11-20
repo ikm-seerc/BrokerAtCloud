@@ -1150,9 +1150,12 @@ public class PolicyCompletenessCompliance {
 			boolean isTheFirstBP = false;
 			boolean hasSuccessorOf = this.hasSuccessorOf(bpInstance.toString());
 			int numberOfBPs = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(WSO2GREGClient.brokerPoliciesFolder)).getChildCount();
-			String successorBP = null;
+			String succeeddedBPInstance = null;
 			Date validFrom = null;
 			Date validThrough = null;
+			Date validFromOfSucceeded = null;
+			Date validThroughOfSucceeded = null;
+			InputStream succeededBP = null;
 			
 			// successorOf checks
 			if(numberOfBPs == 0)
@@ -1175,24 +1178,24 @@ public class PolicyCompletenessCompliance {
 				For any k > 1, BP k should have a successorOf property with exactly 1 BP other
 				than itself (i.e. with BP k−1 ).
 				*/
-				successorBP = this.getSuccessorOf(bpInstance.toString());
-				if(successorBP.equals(bpInstance))
+				succeeddedBPInstance = this.getSuccessorOf(bpInstance.toString());
+				if(succeeddedBPInstance.equals(bpInstance))
 				{
 					writeMessageToBrokerPolicyReport(bpInstance + " declares as successorOf itself.");
 					throw new BrokerPolicyException(bpInstance + " declares as successorOf itself.");
 				}
 				
-				if(!this.checkBPInstanceExists(successorBP))
+				if(!this.checkBPInstanceExists(succeeddedBPInstance))
 				{
-					writeMessageToBrokerPolicyReport(bpInstance + " declares a successorOf " + successorBP + " but a BP with such an instance declared could not be found.");
-					throw new BrokerPolicyException(bpInstance + " declares a successorOf " + successorBP + " but a BP with such an instance declared could not be found.");
+					writeMessageToBrokerPolicyReport(bpInstance + " declares a successorOf " + succeeddedBPInstance + " but a BP with such an instance declared could not be found.");
+					throw new BrokerPolicyException(bpInstance + " declares a successorOf " + succeeddedBPInstance + " but a BP with such an instance declared could not be found.");
 				}
 				
 				// No BP can be the object of a successorOf property of two or more BPs.
-				if(this.successorBPAlreadyExists(successorBP))
+				if(this.successorBPAlreadyExists(succeeddedBPInstance))
 				{
-					writeMessageToBrokerPolicyReport(bpInstance + " declares a successorOf " + successorBP + " but this is already declared as successor in another BP.");
-					throw new BrokerPolicyException(bpInstance + " declares a successorOf " + successorBP + " but this is already declared as successor in another BP.");
+					writeMessageToBrokerPolicyReport(bpInstance + " declares a successorOf " + succeeddedBPInstance + " but this is already declared as successor in another BP.");
+					throw new BrokerPolicyException(bpInstance + " declares a successorOf " + succeeddedBPInstance + " but this is already declared as successor in another BP.");
 				}
 			}
 			
@@ -1223,10 +1226,64 @@ public class PolicyCompletenessCompliance {
 				throw new BrokerPolicyException(bpInstance + " declares a validThrough property (" + validThrough + ") which is not after validFrom (" + validFrom + ").");
 			}
 			
-			int i=0;
+			if(!isTheFirstBP)
+			{	// not the first BP
+				/*
+				 For any k > 1, validFrom(BP k ) > validFrom(BP k−1 ) (i.e. the validFrom date
+				 of a BP must be greater than the validFrom date of the BP it succeeds).
+				 */
+				succeededBP = this.getBPByInstance(succeeddedBPInstance);
+				
+				validFromOfSucceeded = this.getValidFrom(succeededBP, succeeddedBPInstance);
+				if(!validFrom.after(validFromOfSucceeded))
+				{
+					writeMessageToBrokerPolicyReport(bpInstance + " declares a validFrom property (" + validFrom + ") which is not after validFrom of succeeded BP (" + validFromOfSucceeded + ").");
+					throw new BrokerPolicyException(bpInstance + " declares a validFrom property (" + validFrom + ") which is not after validFrom of succeeded BP (" + validFromOfSucceeded + ").");
+				}
+				
+				int i=0;
+			}
+			
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private Date getValidFrom(InputStream stream, String instance) throws IOException 
+	{
+		// Find this in a new PolicyCompletenessCompliance object in order to not pollute current model with the added triples
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+		
+		// Initial Creation
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
+
+		// Add the BP into the Jena model
+		pcc.addDataToJenaModel(stream);
+
+		RDFNode validFrom = pcc.oneVarOneSolutionQuery("{<" + instance + "> usdl-core-cb:validFrom ?var}");
+		if(validFrom != null)
+		{
+			XSDDateTime date = (XSDDateTime) validFrom.asLiteral().getValue();
+			return date.asCalendar().getTime();
+		}
+		
+		return null;
+	}
+
+	private InputStream getBPByInstance(String instance) throws RegistryException, IOException, BrokerPolicyException 
+	{
+		String[] bps = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(greg.brokerPoliciesFolder)).getChildren();
+		for(int i=0;i<bps.length;i++)
+		{
+			InputStream bp = greg.getRemote_registry().get(bps[i]).getContentStream();
+			if(this.getBPInstanceUri(bp).equals(instance))
+			{
+				// return a new stream, in order not to be closed 
+				return greg.getRemote_registry().get(bps[i]).getContentStream();
+			}
+		}
+
+		return null;
 	}
 
 	private boolean checkValidThroughAfterValidFrom(Date validFrom, Date validThrough) {
