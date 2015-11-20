@@ -1,5 +1,6 @@
 package org.seerc.brokeratcloud.policycompletenesscompliance;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -20,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
@@ -1234,6 +1236,8 @@ public class PolicyCompletenessCompliance {
 				 */
 				succeededBP = this.getBPByInstance(succeeddedBPInstance);
 				
+				resetStream(succeededBP);
+				
 				validFromOfSucceeded = this.getValidFrom(succeededBP, succeeddedBPInstance);
 				if(!validFrom.after(validFromOfSucceeded))
 				{
@@ -1247,8 +1251,9 @@ public class PolicyCompletenessCompliance {
 				 validThrough date of a successor BP must be greater than the validThrough
 				 date of the BP it succeeds).
 				 */
-				// reset it to get a new, open stream
-				succeededBP = this.getBPByInstance(succeeddedBPInstance);
+
+				resetStream(succeededBP);
+
 				validThroughOfSucceeded = this.getValidThrough(succeededBP, succeeddedBPInstance);
 				if(validThrough != null && validThroughOfSucceeded != null && !validThrough.after(validThroughOfSucceeded))
 				{
@@ -1312,10 +1317,11 @@ public class PolicyCompletenessCompliance {
 		for(int i=0;i<bps.length;i++)
 		{
 			InputStream bp = greg.getRemote_registry().get(bps[i]).getContentStream();
-			if(this.getBPInstanceUri(bp).equals(instance))
+			ByteArrayInputStream bpBais = new ByteArrayInputStream(IOUtils.toByteArray(bp));
+			if(this.getBPInstanceUri(bpBais).equals(instance))
 			{
 				// return a new stream, in order not to be closed 
-				return greg.getRemote_registry().get(bps[i]).getContentStream();
+				return bpBais;
 			}
 		}
 
