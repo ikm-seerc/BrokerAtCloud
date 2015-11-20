@@ -1159,6 +1159,7 @@ public class PolicyCompletenessCompliance {
 			Date validThroughOfSucceeded = null;
 			InputStream succeededBP = null;
 			boolean succeededBPHasExpired = false;
+			Date deprecationOnBoardingTimePoint = null;
 			
 			// successorOf checks
 			if(numberOfBPs == 0)
@@ -1280,12 +1281,40 @@ public class PolicyCompletenessCompliance {
 						}
 					}
 				}
-				
-				int i=0;
 			}
+			
+			// deprecationOnBoardingTimePoint checks
+			// BP 1 should have no deprecationOnBoardingTimePoint property attached to it
+			if(isTheFirstBP)
+			{	// the first BP
+				if(this.hasDeprecationOnBoardingTimePoint(bpInstance))
+				{
+					writeMessageToBrokerPolicyReport(bpInstance + " is the first BP and should not declare a deprecationOnBoardingTimePoint.");
+					throw new BrokerPolicyException(bpInstance + " is the first BP and should not declare a deprecationOnBoardingTimePoint.");
+				}
+			}
+			else
+			{	// not the first BP
+				
+			}
+			
+			int i=0;
 			
 		} catch (RegistryException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private boolean hasDeprecationOnBoardingTimePoint(RDFNode instance)
+	{
+		int numOfDeprecationOnboardingTimePoints = countQuery("{<" + instance + "> usdl-core-cb:deprecationOnboardingTimePoint ?var}");
+		if(numOfDeprecationOnboardingTimePoints == 0)
+		{
+			return false;
+		}
+		else
+		{
+			return true;			
 		}
 	}
 
