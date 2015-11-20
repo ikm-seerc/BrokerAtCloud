@@ -1158,6 +1158,7 @@ public class PolicyCompletenessCompliance {
 			Date validFromOfSucceeded = null;
 			Date validThroughOfSucceeded = null;
 			InputStream succeededBP = null;
+			boolean succeededBPHasExpired = false;
 			
 			// successorOf checks
 			if(numberOfBPs == 0)
@@ -1261,12 +1262,42 @@ public class PolicyCompletenessCompliance {
 					throw new BrokerPolicyException(bpInstance + " declares a validThrough property (" + validThrough + ") which is not after validThrough of succeeded BP (" + validThroughOfSucceeded + ").");
 				}
 
+				/*
+				For any k > 1, if validThrough(BP k−1 ) is defined, then validFrom(BP k )<=
+				validThrough(BP k−1 ) providing that BP k−1 has not expired (i.e. the validFrom
+				date of a successor BP must be less or equal than the validThrough date of the BP
+				it succeeds, providing that, at the current time, the BP it succeeds has not yet expired).				 
+				 */
+				if(validThroughOfSucceeded != null)
+				{
+					succeededBPHasExpired = this.checkDatesIncludeNow(validFromOfSucceeded, validThroughOfSucceeded);
+					if(!succeededBPHasExpired)
+					{
+						if(validFrom.after(validThroughOfSucceeded))
+						{
+							writeMessageToBrokerPolicyReport(bpInstance + " declares a validFrom property (" + validThrough + ") which is after validThrough of succeeded BP (" + validThroughOfSucceeded + ") and the succeeded BP has not yet expired.");
+							throw new BrokerPolicyException(bpInstance + " declares a validFrom property (" + validThrough + ") which is after validThrough of succeeded BP (" + validThroughOfSucceeded + ") and the succeeded BP has not yet expired.");
+						}
+					}
+				}
+				
 				int i=0;
 			}
 			
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean checkDatesIncludeNow(Date from, Date to) 
+	{
+		Date now = new Date();
+		if(now.equals(from) || now.equals(to) || (now.after(from) && now.before(to)))
+		{
+			return true;
+		}
+		
+		return false;
 	}
 
 	private Date getValidThrough(InputStream stream, String instance) throws IOException 
