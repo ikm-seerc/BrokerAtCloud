@@ -418,7 +418,7 @@ bp:AmountOfConcurrentInstances
   gr:hasUnitOfMeasurement "VMinstance"^^xsd:string ; 
   gr:hasMinValueInteger "0"^^xsd:integer ; 
   gr:hasMaxValueInteger "2"^^xsd:integer ; 
-  usdl-core-cb:isRange "false"^^xsd:boolean ; 
+  usdl-core-cb:isRange "true"^^xsd:boolean ; 
   usdl-core-cb:higherIsBetter "true"^^xsd:boolean . 
 
 bp:AmountOfConcurrentInstancesValueRange 
@@ -598,7 +598,7 @@ bp:FloatingIPs
   gr:hasUnitOfMeasurement "IPaddress"^^xsd:string ; 
   gr:hasMinValueInteger "0"^^xsd:integer ; 
   gr:hasMaxValueInteger "2"^^xsd:integer ; 
-  usdl-core-cb:isRange "false"^^xsd:boolean ; 
+  usdl-core-cb:isRange "true"^^xsd:boolean ; 
   usdl-core-cb:higherIsBetter "true"^^xsd:boolean . 
 
 bp:FloatingIPsValueRange 
