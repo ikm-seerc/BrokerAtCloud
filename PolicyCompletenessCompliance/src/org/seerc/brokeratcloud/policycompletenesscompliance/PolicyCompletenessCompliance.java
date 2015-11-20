@@ -1366,6 +1366,25 @@ public class PolicyCompletenessCompliance {
 						writeMessageToBrokerPolicyReport(bpInstance + " declares a deprecationRecommendationTimePoint (" + deprecationRecommendationTimePoint + ") which is not after its validFrom (" + validFrom + ").");
 						throw new BrokerPolicyException(bpInstance + " declares a deprecationRecommendationTimePoint (" + deprecationRecommendationTimePoint + ") which is not after its validFrom (" + validFrom + ").");
 					}
+					
+					/*
+					For any k > 1, if deprecationOnBoardingTimePoint(BP k ) is defined, then
+					deprecationRecommendationTimePoint(BP k ) >=
+					deprecationOnBoardingTimePoint(BP k ) (i.e. the time point for
+					recommendation deprecation declared in a successor BP must be greater or equal
+					than the time point for onboarding deprecation declared in the same policy). 
+					Of course, this constraint assumes that both
+					deprecationOnBoardingTimePoint and
+					deprecationRecommendationTimePoint are defined in BP k .
+					 */
+					if(deprecationOnBoardingTimePoint != null)
+					{
+						if(deprecationRecommendationTimePoint.before(deprecationOnBoardingTimePoint))
+						{
+							writeMessageToBrokerPolicyReport(bpInstance + " declares both deprecationOnBoardingTimePoint (" + deprecationOnBoardingTimePoint + ") and deprecationRecommendationTimePoint (" + deprecationRecommendationTimePoint + ") but the latter is before the former.");
+							throw new BrokerPolicyException(bpInstance + " declares both deprecationOnBoardingTimePoint (" + deprecationOnBoardingTimePoint + ") and deprecationRecommendationTimePoint (" + deprecationRecommendationTimePoint + ") but the latter is before the former.");
+						}
+					}
 				}
 			}
 			
