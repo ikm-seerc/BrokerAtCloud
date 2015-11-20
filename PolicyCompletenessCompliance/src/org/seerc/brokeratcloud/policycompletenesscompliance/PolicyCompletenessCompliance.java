@@ -1355,6 +1355,17 @@ public class PolicyCompletenessCompliance {
 							throw new BrokerPolicyException(bpInstance + " declares a deprecationRecommendationTimePoint ( " + deprecationRecommendationTimePoint + ") which exceeds the expiration date of the succeeded BP (" + validThroughOfSucceeded + ") and the succeeded BP is due to expire at some point in the future that this BP will still be valid.");
 						}
 					}
+					
+					/*
+					For any k > 1, deprecationRecommendationTimePoint(BP k ) >
+					validFrom(BP k ) (i.e. the time point for recommendation deprecation declared in a
+					successor BP must be greater than the validFrom date of the successor BP).
+					 */
+					if(!deprecationRecommendationTimePoint.after(validFrom))
+					{
+						writeMessageToBrokerPolicyReport(bpInstance + " declares a deprecationRecommendationTimePoint (" + deprecationRecommendationTimePoint + ") which is not after its validFrom (" + validFrom + ").");
+						throw new BrokerPolicyException(bpInstance + " declares a deprecationRecommendationTimePoint (" + deprecationRecommendationTimePoint + ") which is not after its validFrom (" + validFrom + ").");
+					}
 				}
 			}
 			
