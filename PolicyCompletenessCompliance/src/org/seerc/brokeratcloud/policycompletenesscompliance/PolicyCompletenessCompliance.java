@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -1149,6 +1151,8 @@ public class PolicyCompletenessCompliance {
 			boolean hasSuccessorOf = this.hasSuccessorOf(bpInstance.toString());
 			int numberOfBPs = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(WSO2GREGClient.brokerPoliciesFolder)).getChildCount();
 			String successorBP = null;
+			Date validFrom = null;
+			Date validThrough = null;
 			
 			// successorOf checks
 			if(numberOfBPs == 0)
@@ -1190,13 +1194,33 @@ public class PolicyCompletenessCompliance {
 					writeMessageToBrokerPolicyReport(bpInstance + " declares a successorOf " + successorBP + " but this is already declared as successor in another BP.");
 					throw new BrokerPolicyException(bpInstance + " declares a successorOf " + successorBP + " but this is already declared as successor in another BP.");
 				}
-				
-				int i=0;
 			}
 			
+			// validFrom and validThrough checks
+			// For any k >= 1, validFrom(BP k ) must be present.
+			validFrom = this.getValidFrom(bpInstance);
+			if(validFrom == null)
+			{
+				writeMessageToBrokerPolicyReport(bpInstance + " does not declare a validFrom property.");
+				throw new BrokerPolicyException(bpInstance + " does not declare a validFrom property.");
+			}
+			
+			int i=0;
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private Date getValidFrom(RDFNode instance) 
+	{
+		RDFNode validFrom = oneVarOneSolutionQuery("{<" + instance + "> usdl-core-cb:validFrom ?var}");
+		if(validFrom != null)
+		{
+			XSDDateTime date = (XSDDateTime) validFrom.asLiteral().getValue();
+			return date.asCalendar().getTime();
+		}
+
+		return null;
 	}
 
 	private boolean successorBPAlreadyExists(String successorBP) throws RegistryException, IOException, BrokerPolicyException
