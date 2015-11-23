@@ -362,6 +362,7 @@ public class PolicyCompletenessCompliance {
 			Date validFromOfSucceeded = null;
 			Date validThroughOfSucceeded = null;
 			InputStream succeededSD = null;
+			Date deprecationRecommendationTimePoint = null;
 
 			// successorOf checks
 			if(numberOfSDs == 0)
@@ -535,12 +536,43 @@ public class PolicyCompletenessCompliance {
 			}
 			else
 			{	// not the first BP
-				
+				deprecationRecommendationTimePoint = this.getDeprecationRecommendationTimePointSD(sdInstance);
+				if(deprecationRecommendationTimePoint != null)
+				{	// deprecationRecommendationTimePoint is defined
+					/*
+					For any k > 1, if validThrough(SD k−1 ) is defined and
+					validThrough(SD k−1 )>=validFrom(SD k ), then
+					deprecationRecommendationTimePoint(SD k ) <= validThrough(SD k−1 )
+					(i.e. the deprecation recommendation time point for the last succeeded SD that has
+					not expired after SD k starts being valid cannot exceed the expiration date of the
+					succeeded SD).
+					 */
+					if(validThroughOfSucceeded != null && !validThroughOfSucceeded.before(validFrom))
+					{
+						if(deprecationRecommendationTimePoint.after(validThroughOfSucceeded))
+						{
+							writeMessageToComplianceReport("The deprecation recommendation time point for the last succeeded SD that has not expired after new SD starts being valid cannot exceed the expiration date of the succeeded SD.");
+							throw new ComplianceException("The deprecation recommendation time point for the last succeeded SD that has not expired after new SD starts being valid cannot exceed the expiration date of the succeeded SD.");
+						}
+					}
+				}
 			}
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
 
+	}
+
+	private Date getDeprecationRecommendationTimePointSD(RDFNode instance)
+	{
+		RDFNode deprecationRecommendationTimePoint = oneVarOneSolutionQuery("{<" + instance + "> usdl-core-cb:deprecationRecommendationTimePointSD ?var}");
+		if(deprecationRecommendationTimePoint != null)
+		{
+			XSDDateTime date = (XSDDateTime) deprecationRecommendationTimePoint.asLiteral().getValue();
+			return date.asCalendar().getTime();
+		}
+
+		return null;
 	}
 
 	private boolean hasDeprecationRecommendationTimePointSD(RDFNode instance)
