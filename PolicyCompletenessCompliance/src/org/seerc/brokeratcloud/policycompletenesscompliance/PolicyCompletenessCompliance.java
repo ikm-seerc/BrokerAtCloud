@@ -467,8 +467,13 @@ public class PolicyCompletenessCompliance {
 			For any k >= 1, if validThrough(BP) is specified but validThrough(SD k ) is not,
 			then validThrough(SD k ) must be set to a date less or equal than
 			validThrough(BP) by the SP of the SD.
+			Meaning... if BP declares validThrough then SD should also declare validThrough
 			 */
-			//if(validThroughOfBP != null && validThrough == null && )
+			if(validThroughOfBP != null && validThrough == null)
+			{
+				writeMessageToCompletenessReport(sdInstance + " does not declare a validThrough property while the BP with which it conforms does.");
+				throw new CompletenessException(sdInstance + " does not declare a validThrough property while the BP with which it conforms does.");
+			}
 			
 			if(!isTheFirstSD)
 			{	// not first SD
