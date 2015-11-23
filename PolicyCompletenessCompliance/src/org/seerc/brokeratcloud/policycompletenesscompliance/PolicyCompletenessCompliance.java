@@ -393,6 +393,13 @@ public class PolicyCompletenessCompliance {
 				throw new CompletenessException(sdInstance + " does not declare a validFrom property.");
 			}
 
+			// For any k >= 1, validFrom(SD k ) must be greater or equal than the current date.
+			if(this.dateIsBeforeNow(validFrom))
+			{
+				writeMessageToComplianceReport(sdInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
+				throw new ComplianceException(sdInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
+			}
+
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
