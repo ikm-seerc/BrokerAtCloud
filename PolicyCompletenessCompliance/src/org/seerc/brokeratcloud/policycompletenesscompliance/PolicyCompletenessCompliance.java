@@ -356,6 +356,9 @@ public class PolicyCompletenessCompliance {
 			String succeeddedSDInstance = null;
 			Date validFrom = null;
 			Date validThrough = null;
+			Date validFromOfBP = null;
+			Date validThroughOfBP = null;
+			RDFNode bpInstance = oneVarOneSolutionQuery("{?someValue a <" + bp.getServiceModelMap().keySet().iterator().next() + ">; gr:isVariantOf ?var}");
 
 			// successorOf checks
 			if(numberOfSDs == 0)
@@ -411,6 +414,17 @@ public class PolicyCompletenessCompliance {
 				throw new ComplianceException(sdInstance + " declares a validThrough property (" + validThrough + ") which is not after validFrom (" + validFrom + ").");
 			}
 
+			/*
+			For any k >= 1, validFrom(SD k ) >= validFrom(BP) (i.e. the validFrom date of
+			an SD must be greater or equal than the validFrom date of the BP with which it
+			conforms).
+			 */
+			validFromOfBP = this.getValidFrom(bpInstance);
+			if(validFrom.before(validFromOfBP))
+			{
+				writeMessageToComplianceReport(sdInstance + " declares a validThrough property (" + validThrough + ") which is before validFrom of the BP which it conforms (" + validFrom + ").");
+				throw new ComplianceException(sdInstance + " declares a validThrough property (" + validThrough + ") which is before validFrom of the BP which it conforms (" + validFrom + ").");
+			}
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
