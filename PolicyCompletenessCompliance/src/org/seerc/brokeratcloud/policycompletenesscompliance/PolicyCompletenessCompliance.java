@@ -339,8 +339,43 @@ public class PolicyCompletenessCompliance {
 		{	// normal case, full completeness/compliance check in SD.
 			runCompletenessCompliance(dataToCheck);			
 		}
+		
+		this.performSDLifecycleValidations(dataToCheck);
 	}
 	
+	private void performSDLifecycleValidations(Object... dataToCheck) throws CompletenessException
+	{
+		resetStream(dataToCheck);
+		
+		try {
+			RDFNode sdInstance = oneVarOneSolutionQuery("{?var a usdl-core:Service}");
+			boolean isTheFirstSD = false;
+			boolean hasSuccessorOf = this.hasSuccessorOf(sdInstance.toString());
+			int numberOfSDs = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(WSO2GREGClient.serviceDescriptionsFolder)).getChildCount();
+			// successorOf checks
+			if(numberOfSDs == 0)
+			{
+				isTheFirstSD = true;
+			}
+
+			if(isTheFirstSD)
+			{	// first SD
+				// SD 1 should have no successorOf property attached to it.
+				if(hasSuccessorOf)
+				{
+					writeMessageToBrokerPolicyReport("Error - " + sdInstance + " is the first SD and it should not declare a successorOf property.");
+					throw new CompletenessException(sdInstance + " is the first SD and it should not declare a successorOf property.");
+				}
+			}
+			else
+			{	// not first SD
+			}
+		} catch (RegistryException e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	private void runMinimalCheck(Object... dataToCheck) throws IOException, CompletenessException, ComplianceException 
 	{
 		writeMessageToCompletenessReport("##################");
