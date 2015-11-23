@@ -363,6 +363,9 @@ public class PolicyCompletenessCompliance {
 			Date validThroughOfSucceeded = null;
 			InputStream succeededSD = null;
 			Date deprecationRecommendationTimePoint = null;
+			Date deprecationRecommendationTimePointBP = null;
+			String bpOfSucceededSD = null;
+			String successorOfReferencedBP = null;
 
 			// successorOf checks
 			if(numberOfSDs == 0)
@@ -555,17 +558,57 @@ public class PolicyCompletenessCompliance {
 							throw new ComplianceException("The deprecation recommendation time point for the last succeeded SD that has not expired after new SD starts being valid cannot exceed the expiration date of the succeeded SD.");
 						}
 					}
-				}
 				
-				/*
-				For any k > 1, deprecationRecommendationTimePoint(SD k ) >
-				validFrom(SD k ) (i.e. the deprecation recommendation time point for an SD
-				should be greater than the date validFrom date of the successor SD).
-				 */
-				if(!deprecationRecommendationTimePoint.after(validFrom))
-				{
-					writeMessageToComplianceReport(sdInstance + " declares a deprecationRecommendationTimePoint property (" + deprecationRecommendationTimePoint + ") which is not after its validFrom property (" + validFrom + ").");
-					throw new ComplianceException(sdInstance + " declares a deprecationRecommendationTimePoint property (" + deprecationRecommendationTimePoint + ") which is not after its validFrom property (" + validFrom + ").");
+					/*
+					For any k > 1, deprecationRecommendationTimePoint(SD k ) >
+					validFrom(SD k ) (i.e. the deprecation recommendation time point for an SD
+					should be greater than the date validFrom date of the successor SD).
+					 */
+					if(!deprecationRecommendationTimePoint.after(validFrom))
+					{
+						writeMessageToComplianceReport(sdInstance + " declares a deprecationRecommendationTimePoint property (" + deprecationRecommendationTimePoint + ") which is not after its validFrom property (" + validFrom + ").");
+						throw new ComplianceException(sdInstance + " declares a deprecationRecommendationTimePoint property (" + deprecationRecommendationTimePoint + ") which is not after its validFrom property (" + validFrom + ").");
+					}
+					
+					/*
+					For any k > 1, if SD k−1 refers to BP n−1 and SD k refers to BP n , and if
+					deprecationRecommendationTimePoint(SD k ) and
+					deprecationRecommendationTimePoint(BP n ) are both defined, then
+					deprecationRecommendationTimePoint(SD k ) <=
+					deprecationRecommendationTimePoint(BP n ) (i.e. the deprecation
+					recommendation time point defined in a successor SD (SD k ) for the succeeded SD
+					(SD k−1 ) should be less or equal than the deprecation recommendation time defined
+					in the BP referred to from within the successor SD (i.e. defined in BP n ) only if the
+					succeeded SD refers to the succeeded BP (i.e. BP n−1 )).
+					+ a successor is defined both in BP and SD
+					 */
+					deprecationRecommendationTimePointBP = this.getDeprecationRecommendationTimePointBP(bpInstance);
+					if(deprecationRecommendationTimePoint != null && deprecationRecommendationTimePointBP != null && succeededSD != null)
+					{
+						resetStream(succeededSD);
+						// The BP of the succeeded SD
+						bpOfSucceededSD = this.getSDIsVariantOfURI(succeededSD);
+						
+						// The successor of the current BP
+						try {
+							InputStream bpByInstance = this.getBPByInstance(bpInstance.toString());
+							resetStream(bpByInstance);
+							successorOfReferencedBP = this.getSuccessorOf(bpByInstance);
+						} catch (BrokerPolicyException e) {
+							e.printStackTrace();
+							throw new ComplianceException(e.getMessage());
+						}
+						
+						// the BP of the succeeded SD is the same with the sucessor of the referenced BP
+						if(successorOfReferencedBP != null && bpOfSucceededSD.equals(successorOfReferencedBP))
+						{
+							if(deprecationRecommendationTimePoint.after(deprecationRecommendationTimePointBP))
+							{
+								writeMessageToComplianceReport("The deprecation recommendation time point defined in the successor SD (" + deprecationRecommendationTimePoint + ") for the succeeded SD is after the deprecation recommendation time defined in the BP (" + deprecationRecommendationTimePointBP + ") referred to from within the successor SD and the succeeded SD refers to the succeeded BP.");
+								throw new ComplianceException("The deprecation recommendation time point defined in the successor SD (" + deprecationRecommendationTimePoint + ") for the succeeded SD is after the deprecation recommendation time defined in the BP (" + deprecationRecommendationTimePointBP + ") referred to from within the successor SD and the succeeded SD refers to the succeeded BP.");
+							}
+						}
+					}
 				}
 			}
 		} catch (RegistryException e) {
