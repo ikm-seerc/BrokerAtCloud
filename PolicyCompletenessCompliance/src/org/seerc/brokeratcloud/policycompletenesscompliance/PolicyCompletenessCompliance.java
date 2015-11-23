@@ -359,6 +359,9 @@ public class PolicyCompletenessCompliance {
 			Date validFromOfBP = null;
 			Date validThroughOfBP = null;
 			RDFNode bpInstance = oneVarOneSolutionQuery("{?someValue a <" + bp.getServiceModelMap().keySet().iterator().next() + ">; gr:isVariantOf ?var}");
+			Date validFromOfSucceeded = null;
+			Date validThroughOfSucceeded = null;
+			InputStream succeededSD = null;
 
 			// successorOf checks
 			if(numberOfSDs == 0)
@@ -377,13 +380,27 @@ public class PolicyCompletenessCompliance {
 			}
 			else
 			{	// not first SD
-				// No SD can be the object of a successorOf property of two or more SDs.
 				succeeddedSDInstance = this.getSuccessorOf(sdInstance.toString());
 
-				if(this.successorSDAlreadyExists(succeeddedSDInstance))
-				{
-					writeMessageToComplianceReport(sdInstance + " declares a successorOf " + succeeddedSDInstance + " but this is already declared as successor in another SD.");
-					throw new ComplianceException(sdInstance + " declares a successorOf " + succeeddedSDInstance + " but this is already declared as successor in another SD.");
+				/*
+				 * SDs with k>1 may not have successor declared and this is not illegal.
+				 */
+				if(succeeddedSDInstance != null)
+				{	// but if they declare successor
+					// succeeded SD must exist
+					if(!this.checkSDInstanceExists(succeeddedSDInstance))
+					{
+						writeMessageToComplianceReport(sdInstance + " declares a successorOf " + succeeddedSDInstance + " but an SD with such an instance declared could not be found.");
+						throw new ComplianceException(sdInstance + " declares a successorOf " + succeeddedSDInstance + " but an SD with such an instance declared could not be found.");
+					}
+					
+	
+					// No SD can be the object of a successorOf property of two or more SDs.
+					if(this.successorSDAlreadyExists(succeeddedSDInstance))
+					{
+						writeMessageToComplianceReport(sdInstance + " declares a successorOf " + succeeddedSDInstance + " but this is already declared as successor in another SD.");
+						throw new ComplianceException(sdInstance + " declares a successorOf " + succeeddedSDInstance + " but this is already declared as successor in another SD.");
+					}
 				}
 			}
 			
@@ -439,10 +456,116 @@ public class PolicyCompletenessCompliance {
 				throw new ComplianceException(sdInstance + " declares a validThrough property (" + validThrough + ") which is after validThrough of the BP with which it conforms (" + validThroughOfBP + ").");
 			}
 			
+			/*
+			For any k >= 1, if validThrough(BP) is specified but validThrough(SD k ) is not,
+			then validThrough(SD k ) must be set to a date less or equal than
+			validThrough(BP) by the SP of the SD.
+			 */
+			//if(validThroughOfBP != null && validThrough == null && )
+			
+			if(!isTheFirstSD)
+			{	// not first SD
+				/*
+				For any k > 1, validFrom(SD k ) > validFrom(SD k−1 ) (i.e. the validFrom date
+				of a successor SD must be greater than the validFrom date of the SD it succeeds.
+				 */
+				succeededSD = this.getSDByInstance(succeeddedSDInstance);
+				
+				resetStream(succeededSD);
+				
+				validFromOfSucceeded = this.getValidFrom(succeededSD, succeeddedSDInstance);
+				
+				// There is a case where a succeeded SD is invalid and does not declare validFrom, throw this exception
+				// TODO: do not allow an SD to declare itself successor of an invalid SD
+				if(validFromOfSucceeded == null)
+				{
+					writeMessageToComplianceReport(sdInstance + " is the successor of an SD which does not declare a validFrom property.");
+					throw new ComplianceException(sdInstance + " is the successor of an SD which does not declare a validFrom property.");
+				}
+				
+				if(!validFrom.after(validFromOfSucceeded))
+				{
+					writeMessageToComplianceReport(sdInstance + " declares a validFrom property (" + validFrom + ") which is not after validFrom of succeeded SD (" + validFromOfSucceeded + ").");
+					throw new ComplianceException(sdInstance + " declares a validFrom property (" + validFrom + ") which is not after validFrom of succeeded SD (" + validFromOfSucceeded + ").");
+				}
+				
+				/*
+				For any k > 1, if validThrough(SD k ) and validThrough(SD k−1 ) are defined,
+				validThrough(SD k ) > validThrough(SD k−1 ) (i.e. the validThrough date of
+				a successor SD must be greater than the validThrough date of the SD it succeeds.
+				 */
+
+				resetStream(succeededSD);
+
+				validThroughOfSucceeded = this.getValidThrough(succeededSD, succeeddedSDInstance);
+				if(validThrough != null && validThroughOfSucceeded != null && !validThrough.after(validThroughOfSucceeded))
+				{
+					writeMessageToComplianceReport(sdInstance + " declares a validThrough property (" + validThrough + ") which is not after validThrough of succeeded SD (" + validThroughOfSucceeded + ").");
+					throw new ComplianceException(sdInstance + " declares a validThrough property (" + validThrough + ") which is not after validThrough of succeeded SD (" + validThroughOfSucceeded + ").");
+				}				
+			}
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
 
+	}
+
+	private boolean checkSDInstanceExists(String successorSD) throws RegistryException, IOException, CompletenessException
+	{
+		String[] sds = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(greg.serviceDescriptionsFolder)).getChildren();
+		for(int i=0;i<sds.length;i++)
+		{
+			InputStream sd = greg.getRemote_registry().get(sds[i]).getContentStream();
+			if(this.getSDInstanceUri(sd).equals(successorSD))
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	private String getSDInstanceUri(InputStream sd) throws CompletenessException, IOException
+	{
+		// Find this in a new PolicyCompletenessCompliance object in order to not pollute current model with the added triples
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+
+		// Initial Creation
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
+
+		// Add the SD into the Jena model
+		pcc.addDataToJenaModel(sd);
+
+		String sdi_uri;
+		
+		try
+		{
+			sdi_uri = pcc.oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}").toString(); // SD instance URI
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			throw new CompletenessException("Could not find the URI of the Service Description instance.");
+		}
+		
+		return sdi_uri;
+	}
+
+	private InputStream getSDByInstance(String instance) throws RegistryException, IOException, CompletenessException 
+	{
+		String[] sds = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(greg.serviceDescriptionsFolder)).getChildren();
+		for(int i=0;i<sds.length;i++)
+		{
+			InputStream sd = greg.getRemote_registry().get(sds[i]).getContentStream();
+			ByteArrayInputStream sdBais = new ByteArrayInputStream(IOUtils.toByteArray(sd));
+			if(this.getSDInstanceUri(sdBais).equals(instance))
+			{
+				// return a new stream, in order not to be closed 
+				return sdBais;
+			}
+		}
+
+		return null;	
 	}
 
 	private boolean successorSDAlreadyExists(String successorSD) throws RegistryException, IOException
