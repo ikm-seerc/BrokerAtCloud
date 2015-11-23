@@ -400,6 +400,17 @@ public class PolicyCompletenessCompliance {
 				throw new ComplianceException(sdInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
 			}
 
+			/*
+			For any k >= 1, if validThrough(SD k ) is defined then, validThrough(SD k ) >
+			validFrom(SD k ).
+			 */
+			validThrough = this.getValidThrough(sdInstance);
+			if(!this.checkValidThroughAfterValidFrom(validFrom, validThrough))
+			{
+				writeMessageToComplianceReport(sdInstance + " declares a validThrough property (" + validThrough + ") which is not after validFrom (" + validFrom + ").");
+				throw new ComplianceException(sdInstance + " declares a validThrough property (" + validThrough + ") which is not after validFrom (" + validFrom + ").");
+			}
+
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
