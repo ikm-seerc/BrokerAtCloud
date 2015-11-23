@@ -343,15 +343,18 @@ public class PolicyCompletenessCompliance {
 		this.performSDLifecycleValidations(dataToCheck);
 	}
 	
-	private void performSDLifecycleValidations(Object... dataToCheck) throws CompletenessException
+	private void performSDLifecycleValidations(Object... dataToCheck) throws CompletenessException, ComplianceException, IOException
 	{
 		resetStream(dataToCheck);
 		
 		try {
+			// variables used
 			RDFNode sdInstance = oneVarOneSolutionQuery("{?var a usdl-core:Service}");
 			boolean isTheFirstSD = false;
 			boolean hasSuccessorOf = this.hasSuccessorOf(sdInstance.toString());
 			int numberOfSDs = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(WSO2GREGClient.serviceDescriptionsFolder)).getChildCount();
+			String succeeddedSDInstance = null;
+
 			// successorOf checks
 			if(numberOfSDs == 0)
 			{
@@ -369,11 +372,35 @@ public class PolicyCompletenessCompliance {
 			}
 			else
 			{	// not first SD
+				// No SD can be the object of a successorOf property of two or more SDs.
+				succeeddedSDInstance = this.getSuccessorOf(sdInstance.toString());
+
+				if(this.successorSDAlreadyExists(succeeddedSDInstance))
+				{
+					writeMessageToBrokerPolicyReport(sdInstance + " declares a successorOf " + succeeddedSDInstance + " but this is already declared as successor in another SD.");
+					throw new ComplianceException(sdInstance + " declares a successorOf " + succeeddedSDInstance + " but this is already declared as successor in another SD.");
+				}
 			}
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
 
+	}
+
+	private boolean successorSDAlreadyExists(String successorSD) throws RegistryException, IOException
+	{
+		String[] sds = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(greg.serviceDescriptionsFolder)).getChildren();
+		for(int i=0;i<sds.length;i++)
+		{
+			InputStream sd = greg.getRemote_registry().get(sds[i]).getContentStream();
+			String successorOf = this.getSuccessorOf(sd);
+			if(successorOf != null && successorOf.equals(successorSD))
+			{
+				return true;
+			}
+		}
+		
+		return false;	
 	}
 
 	private void runMinimalCheck(Object... dataToCheck) throws IOException, CompletenessException, ComplianceException 
