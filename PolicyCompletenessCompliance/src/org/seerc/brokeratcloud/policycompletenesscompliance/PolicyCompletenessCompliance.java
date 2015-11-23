@@ -387,6 +387,13 @@ public class PolicyCompletenessCompliance {
 				 */
 				if(succeeddedSDInstance != null)
 				{	// but if they declare successor
+					// it cannot declare itself
+					if(succeeddedSDInstance.equals(sdInstance.toString()))
+					{
+						writeMessageToComplianceReport(sdInstance + " declares as successorOf itself.");
+						throw new ComplianceException(sdInstance + " declares as successorOf itself.");
+					}
+
 					// succeeded SD must exist
 					if(!this.checkSDInstanceExists(succeeddedSDInstance))
 					{
@@ -396,7 +403,7 @@ public class PolicyCompletenessCompliance {
 					
 	
 					// No SD can be the object of a successorOf property of two or more SDs.
-					if(this.successorSDAlreadyExists(succeeddedSDInstance))
+					if(this.successorSDAlreadyExists(sdInstance.toString(), succeeddedSDInstance))
 					{
 						writeMessageToComplianceReport(sdInstance + " declares a successorOf " + succeeddedSDInstance + " but this is already declared as successor in another SD.");
 						throw new ComplianceException(sdInstance + " declares a successorOf " + succeeddedSDInstance + " but this is already declared as successor in another SD.");
@@ -465,44 +472,49 @@ public class PolicyCompletenessCompliance {
 			
 			if(!isTheFirstSD)
 			{	// not first SD
-				/*
-				For any k > 1, validFrom(SD k ) > validFrom(SD k−1 ) (i.e. the validFrom date
-				of a successor SD must be greater than the validFrom date of the SD it succeeds.
-				 */
-				succeededSD = this.getSDByInstance(succeeddedSDInstance);
+				// may not have successor, but if it has check
 				
-				resetStream(succeededSD);
-				
-				validFromOfSucceeded = this.getValidFrom(succeededSD, succeeddedSDInstance);
-				
-				// There is a case where a succeeded SD is invalid and does not declare validFrom, throw this exception
-				// TODO: do not allow an SD to declare itself successor of an invalid SD
-				if(validFromOfSucceeded == null)
+				if(succeeddedSDInstance != null)
 				{
-					writeMessageToComplianceReport(sdInstance + " is the successor of an SD which does not declare a validFrom property.");
-					throw new ComplianceException(sdInstance + " is the successor of an SD which does not declare a validFrom property.");
+					/*
+					For any k > 1, validFrom(SD k ) > validFrom(SD k−1 ) (i.e. the validFrom date
+					of a successor SD must be greater than the validFrom date of the SD it succeeds.
+					 */
+					succeededSD = this.getSDByInstance(succeeddedSDInstance);
+					
+					resetStream(succeededSD);
+					
+					validFromOfSucceeded = this.getValidFrom(succeededSD, succeeddedSDInstance);
+					
+					// There is a case where a succeeded SD is invalid and does not declare validFrom, throw this exception
+					// TODO: do not allow an SD to declare itself successor of an invalid SD
+					if(validFromOfSucceeded == null)
+					{
+						writeMessageToComplianceReport(sdInstance + " is the successor of an SD which does not declare a validFrom property.");
+						throw new ComplianceException(sdInstance + " is the successor of an SD which does not declare a validFrom property.");
+					}
+					
+					if(!validFrom.after(validFromOfSucceeded))
+					{
+						writeMessageToComplianceReport(sdInstance + " declares a validFrom property (" + validFrom + ") which is not after validFrom of succeeded SD (" + validFromOfSucceeded + ").");
+						throw new ComplianceException(sdInstance + " declares a validFrom property (" + validFrom + ") which is not after validFrom of succeeded SD (" + validFromOfSucceeded + ").");
+					}
+					
+					/*
+					For any k > 1, if validThrough(SD k ) and validThrough(SD k−1 ) are defined,
+					validThrough(SD k ) > validThrough(SD k−1 ) (i.e. the validThrough date of
+					a successor SD must be greater than the validThrough date of the SD it succeeds.
+					 */
+	
+					resetStream(succeededSD);
+	
+					validThroughOfSucceeded = this.getValidThrough(succeededSD, succeeddedSDInstance);
+					if(validThrough != null && validThroughOfSucceeded != null && !validThrough.after(validThroughOfSucceeded))
+					{
+						writeMessageToComplianceReport(sdInstance + " declares a validThrough property (" + validThrough + ") which is not after validThrough of succeeded SD (" + validThroughOfSucceeded + ").");
+						throw new ComplianceException(sdInstance + " declares a validThrough property (" + validThrough + ") which is not after validThrough of succeeded SD (" + validThroughOfSucceeded + ").");
+					}
 				}
-				
-				if(!validFrom.after(validFromOfSucceeded))
-				{
-					writeMessageToComplianceReport(sdInstance + " declares a validFrom property (" + validFrom + ") which is not after validFrom of succeeded SD (" + validFromOfSucceeded + ").");
-					throw new ComplianceException(sdInstance + " declares a validFrom property (" + validFrom + ") which is not after validFrom of succeeded SD (" + validFromOfSucceeded + ").");
-				}
-				
-				/*
-				For any k > 1, if validThrough(SD k ) and validThrough(SD k−1 ) are defined,
-				validThrough(SD k ) > validThrough(SD k−1 ) (i.e. the validThrough date of
-				a successor SD must be greater than the validThrough date of the SD it succeeds.
-				 */
-
-				resetStream(succeededSD);
-
-				validThroughOfSucceeded = this.getValidThrough(succeededSD, succeeddedSDInstance);
-				if(validThrough != null && validThroughOfSucceeded != null && !validThrough.after(validThroughOfSucceeded))
-				{
-					writeMessageToComplianceReport(sdInstance + " declares a validThrough property (" + validThrough + ") which is not after validThrough of succeeded SD (" + validThroughOfSucceeded + ").");
-					throw new ComplianceException(sdInstance + " declares a validThrough property (" + validThrough + ") which is not after validThrough of succeeded SD (" + validThroughOfSucceeded + ").");
-				}				
 			}
 		} catch (RegistryException e) {
 			e.printStackTrace();
@@ -568,14 +580,17 @@ public class PolicyCompletenessCompliance {
 		return null;	
 	}
 
-	private boolean successorSDAlreadyExists(String successorSD) throws RegistryException, IOException
+	private boolean successorSDAlreadyExists(String currentInstance, String successorSD) throws RegistryException, IOException, CompletenessException
 	{
 		String[] sds = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(greg.serviceDescriptionsFolder)).getChildren();
 		for(int i=0;i<sds.length;i++)
 		{
-			InputStream sd = greg.getRemote_registry().get(sds[i]).getContentStream();
+			InputStream sd = new ByteArrayInputStream(IOUtils.toByteArray(greg.getRemote_registry().get(sds[i]).getContentStream()));
 			String successorOf = this.getSuccessorOf(sd);
-			if(successorOf != null && successorOf.equals(successorSD))
+			resetStream(sd);
+			String sdInstance = this.getSDInstanceUri(sd);
+			// when validation occurs, currentSD is already in, so ignore it
+			if(successorOf != null && successorOf.equals(successorSD) && !sdInstance.equals(currentInstance))
 			{
 				return true;
 			}
