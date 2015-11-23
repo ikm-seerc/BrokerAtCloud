@@ -422,9 +422,23 @@ public class PolicyCompletenessCompliance {
 			validFromOfBP = this.getValidFrom(bpInstance);
 			if(validFrom.before(validFromOfBP))
 			{
-				writeMessageToComplianceReport(sdInstance + " declares a validThrough property (" + validThrough + ") which is before validFrom of the BP which it conforms (" + validFrom + ").");
-				throw new ComplianceException(sdInstance + " declares a validThrough property (" + validThrough + ") which is before validFrom of the BP which it conforms (" + validFrom + ").");
+				writeMessageToComplianceReport(sdInstance + " declares a validFrom property (" + validFrom + ") which is before validFrom of the BP with which it conforms (" + validFromOfBP + ").");
+				throw new ComplianceException(sdInstance + " declares a validFrom property (" + validFrom + ") which is before validFrom of the BP with which it conforms (" + validFromOfBP + ").");
 			}
+			
+			/*
+			For any k >= 1, if validThrough(SD k ) and validThrough(BP) are defined,
+			validThrough(SD k ) <= validThrough(BP) (i.e. the validThrough date of an
+			SD must be less or equal than the validThrough date of the BP with which it
+			conforms).
+			 */
+			validThroughOfBP = this.getValidThrough(bpInstance);
+			if(validThrough != null && validThroughOfBP != null && validThrough.after(validThroughOfBP))
+			{
+				writeMessageToComplianceReport(sdInstance + " declares a validThrough property (" + validThrough + ") which is after validThrough of the BP with which it conforms (" + validThroughOfBP + ").");
+				throw new ComplianceException(sdInstance + " declares a validThrough property (" + validThrough + ") which is after validThrough of the BP with which it conforms (" + validThroughOfBP + ").");
+			}
+			
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
