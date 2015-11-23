@@ -520,11 +520,40 @@ public class PolicyCompletenessCompliance {
 						throw new ComplianceException(sdInstance + " declares a validThrough property (" + validThrough + ") which is not after validThrough of succeeded SD (" + validThroughOfSucceeded + ").");
 					}
 				}
+				
+			}
+
+			// deprecationRecommendationTimePoint checks
+			if(isTheFirstSD)
+			{	// the first SD
+				// SD 1 should have no deprecationRecommendationTimePoint property attached to it.
+				if(this.hasDeprecationRecommendationTimePointSD(sdInstance))
+				{
+					writeMessageToCompletenessReport(sdInstance + " is the first SD and should not declare a deprecationRecommendationTimePoint.");
+					throw new CompletenessException(sdInstance + " is the first SD and should not declare a deprecationRecommendationTimePoint.");
+				}				
+			}
+			else
+			{	// not the first BP
+				
 			}
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
 
+	}
+
+	private boolean hasDeprecationRecommendationTimePointSD(RDFNode instance)
+	{
+		int numOfDeprecationRecommendationTimePoints = countQuery("{<" + instance + "> usdl-core-cb:deprecationRecommendationTimePointSD ?var}");
+		if(numOfDeprecationRecommendationTimePoints == 0)
+		{
+			return false;
+		}
+		else
+		{
+			return true;			
+		}
 	}
 
 	private boolean checkSDInstanceExists(String successorSD) throws RegistryException, IOException, CompletenessException
