@@ -354,6 +354,8 @@ public class PolicyCompletenessCompliance {
 			boolean hasSuccessorOf = this.hasSuccessorOf(sdInstance.toString());
 			int numberOfSDs = ((org.wso2.carbon.registry.core.Collection)greg.getRemote_registry().get(WSO2GREGClient.serviceDescriptionsFolder)).getChildCount();
 			String succeeddedSDInstance = null;
+			Date validFrom = null;
+			Date validThrough = null;
 
 			// successorOf checks
 			if(numberOfSDs == 0)
@@ -366,7 +368,7 @@ public class PolicyCompletenessCompliance {
 				// SD 1 should have no successorOf property attached to it.
 				if(hasSuccessorOf)
 				{
-					writeMessageToBrokerPolicyReport("Error - " + sdInstance + " is the first SD and it should not declare a successorOf property.");
+					writeMessageToCompletenessReport("Error - " + sdInstance + " is the first SD and it should not declare a successorOf property.");
 					throw new CompletenessException(sdInstance + " is the first SD and it should not declare a successorOf property.");
 				}
 			}
@@ -377,10 +379,20 @@ public class PolicyCompletenessCompliance {
 
 				if(this.successorSDAlreadyExists(succeeddedSDInstance))
 				{
-					writeMessageToBrokerPolicyReport(sdInstance + " declares a successorOf " + succeeddedSDInstance + " but this is already declared as successor in another SD.");
+					writeMessageToComplianceReport(sdInstance + " declares a successorOf " + succeeddedSDInstance + " but this is already declared as successor in another SD.");
 					throw new ComplianceException(sdInstance + " declares a successorOf " + succeeddedSDInstance + " but this is already declared as successor in another SD.");
 				}
 			}
+			
+			// validFrom, validThrough checks
+			// For any k >= 1, validFrom(SD k ) must be present.
+			validFrom = this.getValidFrom(sdInstance);
+			if(validFrom == null)
+			{
+				writeMessageToCompletenessReport(sdInstance + " does not declare a validFrom property.");
+				throw new CompletenessException(sdInstance + " does not declare a validFrom property.");
+			}
+
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
