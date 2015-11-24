@@ -1547,6 +1547,55 @@ public class PolicyCompletenessCompliance {
 			}
 		}
 		
+		// All QualitativeValue instances should declare a gr:lesser to a QualitativeValue instance of the same type
+		// Only one should not declare a gr:lesser which should be the maximum of all
+		for(String qualitativeQV:bp.getQualitativeValueMapWithInstances().keySet())
+		{
+			boolean maximumFound = false;
+			for(QualitativeValueInstance qualitativeQVInstance:((QualitativeValue)bp.getQualitativeValueMapWithInstances().get(qualitativeQV)).getInstanceMap().values())
+			{
+				RDFNode lesser = this.getLesser(qualitativeQVInstance.getUri());
+				if(lesser == null)
+				{	// this should be the maximum
+					if(maximumFound)
+					{
+						writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQV + " declares two maximum values.");
+						throw new BrokerPolicyException("Qualitative value " + qualitativeQV + " declares two maximum values.");						
+					}
+					maximumFound = true;
+				}
+				else
+				{
+					// lesser should be of qualitativeQV type 
+					RDFNode lesserType = oneVarOneSolutionQuery("{<" + lesser.toString() + "> a ?var}");
+					if(!lesserType.toString().equals(qualitativeQV))
+					{
+						writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is not of the same type.");
+						throw new BrokerPolicyException("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is not of the same type.");						
+					}
+					
+					// this lesser should not be lesser to more than one QVs
+					int numOfLessers = countQuery("{?anyValue gr:lesser <" + lesser.toString() + ">}");
+					if(numOfLessers > 1)
+					{
+						writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is also declared as lesser by another QV.");
+						throw new BrokerPolicyException("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is also declared as lesser by another QV.");						
+					}
+				}
+			}
+			
+			if(maximumFound == false)
+			{
+				writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQV + " does not declare a maximum value.");
+				throw new BrokerPolicyException("Qualitative value " + qualitativeQV + " does not declare a maximum value.");						
+			}
+		}
+	}
+
+	private RDFNode getLesser(String qualitativeQVInstance)
+	{
+		RDFNode lesser = oneVarOneSolutionQuery("{<" + qualitativeQVInstance + "> gr:lesser ?var}");
+		return lesser;
 	}
 
 	private RDFNode getHigherIsBetter(String quantitativeQV) {
