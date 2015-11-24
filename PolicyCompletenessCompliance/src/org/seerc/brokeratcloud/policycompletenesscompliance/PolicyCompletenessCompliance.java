@@ -2699,6 +2699,12 @@ public class PolicyCompletenessCompliance {
 			RDFNode isRange = oneVarOneSolutionQuery("{<" + qv.getUri() + "> <" + USDL_CORE_CB + "isRange> ?var}");
 			for(RDFNode qvInstance:qvInstances)
 			{	// for every QV instance
+				// ignore those that are declared in BP
+				if(this.qvIsDeclaredInBp(qvInstance))
+				{
+					continue;
+				}
+				
 				if(isRange != null && Boolean.valueOf(isRange.asLiteral().getBoolean()))
 				{	// it's range
 					if(this.bp.getQuantitativeValueIntegerMap().containsKey(qv.getUri()))
@@ -2874,6 +2880,27 @@ public class PolicyCompletenessCompliance {
 			}
 		}
 		
+	}
+
+	private boolean qvIsDeclaredInBp(RDFNode qvInstance)
+	{
+		RDFNode bpInstance = oneVarOneSolutionQuery("{?someValue a <" + bp.getServiceModelMap().keySet().iterator().next() + ">; gr:isVariantOf ?var}");
+		String bpNs = null;
+		for(String ns:qvInstance.getModel().getNsPrefixMap().values())
+		{
+			if(bpInstance.toString().startsWith(ns))
+			{
+				bpNs = ns;
+				break;
+			}
+		}
+		
+		if(qvInstance.toString().startsWith(bpNs))
+		{
+			return true;
+		}
+		
+		return false;
 	}
 
 	private void checkClassificationDimensionsInSD(String smi_uri) throws CompletenessException 
