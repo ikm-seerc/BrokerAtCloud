@@ -51,9 +51,9 @@ import com.hp.hpl.jena.util.FileManager;
 public class PolicyCompletenessCompliance {
 
 	//private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
-	protected static final Object[] brokerPolicyResources = {"Ontologies/ForFinalReview/20150904_BP_ESOCC2015_tutorial_v4_with_successor_and_deprecation.ttl"};
+	protected static final Object[] brokerPolicyResources = {"Ontologies/ForFinalReview/20150904_BP_ESOCC2015_tutorial_v4_FirstBP.ttl"};
 	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
-	protected static final Object[] serviceDescriptionResources = {"Ontologies/ForFinalReview/20150904_BP_ESOCC2015_tutorial_v4_sd_example_with_successor_and_deprecation.ttl"};
+	protected static final Object[] serviceDescriptionResources = {"Ontologies/ForFinalReview/20150904_BP_ESOCC2015_tutorial_v4_sd_SecondSD_forAtLeastAsGood.ttl"};
 	
 	protected static final Object[] brokerPolicyStressTestResources = {"Ontologies/ForStressTest/CAS-broker-policies-minimal-final_AF.ttl", "Ontologies/ForStressTest/CAS-Service-Level-Profile-silver_AF.ttl", "Ontologies/ForStressTest/CAS-functional-categories-v2_AF.ttl"};
 	protected static final Object[] serviceDescriptionStressTestResources = {"Ontologies/ForStressTest/CAS-AddressAppSM-minimal-final_AF.ttl"};
@@ -1680,6 +1680,13 @@ public class PolicyCompletenessCompliance {
 				than itself (i.e. with BP k−1 ).
 				*/
 				succeeddedBPInstance = this.getSuccessorOf(bpInstance.toString());
+				
+				if(succeeddedBPInstance == null)
+				{
+					writeMessageToBrokerPolicyReport(bpInstance + " is not the first BP and it does not declare a successorOf property.");
+					throw new BrokerPolicyException(bpInstance + " is not the first BP and it does not declare a successorOf property.");
+				}
+				
 				if(succeeddedBPInstance.equals(bpInstance))
 				{
 					writeMessageToBrokerPolicyReport(bpInstance + " declares as successorOf itself.");
