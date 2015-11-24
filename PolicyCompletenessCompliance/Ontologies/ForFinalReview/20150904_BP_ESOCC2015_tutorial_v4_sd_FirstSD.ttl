@@ -17,8 +17,8 @@
 @prefix time: <http://www.w3.org/2006/time#> . 
 @prefix gr: <http://purl.org/goodrelations/v1#> . 
 @prefix doap: <http://usefulinc.com/ns/doap#> . 
-@prefix bp: <http://guide.broker-cloud.eu/esocc2015#> . 
-@prefix sd: <http://yournamespace.com/services/yourservicenamespace#> . 
+@prefix bp: <http://guide.broker-cloud.eu/esocc2015FirstBP#> . 
+@prefix sd: <http://yournamespace.com/services/TheFirstSD#> . 
 @prefix sp: <http://sap.com#> . 
 
 sp:SAP 
@@ -30,7 +30,7 @@ sd:SAPEntityInvolvement
   usdl-core:withBusinessRole usdl-business-roles:provider ; 
   usdl-core:ofBusinessEntity sp:SAP . 
 
-sd:MyServiceAcronym 
+sd:TheFirstSD 
   a usdl-core:Service ; 
   dcterms:creator sp:SAP ; 
   dcterms:title "MyFirstHCPService Description Title" ; 
@@ -38,14 +38,12 @@ sd:MyServiceAcronym
   usdl-core:validFrom "2015-11-13"^^xsd:date ; 
   usdl-core:hasEntityInvolvement sd:SAPEntityInvolvement ; 
   usdl-core-cb:hasServiceModel sd:MyFirstHCPServiceModel ; 
-  usdl-core-cb:validFrom "2016-10-01"^^xsd:date ; 
-  usdl-core-cb:validThrough "2017-03-12"^^xsd:date ; 
-  gr:successorOf <http://yournamespace.com/services/TheFirstSD#TheFirstSD> ; 
-  usdl-core-cb:deprecationRecommendationTimePointSD "2016-11-01"^^xsd:date . 
+  usdl-core-cb:validFrom "2015-12-15"^^xsd:date ; 
+  usdl-core-cb:validThrough "2016-11-12"^^xsd:date . 
 
 sd:MyFirstHCPServiceModel 
   a bp:BrokerAtCloudESOCC2015TutorialBrokerPolicyModel ; 
-  gr:isVariantOf bp:BrokerAtCloudESOCC2015TutorialBrokerPolicy ; 
+  gr:isVariantOf bp:TheFirstBP ; 
   bp:hasBrokerAtCloudESOCC2015TutorialServiceLevelProfile sd:MyFirstHCPServiceLevelProfile ; 
   usdl-core-cb:hasClassificationDimension <http://www.broker-cloud.eu/service-descriptions/CAS/categories#Shipment> , 
     <http://www.broker-cloud.eu/service-descriptions/CAS/categories#BankAndCashManagement> . 

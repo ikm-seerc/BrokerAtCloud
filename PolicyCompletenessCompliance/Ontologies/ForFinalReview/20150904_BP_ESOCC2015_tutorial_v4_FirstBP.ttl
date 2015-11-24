@@ -19,7 +19,7 @@
 @prefix gr: <http://purl.org/goodrelations/v1#> . 
 @prefix doap: <http://usefulinc.com/ns/doap#> . 
 @prefix fc: <http://www.broker-cloud.eu/service-descriptions/CAS/categories#> . 
-@prefix bp: <http://guide.broker-cloud.eu/esocc2015#> . 
+@prefix bp: <http://guide.broker-cloud.eu/esocc2015FirstBP#> . 
 
 bp:BrokerAtCloudTutorialTeam 
   a gr:BusinessEntity ; 
@@ -30,16 +30,13 @@ bp:BrokerAtCloudTutorialTeamEntityInvolvement
   usdl-core:withBusinessRole usdl-business-roles:intermediary ; 
   usdl-core:ofBusinessEntity bp:BrokerAtCloudTutorialTeam . 
 
-bp:BrokerAtCloudESOCC2015TutorialBrokerPolicy 
+bp:TheFirstBP 
   a bp:BrokerAtCloudESOCC2015TutorialBrokerPolicyModel ; 
   dcterms:creator bp:BrokerAtCloudTutorialTeam ; 
   usdl-core:hasEntityInvolvement bp:BrokerAtCloudTutorialTeamEntityInvolvement ; 
   usdl-core-cb:hasClassificationDimension fc:rootConcept ; 
-  usdl-core-cb:validFrom "2016-05-30"^^xsd:date ; 
-  usdl-core-cb:validThrough "2017-03-12"^^xsd:date ; 
-  gr:successorOf <http://guide.broker-cloud.eu/esocc2015FirstBP#TheFirstBP> ; 
-  usdl-core-cb:deprecationOnboardingTimePoint "2016-11-01"^^xsd:date ; 
-  usdl-core-cb:deprecationRecommendationTimePointBP "2016-11-01"^^xsd:date . 
+  usdl-core-cb:validFrom "2015-11-30"^^xsd:date ; 
+  usdl-core-cb:validThrough "2016-11-12"^^xsd:date . 
 
 bp:BrokerAtCloudESOCC2015TutorialBrokerPolicyModel 
   rdfs:subClassOf usdl-core:ServiceModel . 
