@@ -1517,7 +1517,41 @@ public class PolicyCompletenessCompliance {
 		// perform BP lifecycle validations
 		this.performBPLifecycleValidations(bpFileData);
 		
+		// check that BP has all properties in QVs needed for at-least-as-good checks.
+		this.performBPAtLeastAsGoodValidations();
+		
 		writeMessageToBrokerPolicyReport("");
+	}
+
+	private void performBPAtLeastAsGoodValidations() throws BrokerPolicyException
+	{
+		// All QuantitativeValues should declare a Boolean usdl-core-cb:higherIsBetter
+		for(String quantitativeQV:bp.getQuantitativeValueMap().keySet())
+		{
+			RDFNode higherIsBetter = this.getHigherIsBetter(quantitativeQV);
+			if(higherIsBetter == null)
+			{
+				writeMessageToBrokerPolicyReport("Quantitative value " + quantitativeQV + " does not declare a higherIsBetter property.");
+				throw new BrokerPolicyException("Quantitative value " + quantitativeQV + " does not declare a higherIsBetter property.");
+			}
+			
+			try
+			{
+				Boolean higherIsBetterValue = higherIsBetter.asLiteral().getBoolean();
+				int i=0;
+			}
+			catch(Exception e)
+			{
+				writeMessageToBrokerPolicyReport("Quantitative value " + quantitativeQV + " should declare a Boolean higherIsBetter property.");
+				throw new BrokerPolicyException("Quantitative value " + quantitativeQV + " should declare a Boolean higherIsBetter property.");
+			}
+		}
+		
+	}
+
+	private RDFNode getHigherIsBetter(String quantitativeQV) {
+		RDFNode higherIsBetter = oneVarOneSolutionQuery("{<" + quantitativeQV + "> usdl-core-cb:higherIsBetter ?var}");
+		return higherIsBetter;
 	}
 
 	private void performBPLifecycleValidations(Object... bpFileData) throws BrokerPolicyException, IOException
