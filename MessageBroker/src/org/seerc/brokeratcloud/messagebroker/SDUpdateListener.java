@@ -29,6 +29,9 @@ public class SDUpdateListener extends AbstractSDEvaluationListener{
 	@Override
 	public void onMessage(Message message) {
 		try {
+			// re-init gregEvaluator 
+			gregEvaluator = new WSO2GREGEvaluator();
+
 			// message received from PubSub
 			System.out.println("SDUpdateListener received the message with ID==> "
 					+ message.getJMSMessageID());
