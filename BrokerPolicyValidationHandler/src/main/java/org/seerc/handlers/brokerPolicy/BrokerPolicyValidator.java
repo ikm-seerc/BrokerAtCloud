@@ -59,7 +59,9 @@ public class BrokerPolicyValidator extends Handler {
 		InputStream newBpIS = requestContext.getResource().getContentStream();
 		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
 		try {
-			pcc.validateBrokerPolicy(newBpIS);
+			// do not validate in the handler, what comes here should ALREADY be validated by the REST API!!!
+			// Should provide a more robust design in the future...
+			pcc.getBrokerPolicy(newBpIS);
 			
 			// flag to indicate whether this is an update or a creation of a BP
 			boolean bpUpdated = false;
@@ -70,7 +72,7 @@ public class BrokerPolicyValidator extends Handler {
 			{	// BP exists
 				currentBP = this.wso2gregClient.getRemote_registry().get(requestContext.getResourcePath().getPath()).getContentStream();
 
-				// this is a service update
+				// this is a BP update
 				bpUpdated = true;
 			}
 
