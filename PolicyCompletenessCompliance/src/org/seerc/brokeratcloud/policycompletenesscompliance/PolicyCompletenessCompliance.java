@@ -341,8 +341,43 @@ public class PolicyCompletenessCompliance {
 		}
 		
 		this.performSDLifecycleValidations(dataToCheck);
+		
+		this.initiateSDAtLeastAsGoodChecks();
 	}
 	
+	private void initiateSDAtLeastAsGoodChecks() throws IOException, CompletenessException
+	{
+		// get the current service instance
+		RDFNode sInstance = oneVarOneSolutionQuery("{?var a usdl-core:Service}");
+		
+		// check if it is an update and the succeeded SD refers to the same BP
+		String successorUri = this.getSuccessorOf(sInstance.toString());
+		if(successorUri != null)
+		{	// it's an update
+			// get succeeded SD
+			try {
+				InputStream successor = this.getSDByInstance(successorUri);
+				resetStream(successor);
+				String bpOfsucceededSd = this.getSDIsVariantOfURI(successor);
+				String bpOfCurrentSd = oneVarOneSolutionQuery("{?someValue a <" + bp.getServiceModelMap().keySet().iterator().next() + ">; gr:isVariantOf ?var}").toString();
+				if(bpOfsucceededSd.equals(bpOfCurrentSd))
+				{
+					// perform checks here
+					this.performSDAtLeastAsGoodChecks();
+				}
+				
+			} catch (RegistryException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+	private void performSDAtLeastAsGoodChecks()
+	{
+		
+	}
+
 	private void performSDLifecycleValidations(Object... dataToCheck) throws CompletenessException, ComplianceException, IOException
 	{
 		resetStream(dataToCheck);
@@ -4018,17 +4053,20 @@ public class PolicyCompletenessCompliance {
 	
 	public String getSDServiceInstanceURI(Object sdFileData) throws IOException, CompletenessException
 	{
+		// Find this in a new PolicyCompletenessCompliance object in order to not pollute current model with the added triples
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+
 		// Initial Creation
-		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
 
 		// Add the SD into the Jena model
-		addDataToJenaModel(sdFileData);
+		pcc.addDataToJenaModel(sdFileData);
 
 		try 
 		{
 			String si_uri = null; // service instance uri
 	
-			RDFNode node = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}");
+			RDFNode node = pcc.oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}");
 			si_uri = node.toString();
 			
 			return si_uri;
@@ -4043,17 +4081,20 @@ public class PolicyCompletenessCompliance {
 	 * Returns the Service Model class URI from a SD
 	 */
 	public String getSDServiceModelURI(Object sdFileData) throws IOException, CompletenessException {
+		// Find this in a new PolicyCompletenessCompliance object in order to not pollute current model with the added triples
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+
 		// Initial Creation
-		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
 
 		// Add the SD into the Jena model
-		addDataToJenaModel(sdFileData);
+		pcc.addDataToJenaModel(sdFileData);
 
 		try
 		{
-			String si_uri = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}").toString(); // Service instance URI
-			String smi_uri = oneVarOneSolutionQuery("{<" + si_uri + "> usdl-core:hasServiceModel ?var}").toString(); // Service model instance URI
-			String smc_uri = oneVarOneSolutionQuery("{<" + smi_uri + "> a ?var}").toString(); // Service model class URI
+			String si_uri = pcc.oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}").toString(); // Service instance URI
+			String smi_uri = pcc.oneVarOneSolutionQuery("{<" + si_uri + "> usdl-core:hasServiceModel ?var}").toString(); // Service model instance URI
+			String smc_uri = pcc.oneVarOneSolutionQuery("{<" + smi_uri + "> a ?var}").toString(); // Service model class URI
 			
 			return smc_uri;
 		}
@@ -4094,18 +4135,21 @@ public class PolicyCompletenessCompliance {
 	 */
 	public String getSDMakeAndModelURI(InputStream sdis) throws IOException, CompletenessException 
 	{
+		// Find this in a new PolicyCompletenessCompliance object in order to not pollute current model with the added triples
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+
 		// Initial Creation
-		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
 
 		// Add the SD into the Jena model
-		addDataToJenaModel(sdis);
+		pcc.addDataToJenaModel(sdis);
 
 		try
 		{
 			// the Service Individual instance 
-			RDFNode siInstance = oneVarOneSolutionQuery("{?var a usdl-core:ServiceIndividual}");
+			RDFNode siInstance = pcc.oneVarOneSolutionQuery("{?var a usdl-core:ServiceIndividual}");
 			// BP URI
-			String bpUri = oneVarOneSolutionQuery("{<" + siInstance.toString() + "> gr:hasMakeAndModel ?var}").toString();
+			String bpUri = pcc.oneVarOneSolutionQuery("{<" + siInstance.toString() + "> gr:hasMakeAndModel ?var}").toString();
 			
 			return bpUri;
 		}
@@ -4147,16 +4191,19 @@ public class PolicyCompletenessCompliance {
 	 * Returns the isVariantOf of an SD
 	 */
 	public String getSDIsVariantOfURI(InputStream sdis) throws IOException, CompletenessException {
+		// Find this in a new PolicyCompletenessCompliance object in order to not pollute current model with the added triples
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+
 		// Initial Creation
-		acquireMemoryForData(OntModelSpec.RDFS_MEM);
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
 	
 		// Add the SD into the Jena model
-		addDataToJenaModel(sdis);
+		pcc.addDataToJenaModel(sdis);
 	
 		try {
-			String si_uri = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}").toString(); // Service instance URI
-			String smi_uri = oneVarOneSolutionQuery("{<" + si_uri + "> usdl-core-cb:hasServiceModel ?var}").toString(); // Service model instance URI
-			String isVariantOfUri = oneVarOneSolutionQuery("{<" + smi_uri + "> gr:isVariantOf ?var}").toString(); // Service model instance URI
+			String si_uri = pcc.oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}").toString(); // Service instance URI
+			String smi_uri = pcc.oneVarOneSolutionQuery("{<" + si_uri + "> usdl-core-cb:hasServiceModel ?var}").toString(); // Service model instance URI
+			String isVariantOfUri = pcc.oneVarOneSolutionQuery("{<" + smi_uri + "> gr:isVariantOf ?var}").toString(); // Service model instance URI
 			
 			return isVariantOfUri;
 		}
