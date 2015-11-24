@@ -36,7 +36,7 @@ bp:TheFirstBP
   usdl-core:hasEntityInvolvement bp:BrokerAtCloudTutorialTeamEntityInvolvement ; 
   usdl-core-cb:hasClassificationDimension fc:rootConcept ; 
   usdl-core-cb:validFrom "2015-11-30"^^xsd:date ; 
-  usdl-core-cb:validThrough "2016-11-12"^^xsd:date . 
+  usdl-core-cb:validThrough "2016-11-30"^^xsd:date . 
 
 bp:BrokerAtCloudESOCC2015TutorialBrokerPolicyModel 
   rdfs:subClassOf usdl-core:ServiceModel . 

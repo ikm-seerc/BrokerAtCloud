@@ -38,8 +38,9 @@ sd:TheSecondSD
   usdl-core:validFrom "2015-11-13"^^xsd:date ; 
   usdl-core:hasEntityInvolvement sd:SAPEntityInvolvement ; 
   usdl-core-cb:hasServiceModel sd:MyFirstHCPServiceModel ; 
-  usdl-core-cb:validFrom "2015-12-15"^^xsd:date ; 
-  usdl-core-cb:validThrough "2016-11-12"^^xsd:date . 
+  gr:successorOf <http://yournamespace.com/services/TheFirstSD#TheFirstSD> ; 
+  usdl-core-cb:validFrom "2015-12-16"^^xsd:date ; 
+  usdl-core-cb:validThrough "2016-11-13"^^xsd:date . 
 
 sd:MyFirstHCPServiceModel 
   a bp:BrokerAtCloudESOCC2015TutorialBrokerPolicyModel ; 
