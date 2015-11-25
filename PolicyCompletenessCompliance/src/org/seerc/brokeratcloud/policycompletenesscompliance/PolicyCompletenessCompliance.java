@@ -457,80 +457,122 @@ public class PolicyCompletenessCompliance {
 		boolean isIntegerQuantitative = this.isIntegerQuantitative(qvClass.toString());
 		if(isRange)
 		{	// a range
-			// use floats both for integer and float QVs
-			float minValue;
-			float maxValue;
-			float minValueOfSucceeded;
-			float maxValueOfSucceeded;
 			if(isIntegerQuantitative)
 			{	// integer range
+				int minValue;
+				int maxValue;
+				int minValueOfSucceeded;
+				int maxValueOfSucceeded;
+
 				minValue = this.getMinInteger(qvInstance.toString());
 				maxValue = this.getMaxInteger(qvInstance.toString());
 				resetStream(succeedded);
 				minValueOfSucceeded = this.getMinInteger(succeedded, succeeddedInstance.toString());
 				resetStream(succeedded);
 				maxValueOfSucceeded = this.getMaxInteger(succeedded, succeeddedInstance.toString());
+				
+				if(higherIsBetter)
+				{	// higherIsBetter
+					if(!(minValue >= minValueOfSucceeded && maxValue >= maxValueOfSucceeded))
+					{	// here is the problem
+						writeMessageToComplianceReport(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+						throw new ComplianceException(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+					}
+				}
+				else
+				{	// not higherIsBetter
+					if(!(minValue <= minValueOfSucceeded && maxValue <= maxValueOfSucceeded))
+					{	// here is the problem
+						writeMessageToComplianceReport(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+						throw new ComplianceException(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+					}
+				}
 			}
 			else
 			{	// float range
+				float minValue;
+				float maxValue;
+				float minValueOfSucceeded;
+				float maxValueOfSucceeded;
+
 				minValue = this.getMinFloat(qvInstance.toString());
 				maxValue = this.getMaxFloat(qvInstance.toString());
 				resetStream(succeedded);
 				minValueOfSucceeded = this.getMinFloat(succeedded, succeeddedInstance.toString());
 				resetStream(succeedded);
 				maxValueOfSucceeded = this.getMaxFloat(succeedded, succeeddedInstance.toString());
-			}
-			
-			if(higherIsBetter)
-			{	// higherIsBetter
-				if(!(minValue >= minValueOfSucceeded && maxValue >= maxValueOfSucceeded))
-				{	// here is the problem
-					writeMessageToComplianceReport(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
-					throw new ComplianceException(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+				
+				if(higherIsBetter)
+				{	// higherIsBetter
+					if(!(minValue >= minValueOfSucceeded && maxValue >= maxValueOfSucceeded))
+					{	// here is the problem
+						writeMessageToComplianceReport(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+						throw new ComplianceException(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+					}
 				}
-			}
-			else
-			{	// not higherIsBetter
-				if(!(minValue <= minValueOfSucceeded && maxValue <= maxValueOfSucceeded))
-				{	// here is the problem
-					writeMessageToComplianceReport(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
-					throw new ComplianceException(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+				else
+				{	// not higherIsBetter
+					if(!(minValue <= minValueOfSucceeded && maxValue <= maxValueOfSucceeded))
+					{	// here is the problem
+						writeMessageToComplianceReport(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+						throw new ComplianceException(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+					}
 				}
+
 			}
 		}
 		else
 		{	// not a range
-			// use float both for integer and float QVs
-			float value;
-			float valueOfSucceeded;
-
 			if(isIntegerQuantitative)
 			{	// integer value
+				int value;
+				int valueOfSucceeded;
+
 				value = this.getValueInteger(qvInstance.toString());
 				resetStream(succeedded);
 				valueOfSucceeded = this.getValueInteger(succeedded, succeeddedInstance.toString());
-			}
-			else
-			{	// float value
-				value = this.getValueFloat(qvInstance.toString());
-				resetStream(succeedded);
-				valueOfSucceeded = this.getValueFloat(succeedded, succeeddedInstance.toString());
-			}
-			
-			if(higherIsBetter)
-			{	// higherIsBetter
-				if(!(value >= valueOfSucceeded))
-				{	// here is the problem
-					writeMessageToComplianceReport(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
-					throw new ComplianceException(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+				
+				if(higherIsBetter)
+				{	// higherIsBetter
+					if(!(value >= valueOfSucceeded))
+					{	// here is the problem
+						writeMessageToComplianceReport(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+						throw new ComplianceException(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+					}
+				}
+				else
+				{	// not higherIsBetter
+					if(!(value <= valueOfSucceeded))
+					{	// here is the problem
+						writeMessageToComplianceReport(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+						throw new ComplianceException(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+					}
 				}
 			}
 			else
-			{	// not higherIsBetter
-				if(!(value <= valueOfSucceeded))
-				{	// here is the problem
-					writeMessageToComplianceReport(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
-					throw new ComplianceException(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+			{	// float value
+				float value;
+				float valueOfSucceeded;
+
+				value = this.getValueFloat(qvInstance.toString());
+				resetStream(succeedded);
+				valueOfSucceeded = this.getValueFloat(succeedded, succeeddedInstance.toString());
+				
+				if(higherIsBetter)
+				{	// higherIsBetter
+					if(!(value >= valueOfSucceeded))
+					{	// here is the problem
+						writeMessageToComplianceReport(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+						throw new ComplianceException(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+					}
+				}
+				else
+				{	// not higherIsBetter
+					if(!(value <= valueOfSucceeded))
+					{	// here is the problem
+						writeMessageToComplianceReport(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+						throw new ComplianceException(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+					}
 				}
 			}
 		}
