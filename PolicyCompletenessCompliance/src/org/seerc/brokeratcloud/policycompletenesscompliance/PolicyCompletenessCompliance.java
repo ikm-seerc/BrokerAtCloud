@@ -51,9 +51,9 @@ import com.hp.hpl.jena.util.FileManager;
 public class PolicyCompletenessCompliance {
 
 	//private static final Object brokerPolicyResources = "Ontologies/SAP_HANA_Cloud_Apps_Broker_Policy_test.ttl";
-	protected static final Object[] brokerPolicyResources = {"Ontologies/ForFinalReview/20150904_BP_ESOCC2015_tutorial_v4_FirstBP.ttl"};
+	protected static final Object[] brokerPolicyResources = {"Ontologies/ForFinalReview/20150904_BP_ESOCC2015_tutorial_v4_with_successor_and_deprecation.ttl"};
 	//private static final String serviceDescriptionResources = "Ontologies/SAP_HANA_Cloud_Apps_SD_test.ttl";
-	protected static final Object[] serviceDescriptionResources = {"Ontologies/ForFinalReview/20150904_BP_ESOCC2015_tutorial_v4_sd_SecondSD_forAtLeastAsGood.ttl"};
+	protected static final Object[] serviceDescriptionResources = {"Ontologies/ForFinalReview/20150904_BP_ESOCC2015_tutorial_v4_sd_example_with_successor_and_deprecation.ttl"};
 	
 	protected static final Object[] brokerPolicyStressTestResources = {"Ontologies/ForStressTest/CAS-broker-policies-minimal-final_AF.ttl", "Ontologies/ForStressTest/CAS-Service-Level-Profile-silver_AF.ttl", "Ontologies/ForStressTest/CAS-functional-categories-v2_AF.ttl"};
 	protected static final Object[] serviceDescriptionStressTestResources = {"Ontologies/ForStressTest/CAS-AddressAppSM-minimal-final_AF.ttl"};
@@ -345,25 +345,25 @@ public class PolicyCompletenessCompliance {
 		this.initiateSDAtLeastAsGoodChecks();
 	}
 	
-	private void initiateSDAtLeastAsGoodChecks() throws IOException, CompletenessException
+	private void initiateSDAtLeastAsGoodChecks() throws IOException, CompletenessException, ComplianceException
 	{
 		// get the current service instance
 		RDFNode sInstance = oneVarOneSolutionQuery("{?var a usdl-core:Service}");
 		
 		// check if it is an update and the succeeded SD refers to the same BP
-		String successorUri = this.getSuccessorOf(sInstance.toString());
-		if(successorUri != null)
+		String succeeddedUri = this.getSuccessorOf(sInstance.toString());
+		if(succeeddedUri != null)
 		{	// it's an update
 			// get succeeded SD
 			try {
-				InputStream successor = this.getSDByInstance(successorUri);
-				resetStream(successor);
-				String bpOfsucceededSd = this.getSDIsVariantOfURI(successor);
+				InputStream succeedded = this.getSDByInstance(succeeddedUri);
+				resetStream(succeedded);
+				String bpOfsucceededSd = this.getSDIsVariantOfURI(succeedded);
 				String bpOfCurrentSd = oneVarOneSolutionQuery("{?someValue a <" + bp.getServiceModelMap().keySet().iterator().next() + ">; gr:isVariantOf ?var}").toString();
 				if(bpOfsucceededSd.equals(bpOfCurrentSd))
 				{
 					// perform checks here
-					this.performSDAtLeastAsGoodChecks();
+					this.performSDAtLeastAsGoodChecks(succeedded);
 				}
 				
 			} catch (RegistryException e) {
@@ -373,9 +373,367 @@ public class PolicyCompletenessCompliance {
 		
 	}
 
-	private void performSDAtLeastAsGoodChecks()
+	private void performSDAtLeastAsGoodChecks(InputStream succeedded) throws IOException, ComplianceException
 	{
+		resetStream(succeedded);
 		
+		// get the current service instance
+		RDFNode sInstance = oneVarOneSolutionQuery("{?var a usdl-core:Service}");
+		// get the service instance's service model
+		RDFNode serviceModel = oneVarOneSolutionQuery("{<" + sInstance + "> usdl-core-cb:hasServiceModel ?var}");
+		// get the hasServiceLevelProfile subproperty
+		RDFNode slpSp = oneVarOneSolutionQuery("{?var rdfs:subPropertyOf usdl-sla:hasServiceLevelProfile}");
+		// get SLP instance
+		RDFNode slpInstance = oneVarOneSolutionQuery("{<" + serviceModel + "> <" + slpSp + "> ?var}");
+		// get SLP class in BP
+		RDFNode slpClass = oneVarOneSolutionQuery("{<" + slpInstance + "> a ?var}");
+		
+		// get all hasServiceLevel sub-properties that have as domain the slpClass
+		RDFNode[] hasSlSps = oneVarManySolutionsQuery("{?var rdfs:domain <" + slpClass + ">}");
+		for(RDFNode hasSlSp:hasSlSps)
+		{
+			// get SL instance(s)
+			RDFNode[] slInstances = oneVarManySolutionsQuery("{<" + slpInstance + "> <" + hasSlSp + "> ?var}");
+			for(RDFNode slInstance:slInstances)
+			{
+				// get slInstance's class
+				RDFNode slClass = oneVarOneSolutionQuery("{<" + slInstance + "> a ?var}");
+				for(String hasSleSp:bp.getServiceLevelMap().get(slClass.toString()).getPropertyMap().keySet())
+				{
+					// get SLE instance(s)
+					RDFNode[] sleInstances = oneVarManySolutionsQuery("{<" + slInstance + "> <" + hasSleSp + "> ?var}");
+					for(RDFNode sleInstance:sleInstances)
+					{
+						// get sleInstance's class
+						RDFNode sleClass = oneVarOneSolutionQuery("{<" + sleInstance + "> a ?var}");
+						for(String hasVarSp:bp.getServiceLevelExpressionMap().get(sleClass.toString()).getPropertyMap().keySet())
+						{
+							// get Var instance(s)
+							RDFNode[] varInstances = oneVarManySolutionsQuery("{<" + sleInstance + "> <" + hasVarSp + "> ?var}");
+							for(RDFNode varInstance:varInstances)
+							{
+								// get varInstance's class
+								RDFNode varClass = oneVarOneSolutionQuery("{<" + varInstance + "> a ?var}");
+								for(String hasQVSp:bp.getExpressionVariableMap().get(varClass.toString()).getPropertyMap().keySet())
+								{
+									// get QV instance(s)
+									RDFNode[] qvInstances = oneVarManySolutionsQuery("{<" + varInstance + "> <" + hasQVSp + "> ?var}");	
+									for(RDFNode qvInstance:qvInstances)
+									{
+										// this is the QV we are looking for
+										// get its class
+										RDFNode qvClass = oneVarOneSolutionQuery("{<" + qvInstance + "> a ?var}");
+										// get all instances attached to succeeded SD of this class
+										RDFNode[] succeeddedInstances = this.getQVsOfClassInSD(qvClass.toString(), succeedded, bp);
+										for(RDFNode succeeddedInstance:succeeddedInstances)
+										{
+											// is it a Qualitative or Quantitative QV
+											if(this.isQualitativeQv(qvClass.toString()))
+											{	// qualitative QV
+												
+											}
+											else
+											{
+												// quantitative QV
+												performQuantitativeAtLeastAsGoodChecks(qvInstance, qvClass, succeeddedInstance, succeedded);
+											}
+
+											int i=0;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private void performQuantitativeAtLeastAsGoodChecks(RDFNode qvInstance, RDFNode qvClass, RDFNode succeeddedInstance, InputStream succeedded) throws ComplianceException, IOException {
+		resetStream(succeedded);
+		boolean higherIsBetter = this.getHigherIsBetter(qvClass.toString()).asLiteral().getBoolean();
+		boolean isRange = this.isRange(qvClass.toString());
+		boolean isIntegerQuantitative = this.isIntegerQuantitative(qvClass.toString());
+		if(isRange)
+		{	// a range
+			// use floats both for integer and float QVs
+			float minValue;
+			float maxValue;
+			float minValueOfSucceeded;
+			float maxValueOfSucceeded;
+			if(isIntegerQuantitative)
+			{	// integer range
+				minValue = this.getMinInteger(qvInstance.toString());
+				maxValue = this.getMaxInteger(qvInstance.toString());
+				resetStream(succeedded);
+				minValueOfSucceeded = this.getMinInteger(succeedded, succeeddedInstance.toString());
+				resetStream(succeedded);
+				maxValueOfSucceeded = this.getMaxInteger(succeedded, succeeddedInstance.toString());
+			}
+			else
+			{	// float range
+				minValue = this.getMinFloat(qvInstance.toString());
+				maxValue = this.getMaxFloat(qvInstance.toString());
+				resetStream(succeedded);
+				minValueOfSucceeded = this.getMinFloat(succeedded, succeeddedInstance.toString());
+				resetStream(succeedded);
+				maxValueOfSucceeded = this.getMaxFloat(succeedded, succeeddedInstance.toString());
+			}
+			
+			if(higherIsBetter)
+			{	// higherIsBetter
+				if(!(minValue >= minValueOfSucceeded && maxValue >= maxValueOfSucceeded))
+				{	// here is the problem
+					writeMessageToComplianceReport(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+					throw new ComplianceException(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+				}
+			}
+			else
+			{	// not higherIsBetter
+				if(!(minValue <= minValueOfSucceeded && maxValue <= maxValueOfSucceeded))
+				{	// here is the problem
+					writeMessageToComplianceReport(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+					throw new ComplianceException(qvInstance + " declares a range (min=" + minValue + ", max=" + maxValue + ") which is not at least as good the range declared in the relative instance in the succeeded SD (min=" + minValueOfSucceeded + ", max=" + maxValueOfSucceeded + ").");
+				}
+			}
+		}
+		else
+		{	// not a range
+			// use float both for integer and float QVs
+			float value;
+			float valueOfSucceeded;
+
+			if(isIntegerQuantitative)
+			{	// integer value
+				value = this.getValueInteger(qvInstance.toString());
+				resetStream(succeedded);
+				valueOfSucceeded = this.getValueInteger(succeedded, succeeddedInstance.toString());
+			}
+			else
+			{	// float value
+				value = this.getValueFloat(qvInstance.toString());
+				resetStream(succeedded);
+				valueOfSucceeded = this.getValueFloat(succeedded, succeeddedInstance.toString());
+			}
+			
+			if(higherIsBetter)
+			{	// higherIsBetter
+				if(!(value >= valueOfSucceeded))
+				{	// here is the problem
+					writeMessageToComplianceReport(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+					throw new ComplianceException(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+				}
+			}
+			else
+			{	// not higherIsBetter
+				if(!(value <= valueOfSucceeded))
+				{	// here is the problem
+					writeMessageToComplianceReport(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+					throw new ComplianceException(qvInstance + " declares a value (" + value + ") which is not at least as good the value declared in the relative instance in the succeeded SD (" + valueOfSucceeded+ ").");
+				}
+			}
+		}
+	}
+	
+	private RDFNode[] getQVsOfClassInSD(String qvClass, InputStream sd, BrokerPolicy bp) throws IOException, ComplianceException
+	{
+		resetStream(sd);
+
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+
+		// Initial Creation
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
+
+		// Add the SD into the Jena model
+		pcc.addDataToJenaModel(sd);
+		
+		resetStream(sd);
+
+		// get BP of SD and add it to Jena model
+		try {
+			String sdIsVariantOfURI = this.getSDIsVariantOfURI(sd);
+			resetStream(sd);
+			InputStream bpByInstance = this.getBPByInstance(sdIsVariantOfURI);
+			resetStream(bpByInstance);
+			pcc.addDataToJenaModel(bpByInstance);
+		} catch (RegistryException | BrokerPolicyException
+				| CompletenessException e) {
+			e.printStackTrace();
+			throw new ComplianceException(e.getMessage());
+		}
+		
+		// get the current service instance
+		RDFNode sInstance = pcc.oneVarOneSolutionQuery("{?var a usdl-core:Service}");
+		// get the service instance's service model
+		RDFNode serviceModel = pcc.oneVarOneSolutionQuery("{<" + sInstance + "> usdl-core-cb:hasServiceModel ?var}");
+		// get the hasServiceLevelProfile subproperty
+		RDFNode slpSp = pcc.oneVarOneSolutionQuery("{?var rdfs:subPropertyOf usdl-sla:hasServiceLevelProfile}");
+		// get SLP instance
+		RDFNode slpInstance = pcc.oneVarOneSolutionQuery("{<" + serviceModel + "> <" + slpSp + "> ?var}");
+		// get SLP class in BP
+		RDFNode slpClass = pcc.oneVarOneSolutionQuery("{<" + slpInstance + "> a ?var}");
+		
+		// get all hasServiceLevel sub-properties that have as domain the slpClass
+		RDFNode[] hasSlSps = pcc.oneVarManySolutionsQuery("{?var rdfs:domain <" + slpClass + ">}");
+		for(RDFNode hasSlSp:hasSlSps)
+		{
+			// get SL instance(s)
+			RDFNode[] slInstances = pcc.oneVarManySolutionsQuery("{<" + slpInstance + "> <" + hasSlSp + "> ?var}");
+			for(RDFNode slInstance:slInstances)
+			{
+				// get slInstance's class
+				RDFNode slClass = pcc.oneVarOneSolutionQuery("{<" + slInstance + "> a ?var}");
+				for(String hasSleSp:bp.getServiceLevelMap().get(slClass.toString()).getPropertyMap().keySet())
+				{
+					// get SLE instance(s)
+					RDFNode[] sleInstances = pcc.oneVarManySolutionsQuery("{<" + slInstance + "> <" + hasSleSp + "> ?var}");
+					for(RDFNode sleInstance:sleInstances)
+					{
+						// get sleInstance's class
+						RDFNode sleClass = pcc.oneVarOneSolutionQuery("{<" + sleInstance + "> a ?var}");
+						for(String hasVarSp:bp.getServiceLevelExpressionMap().get(sleClass.toString()).getPropertyMap().keySet())
+						{
+							// get Var instance(s)
+							RDFNode[] varInstances = pcc.oneVarManySolutionsQuery("{<" + sleInstance + "> <" + hasVarSp + "> ?var}");
+							for(RDFNode varInstance:varInstances)
+							{
+								// get varInstance's class
+								RDFNode varClass = pcc.oneVarOneSolutionQuery("{<" + varInstance + "> a ?var}");
+								for(String hasQVSp:bp.getExpressionVariableMap().get(varClass.toString()).getPropertyMap().keySet())
+								{
+									// get QV instance(s)
+									RDFNode[] qvInstances = pcc.oneVarManySolutionsQuery("{<" + varInstance + "> <" + hasQVSp + "> ?var}");	
+									for(RDFNode qvInstance:qvInstances)
+									{
+										// this is the QV we are looking for
+										// if its class equals the class we are looking for, return all instances
+										if(qvClass.equals(pcc.oneVarOneSolutionQuery("{<" + qvInstance + "> a ?var}").toString()))
+										{
+											return qvInstances;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return new RDFNode[0];
+	}
+
+	private int getValueInteger(String qvInstance) {
+		return oneVarOneSolutionQuery("{<" + qvInstance + "> gr:hasValueInteger ?var}").asLiteral().getInt();
+	}
+
+	private int getValueFloat(String qvInstance) {
+		return oneVarOneSolutionQuery("{<" + qvInstance + "> gr:hasValueFloat ?var}").asLiteral().getInt();
+	}
+
+	private int getMinInteger(String qvInstance) {
+		return oneVarOneSolutionQuery("{<" + qvInstance + "> gr:hasMinValueInteger ?var}").asLiteral().getInt();
+	}
+
+	private int getMaxInteger(String qvInstance) {
+		return oneVarOneSolutionQuery("{<" + qvInstance + "> gr:hasMaxValueInteger ?var}").asLiteral().getInt();
+	}
+
+	private int getMinFloat(String qvInstance) {
+		return oneVarOneSolutionQuery("{<" + qvInstance + "> gr:hasMinValueFloat ?var}").asLiteral().getInt();
+	}
+
+	private int getMaxFloat(String qvInstance) {
+		return oneVarOneSolutionQuery("{<" + qvInstance + "> gr:hasMaxValueFloat ?var}").asLiteral().getInt();
+	}
+	
+	//////////////////////////////////////////////////////
+	
+	private int getValueInteger(InputStream data, String qvInstance) throws IOException {
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+
+		// Initial Creation
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
+	
+		// Add the SD into the Jena model
+		pcc.addDataToJenaModel(data);
+
+		return pcc.oneVarOneSolutionQuery("{<" + qvInstance + "> gr:hasValueInteger ?var}").asLiteral().getInt();
+	}
+
+	private int getValueFloat(InputStream data, String qvInstance) throws IOException {
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+
+		// Initial Creation
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
+	
+		// Add the SD into the Jena model
+		pcc.addDataToJenaModel(data);
+
+		return pcc.oneVarOneSolutionQuery("{<" + qvInstance + "> gr:hasValueFloat ?var}").asLiteral().getInt();
+	}
+
+	private int getMinInteger(InputStream data, String qvInstance) throws IOException {
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+
+		// Initial Creation
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
+	
+		// Add the SD into the Jena model
+		pcc.addDataToJenaModel(data);
+
+		return pcc.oneVarOneSolutionQuery("{<" + qvInstance + "> gr:hasMinValueInteger ?var}").asLiteral().getInt();
+	}
+
+	private int getMaxInteger(InputStream data, String qvInstance) throws IOException {
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+
+		// Initial Creation
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
+	
+		// Add the SD into the Jena model
+		pcc.addDataToJenaModel(data);
+
+		return pcc.oneVarOneSolutionQuery("{<" + qvInstance + "> gr:hasMaxValueInteger ?var}").asLiteral().getInt();
+	}
+
+	private int getMinFloat(InputStream data, String qvInstance) throws IOException {
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+
+		// Initial Creation
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
+	
+		// Add the SD into the Jena model
+		pcc.addDataToJenaModel(data);
+
+		return pcc.oneVarOneSolutionQuery("{<" + qvInstance + "> gr:hasMinValueFloat ?var}").asLiteral().getInt();
+	}
+
+	private int getMaxFloat(InputStream data, String qvInstance) throws IOException {
+		PolicyCompletenessCompliance pcc = new PolicyCompletenessCompliance();
+
+		// Initial Creation
+		pcc.acquireMemoryForData(OntModelSpec.RDFS_MEM);
+	
+		// Add the SD into the Jena model
+		pcc.addDataToJenaModel(data);
+
+		return pcc.oneVarOneSolutionQuery("{<" + qvInstance + "> gr:hasMaxValueFloat ?var}").asLiteral().getInt();
+	}
+
+	private boolean isIntegerQuantitative(String qvUri) {
+		return (countQuery("{<" + qvUri + "> rdfs:subClassOf gr:QuantitativeValueInteger}") !=0);
+	}
+
+	private boolean isQualitativeQv(String qvUri)
+	{
+		return (countQuery("{<" + qvUri + "> rdfs:subClassOf gr:QualitativeValue}") != 0);
+	}
+
+	private boolean isRange(String qvUri)
+	{
+		return oneVarOneSolutionQuery("{<" + qvUri + "> <" + USDL_CORE_CB + "isRange> ?var}").asLiteral().getBoolean();
 	}
 
 	private void performSDLifecycleValidations(Object... dataToCheck) throws CompletenessException, ComplianceException, IOException
