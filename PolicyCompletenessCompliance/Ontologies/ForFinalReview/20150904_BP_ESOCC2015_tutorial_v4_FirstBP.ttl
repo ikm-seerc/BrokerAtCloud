@@ -35,7 +35,7 @@ bp:TheFirstBP
   dcterms:creator bp:BrokerAtCloudTutorialTeam ; 
   usdl-core:hasEntityInvolvement bp:BrokerAtCloudTutorialTeamEntityInvolvement ; 
   usdl-core-cb:hasClassificationDimension fc:rootConcept ; 
-  usdl-core-cb:validFrom "2015-11-30"^^xsd:date ; 
+  usdl-core-cb:validFrom "2015-12-30"^^xsd:date ; 
   usdl-core-cb:validThrough "2016-11-30"^^xsd:date . 
 
 bp:BrokerAtCloudESOCC2015TutorialBrokerPolicyModel 

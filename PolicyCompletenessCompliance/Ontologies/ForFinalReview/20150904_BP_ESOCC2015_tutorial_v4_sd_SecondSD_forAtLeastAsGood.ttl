@@ -39,7 +39,7 @@ sd:TheSecondSD
   usdl-core:hasEntityInvolvement sd:SAPEntityInvolvement ; 
   usdl-core-cb:hasServiceModel sd:MyFirstHCPServiceModel ; 
   gr:successorOf <http://yournamespace.com/services/TheFirstSD#TheFirstSD> ; 
-  usdl-core-cb:validFrom "2015-12-16"^^xsd:date ; 
+  usdl-core-cb:validFrom "2016-01-16"^^xsd:date ; 
   usdl-core-cb:validThrough "2016-11-13"^^xsd:date . 
 
 sd:MyFirstHCPServiceModel 
