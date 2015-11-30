@@ -2103,6 +2103,16 @@ public class PolicyCompletenessCompliance {
 			}
 			else
 			{	// not first BP
+
+				/*
+				 * BP instance should be unique
+				 */
+				if(this.checkBPInstanceExists(bpInstance.toString()))
+				{
+					writeMessageToBrokerPolicyReport("A Broker Policy with instance " + bpInstance + " already exists.");
+					throw new BrokerPolicyException("A Broker Policy with instance " + bpInstance + " already exists.");
+				}
+				
 				/*
 				For any k > 1, BP k should have a successorOf property with exactly 1 BP other
 				than itself (i.e. with BP k−1 ).
