@@ -85,17 +85,6 @@ public class SDEvaluationListener extends AbstractSDEvaluationListener {
 				//serviceUpdated = true;
 			}*/
 			
-			// send SD to Registry Repository
-			System.out.println("Sending received SD to repository at " + pathToPutSiUri);
-			
-			Resource sdResource = this.wso2gregClient.getRemote_registry().newResource();
-			sdResource.setContentStream(sdis);
-			sdResource.setMediaType("text/plain");
-			this.wso2gregClient.putWithRetryHack(pathToPutSiUri, sdResource);
-			
-			// reuse stream
-			sdis.reset();
-
 			// The service instance URI
 			String si = WSO2GREGClient.createNameFromUri(new URI(gregEvaluator.getPcc().getSDServiceInstanceURI(sdis)));
 			
@@ -115,6 +104,20 @@ public class SDEvaluationListener extends AbstractSDEvaluationListener {
 					
 			// perform evaluation
 			this.evaluateCompletenessCompliance(sdis);
+
+			// reuse stream
+			sdis.reset();
+
+			// send SD to Registry Repository
+			System.out.println("Evaluation went OK, sending received SD with validation report to repository at " + pathToPutSiUri);
+			Resource sdResource = this.wso2gregClient.getRemote_registry().newResource();
+			sdResource.setContentStream(sdis);
+			sdResource.setProperty("SD evaluation report", gson.toJson(ep));
+			sdResource.setMediaType("text/plain");
+			this.wso2gregClient.putWithRetryHack(pathToPutSiUri, sdResource);
+			
+			// reuse stream
+			sdis.reset();
 
 			// evaluation went OK, publish serialized report
 			mbsp.publishStringToTopic(gson.toJson(ep));

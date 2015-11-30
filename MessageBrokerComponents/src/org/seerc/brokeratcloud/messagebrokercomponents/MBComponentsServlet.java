@@ -39,7 +39,7 @@ public class MBComponentsServlet extends HttpServlet {
 		} catch (RegistryException e) {
 			e.printStackTrace();
 		}
-		RegistryRepositoryTopicSubscriber.main(null);
+		//RegistryRepositoryTopicSubscriber.main(null);
 		EvaluationComponentSDSubscriber.main(null);
 		//SDUpdateSubscriber.main(null);
 		//SDDeprecateSubscriber.main(null);
