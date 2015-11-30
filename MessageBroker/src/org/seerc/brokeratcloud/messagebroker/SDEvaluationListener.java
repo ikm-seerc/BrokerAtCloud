@@ -72,7 +72,7 @@ public class SDEvaluationListener extends AbstractSDEvaluationListener {
 			
 			InputStream currentSD = null;
 			
-			if(this.wso2gregClient.getRemote_registry().resourceExists(pathToPutSiUri))
+			/*if(this.wso2gregClient.getRemote_registry().resourceExists(pathToPutSiUri))
 			{	// resource exists, throw CompletenessException
 				System.out.println("An SD with namespace " + siUri + " already exists.");
 				throw new CompletenessException("An SD with namespace " + siUri + " already exists.");
@@ -83,7 +83,7 @@ public class SDEvaluationListener extends AbstractSDEvaluationListener {
 
 				// this is a service update
 				//serviceUpdated = true;
-			}
+			}*/
 			
 			// send SD to Registry Repository
 			System.out.println("Sending received SD to repository at " + pathToPutSiUri);

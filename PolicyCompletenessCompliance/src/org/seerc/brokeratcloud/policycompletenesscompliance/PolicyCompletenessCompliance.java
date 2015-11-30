@@ -850,6 +850,15 @@ public class PolicyCompletenessCompliance {
 				succeeddedSDInstance = this.getSuccessorOf(sdInstance.toString());
 
 				/*
+				 * SD instance should be unique.
+				 */
+				if(this.checkSDInstanceExists(sdInstance.toString()))
+				{
+					writeMessageToComplianceReport("A Service Description with isntance " + sdInstance + " already exists.");
+					throw new ComplianceException("A Service Description with isntance " + sdInstance + " already exists.");
+				}
+				
+				/*
 				 * SDs with k>1 may not have successor declared and this is not illegal.
 				 */
 				if(succeeddedSDInstance != null)
