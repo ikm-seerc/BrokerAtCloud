@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -897,7 +899,7 @@ public class PolicyCompletenessCompliance {
 			}
 
 			// For any k >= 1, validFrom(SD k ) must be greater or equal than the current date.
-			if(this.dateIsBeforeNow(validFrom))
+			if(this.dateIsBeforeNowIgnoringTime(validFrom))
 			{
 				writeMessageToComplianceReport(sdInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
 				throw new ComplianceException(sdInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
@@ -2164,7 +2166,7 @@ public class PolicyCompletenessCompliance {
 			}
 			
 			// For any k >= 1, validFrom(BP k ) must be greater or equal than the current date
-			if(this.dateIsBeforeNow(validFrom))
+			if(this.dateIsBeforeNowIgnoringTime(validFrom))
 			{
 				writeMessageToBrokerPolicyReport(bpInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
 				throw new BrokerPolicyException(bpInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
@@ -2483,6 +2485,20 @@ public class PolicyCompletenessCompliance {
 
 	private boolean dateIsBeforeNow(Date date) {
 		return date.before(new Date());
+	}
+
+	// including date equality
+	private boolean dateIsBeforeNowIgnoringTime(Date date) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date nowWithoutTime = null;
+		
+		try {
+			nowWithoutTime = sdf.parse(sdf.format(new Date()));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		return date.before(nowWithoutTime);
 	}
 
 	private Date getValidFrom(RDFNode instance) 
