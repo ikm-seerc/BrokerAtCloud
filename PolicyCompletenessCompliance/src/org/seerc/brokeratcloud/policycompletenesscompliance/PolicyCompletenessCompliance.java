@@ -452,31 +452,35 @@ public class PolicyCompletenessCompliance {
 		}
 	}
 
+	// do this only if the qualitative values are ordered
 	private void performQualitativeAtLeastAsGoodChecks(RDFNode qvInstance, RDFNode qvClass, RDFNode succeeddedInstance, InputStream succeedded) throws ComplianceException 
 	{
-		resetStream(succeedded);
-		
-		// if they declare the same QV instance then everything is OK, no checks required
-		if(qvInstance.toString().equals(succeeddedInstance.toString()))
+		if(this.isOrderedQualitativeValueClass(qvClass.toString()))
 		{
-			return;
-		}
-		
-		/*
-		 * Retrieve all lessers of qvInstance. If succeeddedInstance is found 
-		 * then we have a problem.
-		 */
-		RDFNode lesser = this.getLesser(qvInstance.toString());
-		while(lesser != null)
-		{
-			if(lesser.toString().equals(succeeddedInstance.toString()))
+			resetStream(succeedded);
+			
+			// if they declare the same QV instance then everything is OK, no checks required
+			if(qvInstance.toString().equals(succeeddedInstance.toString()))
 			{
-				writeMessageToComplianceReport(qvInstance + " is not at least as good the QV declared in the succeeded SD (" + succeeddedInstance + ").");
-				throw new ComplianceException(qvInstance + " is not at least as good the QV declared in the succeeded SD (" + succeeddedInstance + ").");
+				return;
 			}
 			
-			// get next lesser
-			lesser = this.getLesser(lesser.toString());
+			/*
+			 * Retrieve all lessers of qvInstance. If succeeddedInstance is found 
+			 * then we have a problem.
+			 */
+			RDFNode lesser = this.getLesser(qvInstance.toString());
+			while(lesser != null)
+			{
+				if(lesser.toString().equals(succeeddedInstance.toString()))
+				{
+					writeMessageToComplianceReport(qvInstance + " is not at least as good the QV declared in the succeeded SD (" + succeeddedInstance + ").");
+					throw new ComplianceException(qvInstance + " is not at least as good the QV declared in the succeeded SD (" + succeeddedInstance + ").");
+				}
+				
+				// get next lesser
+				lesser = this.getLesser(lesser.toString());
+			}
 		}
 	}
 
