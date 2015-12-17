@@ -2023,46 +2023,94 @@ public class PolicyCompletenessCompliance {
 		
 		// All QualitativeValue instances should declare a gr:lesser to a QualitativeValue instance of the same type
 		// Only one should not declare a gr:lesser which should be the maximum of all
+		// OR
+		// they should have a gr:nonEqual relation
 		for(String qualitativeQV:bp.getQualitativeValueMapWithInstances().keySet())
 		{
-			boolean maximumFound = false;
-			for(QualitativeValueInstance qualitativeQVInstance:((QualitativeValue)bp.getQualitativeValueMapWithInstances().get(qualitativeQV)).getInstanceMap().values())
-			{
-				RDFNode lesser = this.getLesser(qualitativeQVInstance.getUri());
-				if(lesser == null)
-				{	// this should be the maximum
-					if(maximumFound)
-					{
-						writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQV + " declares two maximum values.");
-						throw new BrokerPolicyException("Qualitative value " + qualitativeQV + " declares two maximum values.");						
-					}
-					maximumFound = true;
-				}
-				else
+			if(!this.isOrderedQualitativeValueClass(qualitativeQV))
+			{	// unordered QVs
+				for(QualitativeValueInstance qualitativeQVInstance:((QualitativeValue)bp.getQualitativeValueMapWithInstances().get(qualitativeQV)).getInstanceMap().values())
 				{
-					// lesser should be of qualitativeQV type 
-					RDFNode lesserType = oneVarOneSolutionQuery("{<" + lesser.toString() + "> a ?var}");
-					if(!lesserType.toString().equals(qualitativeQV))
+					RDFNode nonEqual = this.getNonEqual(qualitativeQVInstance.getUri());
+					if(nonEqual == null)
 					{
-						writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is not of the same type.");
-						throw new BrokerPolicyException("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is not of the same type.");						
-					}
-					
-					// this lesser should not be lesser to more than one QVs
-					int numOfLessers = countQuery("{?anyValue gr:lesser <" + lesser.toString() + ">}");
-					if(numOfLessers > 1)
-					{
-						writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is also declared as lesser by another QV.");
-						throw new BrokerPolicyException("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is also declared as lesser by another QV.");						
+						writeMessageToBrokerPolicyReport("Qualitative value instance" + qualitativeQVInstance + " is member of an unordered list and it does not declare a gr:nonEqual relation.");
+						throw new BrokerPolicyException("Qualitative value instance" + qualitativeQVInstance + " is member of an unordered list and it does not declare a gr:nonEqual relation.");						
 					}
 				}
 			}
-			
-			if(maximumFound == false)
-			{
-				writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQV + " does not declare a maximum value.");
-				throw new BrokerPolicyException("Qualitative value " + qualitativeQV + " does not declare a maximum value.");						
+			else
+			{	// ordered QVs
+				boolean maximumFound = false;
+				for(QualitativeValueInstance qualitativeQVInstance:((QualitativeValue)bp.getQualitativeValueMapWithInstances().get(qualitativeQV)).getInstanceMap().values())
+				{
+					RDFNode lesser = this.getLesser(qualitativeQVInstance.getUri());
+					if(lesser == null)
+					{	// this should be the maximum
+						if(maximumFound)
+						{
+							writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQV + " declares two maximum values.");
+							throw new BrokerPolicyException("Qualitative value " + qualitativeQV + " declares two maximum values.");						
+						}
+						maximumFound = true;
+					}
+					else
+					{
+						// lesser should be of qualitativeQV type 
+						RDFNode lesserType = oneVarOneSolutionQuery("{<" + lesser.toString() + "> a ?var}");
+						if(!lesserType.toString().equals(qualitativeQV))
+						{
+							writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is not of the same type.");
+							throw new BrokerPolicyException("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is not of the same type.");						
+						}
+						
+						// this lesser should not be lesser to more than one QVs
+						int numOfLessers = countQuery("{?anyValue gr:lesser <" + lesser.toString() + ">}");
+						if(numOfLessers > 1)
+						{
+							writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is also declared as lesser by another QV.");
+							throw new BrokerPolicyException("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is also declared as lesser by another QV.");						
+						}
+					}
+				}
+				
+				if(maximumFound == false)
+				{
+					writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQV + " does not declare a maximum value.");
+					throw new BrokerPolicyException("Qualitative value " + qualitativeQV + " does not declare a maximum value.");						
+				}
 			}
+		}
+	}
+
+	private RDFNode getNonEqual(String qualitativeQVInstance) 
+	{
+		RDFNode nonEqual = oneVarOneSolutionQuery("{<" + qualitativeQVInstance + "> gr:nonEqual ?var}");
+		return nonEqual;
+	}
+
+	/*
+	 * in an ordered QV list all but one QV instances should have gr:lesser
+	 */
+	private boolean isOrderedQualitativeValueClass(String qualitativeQV)
+	{
+		int numOfMissingLessers = 0;
+		for(QualitativeValueInstance qualitativeQVInstance:((QualitativeValue)bp.getQualitativeValueMapWithInstances().get(qualitativeQV)).getInstanceMap().values())
+		{
+			RDFNode lesser = this.getLesser(qualitativeQVInstance.getUri());
+			if(lesser == null)
+			{
+				numOfMissingLessers++;
+			}
+		}
+		
+		if(numOfMissingLessers == 1)
+		{	// ordered
+			return true;
+		}
+		else
+		{
+			return false;
 		}
 	}
 
