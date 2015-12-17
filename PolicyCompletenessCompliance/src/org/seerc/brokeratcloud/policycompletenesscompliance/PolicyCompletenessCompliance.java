@@ -2027,23 +2027,9 @@ public class PolicyCompletenessCompliance {
 		
 		// All QualitativeValue instances should declare a gr:lesser to a QualitativeValue instance of the same type
 		// Only one should not declare a gr:lesser which should be the maximum of all
-		// OR
-		// they should have a gr:nonEqual relation
 		for(String qualitativeQV:bp.getQualitativeValueMapWithInstances().keySet())
 		{
-			if(!this.isOrderedQualitativeValueClass(qualitativeQV))
-			{	// unordered QVs
-				for(QualitativeValueInstance qualitativeQVInstance:((QualitativeValue)bp.getQualitativeValueMapWithInstances().get(qualitativeQV)).getInstanceMap().values())
-				{
-					RDFNode nonEqual = this.getNonEqual(qualitativeQVInstance.getUri());
-					if(nonEqual == null)
-					{
-						writeMessageToBrokerPolicyReport("Qualitative value instance" + qualitativeQVInstance + " is member of an unordered list and it does not declare a gr:nonEqual relation.");
-						throw new BrokerPolicyException("Qualitative value instance" + qualitativeQVInstance + " is member of an unordered list and it does not declare a gr:nonEqual relation.");						
-					}
-				}
-			}
-			else
+			if(this.isOrderedQualitativeValueClass(qualitativeQV))
 			{	// ordered QVs
 				boolean maximumFound = false;
 				for(QualitativeValueInstance qualitativeQVInstance:((QualitativeValue)bp.getQualitativeValueMapWithInstances().get(qualitativeQV)).getInstanceMap().values())
@@ -2094,28 +2080,20 @@ public class PolicyCompletenessCompliance {
 	}
 
 	/*
-	 * in an ordered QV list all but one QV instances should have gr:lesser
+	 * If any number of gr:lesser are found then this is an ordered QV list
 	 */
 	private boolean isOrderedQualitativeValueClass(String qualitativeQV)
 	{
-		int numOfMissingLessers = 0;
 		for(QualitativeValueInstance qualitativeQVInstance:((QualitativeValue)bp.getQualitativeValueMapWithInstances().get(qualitativeQV)).getInstanceMap().values())
 		{
 			RDFNode lesser = this.getLesser(qualitativeQVInstance.getUri());
-			if(lesser == null)
+			if(lesser != null)
 			{
-				numOfMissingLessers++;
+				return true;
 			}
 		}
-		
-		if(numOfMissingLessers == 1)
-		{	// ordered
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+
+		return false;
 	}
 
 	private RDFNode getLesser(String qualitativeQVInstance)
