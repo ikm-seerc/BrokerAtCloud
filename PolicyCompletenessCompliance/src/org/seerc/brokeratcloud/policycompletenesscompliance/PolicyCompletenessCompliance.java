@@ -860,8 +860,8 @@ public class PolicyCompletenessCompliance {
 				 */
 				if(this.checkSDInstanceExists(sdInstance.toString()))
 				{
-					writeMessageToComplianceReport("A Service Description with isntance " + sdInstance + " already exists.");
-					throw new ComplianceException("A Service Description with isntance " + sdInstance + " already exists.");
+					writeMessageToComplianceReport("A Service Description with instance " + sdInstance + " already exists.");
+					throw new ComplianceException("A Service Description with instance " + sdInstance + " already exists.");
 				}
 				
 				/*
