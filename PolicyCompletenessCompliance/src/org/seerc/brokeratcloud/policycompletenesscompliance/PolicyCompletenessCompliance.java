@@ -1280,7 +1280,34 @@ public class PolicyCompletenessCompliance {
 		writeMessageToCompletenessReport("Entity Involvement instance is associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");		
 		
 		// check that instance of Business Entity exists
-		RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
+		RDFNode beInstance = oneVarOneSolutionQuery("{<" + eiInstance.toString() + "> usdl-core:ofBusinessEntity ?var}");
+		if(beInstance == null)
+		{
+			writeMessageToCompletenessReport("Error - Entity Involvement instance does not declare a ofBusinessEnity relation.");
+			throw new CompletenessException("Entity Involvement instance does not declare a ofBusinessEnity relation.");
+		}
+		
+		Integer beInstanceCount = countQuery("{<" + beInstance.toString() + "> a gr:BusinessEntity}");
+		if(beInstanceCount == 0)
+		{	
+			if(this.hasSuccessorOf(sInstance.toString()))
+			{	// a successor, look in Fuseki
+				Integer beInstanceCountInFuseki = countQuery("{<"+ beInstance.toString() + "> a gr:BusinessEntity}", fc.getModel());
+				if(beInstanceCountInFuseki == 0)
+				{
+					writeMessageToBrokerPolicyReport("Error - Business Entity instance was not found in the Fuseki.");
+					throw new CompletenessException("Business Entity instance was not found in the Fuseki.");
+				}
+			}
+			else
+			{	// root SD, problem...
+				writeMessageToBrokerPolicyReport("Error - Business Entity instance was not found in the Service Description.");
+				throw new CompletenessException("Business Entity instance was not found in the Service Description.");
+			}
+		}
+		writeMessageToBrokerPolicyReport("Business Entity instance was found.");
+		
+		/*RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
 		if(beInstance == null)
 		{
 			writeMessageToCompletenessReport("Error - No Business Entity instance was found in the Service Description.");
@@ -1295,7 +1322,7 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 			throw new CompletenessException("Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 		}
-		writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");		
+		writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");*/		
 		
 		writeMessageToCompletenessReport("----------------");
 		writeMessageToCompletenessReport("Service Section:");
@@ -3125,8 +3152,7 @@ public class PolicyCompletenessCompliance {
 			}
 			writeMessageToCompletenessReport("Entity Involvement instance is associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");		
 			
-			// check that instance of Business Entity exists
-			RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
+			/*RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
 			if(beInstance == null)
 			{
 				writeMessageToCompletenessReport("Error - No Business Entity instance was found in the Service Description.");
@@ -3141,7 +3167,7 @@ public class PolicyCompletenessCompliance {
 				writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 				throw new CompletenessException("Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 			}
-			writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");		
+			writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");*/		
 			
 			writeMessageToCompletenessReport("----------------");
 			writeMessageToCompletenessReport("Service Section:");
@@ -3162,6 +3188,34 @@ public class PolicyCompletenessCompliance {
 				RDFNode node = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}");
 				si_uri = node.toString();
 			}
+			
+			// check that instance of Business Entity exists
+			RDFNode beInstance = oneVarOneSolutionQuery("{<" + eiInstance.toString() + "> usdl-core:ofBusinessEntity ?var}");
+			if(beInstance == null)
+			{
+				writeMessageToCompletenessReport("Error - Entity Involvement instance does not declare a ofBusinessEnity relation.");
+				throw new CompletenessException("Entity Involvement instance does not declare a ofBusinessEnity relation.");
+			}
+			
+			Integer beInstanceCount = countQuery("{<" + beInstance.toString() + "> a gr:BusinessEntity}");
+			if(beInstanceCount == 0)
+			{	
+				if(this.hasSuccessorOf(si_uri))
+				{	// a successor, look in Fuseki
+					Integer beInstanceCountInFuseki = countQuery("{<"+ beInstance.toString() + "> a gr:BusinessEntity}", fc.getModel());
+					if(beInstanceCountInFuseki == 0)
+					{
+						writeMessageToBrokerPolicyReport("Error - Business Entity instance was not found in the Fuseki.");
+						throw new CompletenessException("Business Entity instance was not found in the Fuseki.");
+					}
+				}
+				else
+				{	// root SD, problem...
+					writeMessageToBrokerPolicyReport("Error - Business Entity instance was not found in the Service Description.");
+					throw new CompletenessException("Business Entity instance was not found in the Service Description.");
+				}
+			}
+			writeMessageToBrokerPolicyReport("Business Entity instance was found.");
 			
 			// check that Service Individual instance is associated via a hasEntityInvolvement relation with the Entity Involvement instance
 			Integer heiAssociationsCount = countQuery("{<" + si_uri + "> usdl-core:hasEntityInvolvement <" + eiInstance.toString() + ">}");
