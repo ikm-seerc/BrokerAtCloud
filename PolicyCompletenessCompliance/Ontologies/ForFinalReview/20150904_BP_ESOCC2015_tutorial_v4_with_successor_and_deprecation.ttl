@@ -21,14 +21,10 @@
 @prefix fc: <http://www.broker-cloud.eu/service-descriptions/CAS/categories#> . 
 @prefix bp: <http://guide.broker-cloud.eu/esocc2015#> . 
 
-bp:BrokerAtCloudTutorialTeam 
-  a gr:BusinessEntity ; 
-  gr:legalName "Broker at Cloud project consortium"^^xsd:string . 
-
 bp:BrokerAtCloudTutorialTeamEntityInvolvement 
   a usdl-core:EntityInvolvement ; 
   usdl-core:withBusinessRole usdl-business-roles:intermediary ; 
-  usdl-core:ofBusinessEntity bp:BrokerAtCloudTutorialTeam . 
+  usdl-core:ofBusinessEntity <http://guide.broker-cloud.eu/esocc2015FirstBP#BrokerAtCloudTutorialTeam> . 
 
 bp:BrokerAtCloudESOCC2015TutorialBrokerPolicy 
   a bp:BrokerAtCloudESOCC2015TutorialBrokerPolicyModel ; 

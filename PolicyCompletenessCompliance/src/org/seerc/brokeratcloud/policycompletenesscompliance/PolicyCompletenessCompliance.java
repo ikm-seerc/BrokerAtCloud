@@ -1712,16 +1712,36 @@ public class PolicyCompletenessCompliance {
 		}
 		writeMessageToBrokerPolicyReport("Entity Involvement instance is associated with the intermediary instance of the class BusinessRole via the object property withBusinessRole.");
 
-		// check that single Business Entity instance exists for the Cloud Platform
-		Integer beInstanceCount = countQuery("{?var a gr:BusinessEntity}");
-		if(beInstanceCount == 0 || beInstanceCount > 1)
-		{	// more than one instances of business entity, throw exception
-			writeMessageToBrokerPolicyReport("Error - Not exactly one instance of Business Entity was found in the Broker Policy.");
-			throw new BrokerPolicyException("Not exactly one instance of Business Entity was found in the Broker Policy.");
+		RDFNode beInstance = oneVarOneSolutionQuery("{<"+ eiInstance.toString() + "> usdl-core:ofBusinessEntity ?var}");
+		if(beInstance == null)
+		{
+			writeMessageToBrokerPolicyReport("Error - Entity Involvement instance does not declare a ofBusinessEntity relation.");
+			throw new BrokerPolicyException("Entity Involvement instance does not declare a ofBusinessEntity relation.");
 		}
-		writeMessageToBrokerPolicyReport("Exactly one instance of Business Entity was found in the Broker Policy.");
+		writeMessageToBrokerPolicyReport("Entity Involvement instance declares a ofBusinessEntity relation with " + beInstance.toString() + ".");
 
-		RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
+		// check that single Business Entity instance exists for the Cloud Platform
+		Integer beInstanceCount = countQuery("{<"+ beInstance.toString() + "> a gr:BusinessEntity}");
+		if(beInstanceCount == 0)
+		{	
+			if(this.hasSuccessorOf(smInstance.toString()))
+			{	// a successor, look in Fuseki
+				Integer beInstanceCountInFuseki = countQuery("{<"+ beInstance.toString() + "> a gr:BusinessEntity}", fc.getModel());
+				if(beInstanceCountInFuseki == 0)
+				{
+					writeMessageToBrokerPolicyReport("Error - Business Entity instance was not found in the Fuseki.");
+					throw new BrokerPolicyException("Business Entity instance was not found in the Fuseki.");
+				}
+			}
+			else
+			{	// root BP, problem...
+				writeMessageToBrokerPolicyReport("Error - Business Entity instance was not found in the Broker Policy.");
+				throw new BrokerPolicyException("Business Entity instance was not found in the Broker Policy.");
+			}
+		}
+		writeMessageToBrokerPolicyReport("Business Entity instance was found.");
+
+		/*RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
 		if(beInstance == null)
 		{
 			writeMessageToBrokerPolicyReport("Error - Business Entity instance for the Cloud Platform does not exist in the Broker Policy.");
@@ -1736,7 +1756,7 @@ public class PolicyCompletenessCompliance {
 			writeMessageToBrokerPolicyReport("Error - Entity Involvement instance is not associated with the Business Entity instance via the ofBusinessEntity relation.");
 			throw new BrokerPolicyException("Entity Involvement instance is not associated with the Business Entity instance via the ofBusinessEntity relation.");
 		}
-		writeMessageToBrokerPolicyReport("Entity Involvement instance is associated with the Business Entity instance via the ofBusinessEntity relation.");
+		writeMessageToBrokerPolicyReport("Entity Involvement instance is associated with the Business Entity instance via the ofBusinessEntity relation.");*/
 		
 		// if BP data are in InputStream, reset it to reuse it
 		for(int i=0;i<bpFileData.length;i++)
