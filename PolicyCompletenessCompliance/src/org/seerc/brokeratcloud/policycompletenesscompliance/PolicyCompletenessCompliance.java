@@ -1641,6 +1641,14 @@ public class PolicyCompletenessCompliance {
 		}
 		writeMessageToBrokerPolicyReport("Service Model instance was found in the Broker Policy: " + smInstance.toString());
 		
+		// check that SM instance is connected to a Classification Dimension that exists
+		RDFNode cdInstance = oneVarOneSolutionQuery("{<"+ smInstance.toString() + "> usdl-core-cb:hasClassificationDimension ?var}");
+		Integer cdInstanceCount = countQuery("{<"+ cdInstance.toString() + "> a usdl-core-cb:ClassificationDimension}");
+		if(cdInstanceCount == 0)
+		{
+			writeMessageToBrokerPolicyReport("Error - Broker Policy instance is referring to a classification dimension that does not exist (" + cdInstance.toString() + ").");
+			throw new BrokerPolicyException("Broker Policy instance is referring to a classification dimension that does not exist (" + cdInstance.toString() + ").");
+		}
 		// check that SM instance is connected to fc:rootConcept via the usdl-core-cb:hasClassificationDimension
 		/*Integer rcHasClassificationDimensionCount = countQuery("{<"+ smInstance.toString() + "> usdl-core-cb:hasClassificationDimension <" + FC + "rootConcept>}");
 		if(rcHasClassificationDimensionCount == 0)
