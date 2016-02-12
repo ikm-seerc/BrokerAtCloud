@@ -1653,17 +1653,20 @@ public class PolicyCompletenessCompliance {
 			if(this.hasSuccessorOf(smInstance.toString()))
 			{	// yes
 				// check if it is inside the Fuseki
-				if(!fc.resourceExists(cdInstance))
+				Integer cdInstanceCountInFuseki = countQuery("{<"+ cdInstance.toString() + "> a usdl-core-cb:ClassificationDimension}", fc.getModel());
 				{	// doesn't exist in Fuseki... problem
-					writeMessageToBrokerPolicyReport("Error - Broker Policy instance is referring to a classification dimension that does not exist in Fuseki (" + cdInstance.toString() + ").");
-					throw new BrokerPolicyException("Broker Policy instance is referring to a classification dimension that does not exist in Fuseki (" + cdInstance.toString() + ").");
+					if(cdInstanceCountInFuseki == 0)
+					{
+						writeMessageToBrokerPolicyReport("Error - Broker Policy instance is referring to a classification dimension that does not exist in Fuseki (" + cdInstance.toString() + ").");
+						throw new BrokerPolicyException("Broker Policy instance is referring to a classification dimension that does not exist in Fuseki (" + cdInstance.toString() + ").");
+					}
 				}
 			}
 			else
 			{	// no
 				// throw exception, classification dimension should be here 
 				writeMessageToBrokerPolicyReport("Error - Broker Policy instance is referring to a classification dimension that does not exist in the BP (" + cdInstance.toString() + ").");
-				throw new BrokerPolicyException("Broker Policy instance is referring to a classification dimension that does not exist the BP (" + cdInstance.toString() + ").");
+				throw new BrokerPolicyException("Broker Policy instance is referring to a classification dimension that does not exist in the BP (" + cdInstance.toString() + ").");
 			}
 		}
 		// check that SM instance is connected to fc:rootConcept via the usdl-core-cb:hasClassificationDimension
@@ -3562,8 +3565,13 @@ public class PolicyCompletenessCompliance {
 			Integer cdCount = countQuery("{<" + cdsNodes[i].toString() + "> rdf:type <" + USDL_CORE_CB + "ClassificationDimension>}");
 			if(cdCount == 0)
 			{
-				writeMessageToCompletenessReport("Error - Classification dimension " + cdsNodes[i].toString() + " does not exist.");
-				throw new CompletenessException("Classification dimension " + cdsNodes[i].toString() + " does not exist.");
+				// not found in BP or SD, find in triple store
+				Integer cdCountInFuseki = countQuery("{<" + cdsNodes[i].toString() + "> rdf:type <" + USDL_CORE_CB + "ClassificationDimension>}", fc.getModel());
+				if(cdCountInFuseki == 0)
+				{
+					writeMessageToCompletenessReport("Error - Classification dimension " + cdsNodes[i].toString() + " does not exist.");
+					throw new CompletenessException("Classification dimension " + cdsNodes[i].toString() + " does not exist.");
+				}
 			}
 			writeMessageToCompletenessReport("Found classification dimension " + cdsNodes[i].toString() + ".");
 		}
@@ -4487,6 +4495,26 @@ public class PolicyCompletenessCompliance {
 		return num;
 	}
 
+	private Integer countQuery(String subQuery, Model model) {
+		QueryExecution qexec = returnQueryExecObject("SELECT (COUNT(*) as ?count) WHERE "
+				+ subQuery, model);
+		Integer num = null;
+		try {
+			ResultSet countResultSet = qexec.execSelect();
+
+			while (countResultSet.hasNext()) {
+				QuerySolution soln = countResultSet.nextSolution();
+				RDFNode countNode = soln.get("?count");
+
+				num = countNode.asLiteral().getInt();
+			}
+		} finally {
+			qexec.close();
+		}
+
+		return num;
+	}
+
 	private RDFNode oneVarOneSolutionQuery(String subQuery) {
 		QueryExecution qexec = returnQueryExecObject("SELECT ?var WHERE "
 				+ subQuery);
@@ -4547,6 +4575,31 @@ public class PolicyCompletenessCompliance {
 		return qexec;
 	}
 	
+	private QueryExecution returnQueryExecObject(String coreQuery, Model model) {
+		StringBuffer queryStr = new StringBuffer();
+		// Establish Prefixes
+
+		queryStr.append("PREFIX owl: <http://www.w3.org/2002/07/owl#>");
+		queryStr.append("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>");
+		queryStr.append("PREFIX xml: <http://www.w3.org/XML/1998/namespace>");
+		queryStr.append("PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>");
+		queryStr.append("PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>");
+		queryStr.append("PREFIX usdl-core: <http://www.linked-usdl.org/ns/usdl-core#>");
+		queryStr.append("PREFIX usdl-sla: <http://www.linked-usdl.org/ns/usdl-sla#>");
+		queryStr.append("PREFIX usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#>");
+		queryStr.append("PREFIX usdl-sla-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker-sla#>");
+		//queryStr.append("PREFIX brokerpolicy: <http://www.broker-cloud.eu/d043567/linked-usdl-ontologies/SAP-HANA-Cloud-Apps-Broker/2014/01/brokerpolicy#>");
+		//queryStr.append("PREFIX cas: <http://www.broker-cloud.eu/service-descriptions/CAS/broker#>");
+		queryStr.append("PREFIX gr: <http://purl.org/goodrelations/v1#>");
+		//queryStr.append("PREFIX fc: <http://www.broker-cloud.eu/service-descriptions/CAS/categories#>");
+
+		queryStr.append(coreQuery);
+
+		Query query = QueryFactory.create(queryStr.toString());
+		QueryExecution qexec = QueryExecutionFactory.create(query, model);
+
+		return qexec;
+	}
 	// Write a String message to a TeeOutputStream
 	private void writeMessageToTee(TeeOutputStream teeos, String message)
 	{

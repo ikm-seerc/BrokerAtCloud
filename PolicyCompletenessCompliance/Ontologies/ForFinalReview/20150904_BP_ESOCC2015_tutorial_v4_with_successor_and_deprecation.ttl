@@ -58,20 +58,6 @@ fc:BrokerAtCloudESOCC2015TutorialBrokerPolicyConceptScheme
   skos:prefLabel "Root Concept Scheme"@en ; 
   skos:hasTopConcept fc:rootConcept . 
 
-fc:Shipment 
-  a usdl-core-cb:ClassificationDimension ; 
-  dcterms:title "Shipment extension" ; 
-  skos:prefLabel "Shipment"@en ; 
-  skos:broader fc:rootConcept ; 
-  skos:inScheme fc:BrokerAtCloudESOCC2015TutorialBrokerPolicyConceptScheme . 
-
-fc:BankAndCashManagement 
-  a usdl-core-cb:ClassificationDimension ; 
-  dcterms:title "Bank and Cash Management extension." ; 
-  skos:prefLabel "Bank&Cash"@en ; 
-  skos:broader fc:rootConcept ; 
-  skos:inScheme fc:BrokerAtCloudESOCC2015TutorialBrokerPolicyConceptScheme . 
-
 fc:PointOfSales 
   a usdl-core-cb:ClassificationDimension ; 
   dcterms:title "Point of sales extension" ; 

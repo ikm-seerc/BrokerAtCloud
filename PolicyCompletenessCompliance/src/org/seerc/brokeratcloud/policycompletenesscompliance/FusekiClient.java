@@ -17,6 +17,7 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.query.DatasetAccessor;
 import com.hp.hpl.jena.query.DatasetAccessorFactory;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
@@ -94,11 +95,11 @@ public class FusekiClient {
 		dataAccessor.putModel(ontmodel);
 	}
 	
-	public boolean resourceExists(RDFNode resource)
+	public Model getModel()
 	{
 		DatasetAccessor dataAccessor = DatasetAccessorFactory.createHTTP(datasetURL + "/data");
 		
-		return dataAccessor.getModel().containsResource(resource);
+		return dataAccessor.getModel();
 	}
 
 }
