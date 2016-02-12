@@ -104,6 +104,8 @@ public class PolicyCompletenessCompliance {
 
 	// the GREG client used during validation
 	WSO2GREGClient greg = new WSO2GREGClient();
+	
+	FusekiClient fc;
 
 	public PolicyCompletenessCompliance()
 	{
@@ -1646,8 +1648,18 @@ public class PolicyCompletenessCompliance {
 		Integer cdInstanceCount = countQuery("{<"+ cdInstance.toString() + "> a usdl-core-cb:ClassificationDimension}");
 		if(cdInstanceCount == 0)
 		{
-			writeMessageToBrokerPolicyReport("Error - Broker Policy instance is referring to a classification dimension that does not exist (" + cdInstance.toString() + ").");
-			throw new BrokerPolicyException("Broker Policy instance is referring to a classification dimension that does not exist (" + cdInstance.toString() + ").");
+			// classification dimension not found in BP...
+			// is this a successor?
+			if(this.hasSuccessorOf(smInstance.toString()))
+			{	// yes
+				// check if it is inside the Fuseki
+			}
+			else
+			{	// no
+				// throw exception, classification dimension should be here 
+				writeMessageToBrokerPolicyReport("Error - Broker Policy instance is referring to a classification dimension that does not exist (" + cdInstance.toString() + ").");
+				throw new BrokerPolicyException("Broker Policy instance is referring to a classification dimension that does not exist (" + cdInstance.toString() + ").");
+			}
 		}
 		// check that SM instance is connected to fc:rootConcept via the usdl-core-cb:hasClassificationDimension
 		/*Integer rcHasClassificationDimensionCount = countQuery("{<"+ smInstance.toString() + "> usdl-core-cb:hasClassificationDimension <" + FC + "rootConcept>}");
