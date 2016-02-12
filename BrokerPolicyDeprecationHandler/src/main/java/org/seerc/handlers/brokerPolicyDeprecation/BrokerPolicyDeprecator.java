@@ -2,7 +2,7 @@ package org.seerc.handlers.brokerPolicyDeprecation;
 
 import java.io.InputStream;
 
-import org.seerc.brokeratcloud.messagebroker.FusekiClient;
+import org.seerc.brokeratcloud.policycompletenesscompliance.FusekiClient;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
