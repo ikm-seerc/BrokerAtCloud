@@ -58,15 +58,6 @@ fc:BrokerAtCloudESOCC2015TutorialBrokerPolicyConceptScheme
   skos:prefLabel "Root Concept Scheme"@en ; 
   skos:hasTopConcept fc:rootConcept . 
 
-fc:rootConcept 
-  a usdl-core-cb:ClassificationDimension ; 
-  skos:prefLabel "Root Concept"@en ; 
-  skos:topConceptOf fc:BrokerAtCloudESOCC2015TutorialBrokerPolicyConceptScheme ; 
-  skos:inScheme fc:BrokerAtCloudESOCC2015TutorialBrokerPolicyConceptScheme ; 
-  skos:narrower fc:Shipment , 
-    fc:BankAndCashManagement , 
-    fc:PointOfSales . 
-
 fc:Shipment 
   a usdl-core-cb:ClassificationDimension ; 
   dcterms:title "Shipment extension" ; 
