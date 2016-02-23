@@ -21,14 +21,10 @@
 @prefix fc: <http://www.broker-cloud.eu/service-descriptions/CAS/categories#> . 
 @prefix bp: <http://guide.broker-cloud.eu/esocc2015#> . 
 
-bp:BrokerAtCloudTutorialTeam 
-  a gr:BusinessEntity ; 
-  gr:legalName "Broker at Cloud project consortium"^^xsd:string . 
-
 bp:BrokerAtCloudTutorialTeamEntityInvolvement 
   a usdl-core:EntityInvolvement ; 
   usdl-core:withBusinessRole usdl-business-roles:intermediary ; 
-  usdl-core:ofBusinessEntity bp:BrokerAtCloudTutorialTeam . 
+  usdl-core:ofBusinessEntity <http://guide.broker-cloud.eu/esocc2015FirstBP#BrokerAtCloudTutorialTeam> . 
 
 bp:BrokerAtCloudESOCC2015TutorialBrokerPolicy 
   a bp:BrokerAtCloudESOCC2015TutorialBrokerPolicyModel ; 
@@ -57,29 +53,6 @@ fc:BrokerAtCloudESOCC2015TutorialBrokerPolicyConceptScheme
   dcterms:title "Root for all classification dimensions." ; 
   skos:prefLabel "Root Concept Scheme"@en ; 
   skos:hasTopConcept fc:rootConcept . 
-
-fc:rootConcept 
-  a usdl-core-cb:ClassificationDimension ; 
-  skos:prefLabel "Root Concept"@en ; 
-  skos:topConceptOf fc:BrokerAtCloudESOCC2015TutorialBrokerPolicyConceptScheme ; 
-  skos:inScheme fc:BrokerAtCloudESOCC2015TutorialBrokerPolicyConceptScheme ; 
-  skos:narrower fc:Shipment , 
-    fc:BankAndCashManagement , 
-    fc:PointOfSales . 
-
-fc:Shipment 
-  a usdl-core-cb:ClassificationDimension ; 
-  dcterms:title "Shipment extension" ; 
-  skos:prefLabel "Shipment"@en ; 
-  skos:broader fc:rootConcept ; 
-  skos:inScheme fc:BrokerAtCloudESOCC2015TutorialBrokerPolicyConceptScheme . 
-
-fc:BankAndCashManagement 
-  a usdl-core-cb:ClassificationDimension ; 
-  dcterms:title "Bank and Cash Management extension." ; 
-  skos:prefLabel "Bank&Cash"@en ; 
-  skos:broader fc:rootConcept ; 
-  skos:inScheme fc:BrokerAtCloudESOCC2015TutorialBrokerPolicyConceptScheme . 
 
 fc:PointOfSales 
   a usdl-core-cb:ClassificationDimension ; 

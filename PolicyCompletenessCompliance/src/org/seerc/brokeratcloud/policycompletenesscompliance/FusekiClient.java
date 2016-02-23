@@ -1,4 +1,4 @@
-package org.seerc.brokeratcloud.messagebroker;
+package org.seerc.brokeratcloud.policycompletenesscompliance;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
+import org.h2.util.StatementBuilder;
 
 import com.hp.hpl.jena.graph.GraphUtil;
 import com.hp.hpl.jena.graph.Node;
@@ -16,7 +17,9 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.query.DatasetAccessor;
 import com.hp.hpl.jena.query.DatasetAccessorFactory;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.update.GraphStore;
@@ -30,8 +33,8 @@ public class FusekiClient {
 
 	String datasetURL;
 	
-	public FusekiClient(){
 		Properties fuseki_properties = new Properties();
+		public FusekiClient(){
 
 		try {
 			fuseki_properties.load(this.getClass().getResourceAsStream("/properties/fuseki.properties"));
@@ -90,6 +93,13 @@ public class FusekiClient {
 		
 		// replace Fusseki model
 		dataAccessor.putModel(ontmodel);
+	}
+	
+	public Model getModel()
+	{
+		DatasetAccessor dataAccessor = DatasetAccessorFactory.createHTTP(datasetURL + "/data");
+		
+		return dataAccessor.getModel();
 	}
 
 }

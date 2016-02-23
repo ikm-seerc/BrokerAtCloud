@@ -3,7 +3,7 @@ package org.seerc.handlers.service;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.seerc.brokeratcloud.messagebroker.FusekiClient;
+import org.seerc.brokeratcloud.policycompletenesscompliance.FusekiClient;
 import org.seerc.brokeratcloud.messagebroker.ServiceLifecyclePublisher;
 import org.seerc.brokeratcloud.messagebroker.WSO2GREGEvaluator;
 import org.seerc.brokeratcloud.policycompletenesscompliance.CompletenessException;

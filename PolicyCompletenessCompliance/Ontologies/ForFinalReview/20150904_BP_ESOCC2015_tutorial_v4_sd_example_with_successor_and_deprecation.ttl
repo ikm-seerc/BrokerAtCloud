@@ -21,10 +21,6 @@
 @prefix sd: <http://yournamespace.com/services/yourservicenamespace#> . 
 @prefix sp: <http://sap.com#> . 
 
-sp:SAP 
-  a gr:BusinessEntity ; 
-  gr:legalName "SAP SE" . 
-
 sd:SAPEntityInvolvement 
   a usdl-core:EntityInvolvement ; 
   usdl-core:withBusinessRole usdl-business-roles:provider ; 

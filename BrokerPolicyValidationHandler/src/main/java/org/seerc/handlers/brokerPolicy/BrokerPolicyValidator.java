@@ -9,7 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.seerc.brokeratcloud.messagebroker.FusekiClient;
+import org.seerc.brokeratcloud.policycompletenesscompliance.FusekiClient;
 import org.seerc.brokeratcloud.messagebroker.MessageBrokerSubscriber;
 import org.seerc.brokeratcloud.messagebroker.OutOfRangeSLAViolationListener;
 import org.seerc.brokeratcloud.messagebroker.OutOfRangeSLAViolationSubscriber;

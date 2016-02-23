@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -102,6 +104,8 @@ public class PolicyCompletenessCompliance {
 
 	// the GREG client used during validation
 	WSO2GREGClient greg = new WSO2GREGClient();
+	
+	FusekiClient fc = new FusekiClient();
 
 	public PolicyCompletenessCompliance()
 	{
@@ -450,31 +454,35 @@ public class PolicyCompletenessCompliance {
 		}
 	}
 
+	// do this only if the qualitative values are ordered
 	private void performQualitativeAtLeastAsGoodChecks(RDFNode qvInstance, RDFNode qvClass, RDFNode succeeddedInstance, InputStream succeedded) throws ComplianceException 
 	{
-		resetStream(succeedded);
-		
-		// if they declare the same QV instance then everything is OK, no checks required
-		if(qvInstance.toString().equals(succeeddedInstance.toString()))
+		if(this.isOrderedQualitativeValueClass(qvClass.toString()))
 		{
-			return;
-		}
-		
-		/*
-		 * Retrieve all lessers of qvInstance. If succeeddedInstance is found 
-		 * then we have a problem.
-		 */
-		RDFNode lesser = this.getLesser(qvInstance.toString());
-		while(lesser != null)
-		{
-			if(lesser.toString().equals(succeeddedInstance.toString()))
+			resetStream(succeedded);
+			
+			// if they declare the same QV instance then everything is OK, no checks required
+			if(qvInstance.toString().equals(succeeddedInstance.toString()))
 			{
-				writeMessageToComplianceReport(qvInstance + " is not at least as good the QV declared in the succeeded SD (" + succeeddedInstance + ").");
-				throw new ComplianceException(qvInstance + " is not at least as good the QV declared in the succeeded SD (" + succeeddedInstance + ").");
+				return;
 			}
 			
-			// get next lesser
-			lesser = this.getLesser(lesser.toString());
+			/*
+			 * Retrieve all lessers of qvInstance. If succeeddedInstance is found 
+			 * then we have a problem.
+			 */
+			RDFNode lesser = this.getLesser(qvInstance.toString());
+			while(lesser != null)
+			{
+				if(lesser.toString().equals(succeeddedInstance.toString()))
+				{
+					writeMessageToComplianceReport(qvInstance + " is not at least as good the QV declared in the succeeded SD (" + succeeddedInstance + ").");
+					throw new ComplianceException(qvInstance + " is not at least as good the QV declared in the succeeded SD (" + succeeddedInstance + ").");
+				}
+				
+				// get next lesser
+				lesser = this.getLesser(lesser.toString());
+			}
 		}
 	}
 
@@ -854,8 +862,8 @@ public class PolicyCompletenessCompliance {
 				 */
 				if(this.checkSDInstanceExists(sdInstance.toString()))
 				{
-					writeMessageToComplianceReport("A Service Description with isntance " + sdInstance + " already exists.");
-					throw new ComplianceException("A Service Description with isntance " + sdInstance + " already exists.");
+					writeMessageToComplianceReport("A Service Description with instance " + sdInstance + " already exists.");
+					throw new ComplianceException("A Service Description with instance " + sdInstance + " already exists.");
 				}
 				
 				/*
@@ -897,7 +905,7 @@ public class PolicyCompletenessCompliance {
 			}
 
 			// For any k >= 1, validFrom(SD k ) must be greater or equal than the current date.
-			if(this.dateIsBeforeNow(validFrom))
+			if(this.dateIsBeforeNowIgnoringTime(validFrom))
 			{
 				writeMessageToComplianceReport(sdInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
 				throw new ComplianceException(sdInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
@@ -1032,14 +1040,14 @@ public class PolicyCompletenessCompliance {
 					}
 				
 					/*
-					For any k > 1, deprecationRecommendationTimePoint(SD k ) >
+					For any k > 1, deprecationRecommendationTimePoint(SD k ) >=
 					validFrom(SD k ) (i.e. the deprecation recommendation time point for an SD
-					should be greater than the date validFrom date of the successor SD).
+					should be greater or equal than the validFrom date of the successor SD).
 					 */
-					if(!deprecationRecommendationTimePoint.after(validFrom))
+					if(deprecationRecommendationTimePoint.before(validFrom))
 					{
-						writeMessageToComplianceReport(sdInstance + " declares a deprecationRecommendationTimePoint property (" + deprecationRecommendationTimePoint + ") which is not after its validFrom property (" + validFrom + ").");
-						throw new ComplianceException(sdInstance + " declares a deprecationRecommendationTimePoint property (" + deprecationRecommendationTimePoint + ") which is not after its validFrom property (" + validFrom + ").");
+						writeMessageToComplianceReport(sdInstance + " declares a deprecationRecommendationTimePoint property (" + deprecationRecommendationTimePoint + ") which is before its validFrom property (" + validFrom + ").");
+						throw new ComplianceException(sdInstance + " declares a deprecationRecommendationTimePoint property (" + deprecationRecommendationTimePoint + ") which is before its validFrom property (" + validFrom + ").");
 					}
 					
 					/*
@@ -1272,7 +1280,34 @@ public class PolicyCompletenessCompliance {
 		writeMessageToCompletenessReport("Entity Involvement instance is associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");		
 		
 		// check that instance of Business Entity exists
-		RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
+		RDFNode beInstance = oneVarOneSolutionQuery("{<" + eiInstance.toString() + "> usdl-core:ofBusinessEntity ?var}");
+		if(beInstance == null)
+		{
+			writeMessageToCompletenessReport("Error - Entity Involvement instance does not declare a ofBusinessEnity relation.");
+			throw new CompletenessException("Entity Involvement instance does not declare a ofBusinessEnity relation.");
+		}
+		
+		Integer beInstanceCount = countQuery("{<" + beInstance.toString() + "> a gr:BusinessEntity}");
+		if(beInstanceCount == 0)
+		{	
+			if(this.hasSuccessorOf(sInstance.toString()))
+			{	// a successor, look in Fuseki
+				Integer beInstanceCountInFuseki = countQuery("{<"+ beInstance.toString() + "> a gr:BusinessEntity}", fc.getModel());
+				if(beInstanceCountInFuseki == 0)
+				{
+					writeMessageToBrokerPolicyReport("Error - Business Entity instance was not found in the Fuseki.");
+					throw new CompletenessException("Business Entity instance was not found in the Fuseki.");
+				}
+			}
+			else
+			{	// root SD, problem...
+				writeMessageToBrokerPolicyReport("Error - Business Entity instance was not found in the Service Description.");
+				throw new CompletenessException("Business Entity instance was not found in the Service Description.");
+			}
+		}
+		writeMessageToBrokerPolicyReport("Business Entity instance was found.");
+		
+		/*RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
 		if(beInstance == null)
 		{
 			writeMessageToCompletenessReport("Error - No Business Entity instance was found in the Service Description.");
@@ -1287,7 +1322,7 @@ public class PolicyCompletenessCompliance {
 			writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 			throw new CompletenessException("Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 		}
-		writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");		
+		writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");*/		
 		
 		writeMessageToCompletenessReport("----------------");
 		writeMessageToCompletenessReport("Service Section:");
@@ -1635,6 +1670,32 @@ public class PolicyCompletenessCompliance {
 		}
 		writeMessageToBrokerPolicyReport("Service Model instance was found in the Broker Policy: " + smInstance.toString());
 		
+		// check that SM instance is connected to a Classification Dimension that exists
+		RDFNode cdInstance = oneVarOneSolutionQuery("{<"+ smInstance.toString() + "> usdl-core-cb:hasClassificationDimension ?var}");
+		Integer cdInstanceCount = countQuery("{<"+ cdInstance.toString() + "> a usdl-core-cb:ClassificationDimension}");
+		if(cdInstanceCount == 0)
+		{
+			// classification dimension not found in BP...
+			// is this a successor?
+			if(this.hasSuccessorOf(smInstance.toString()))
+			{	// yes
+				// check if it is inside the Fuseki
+				Integer cdInstanceCountInFuseki = countQuery("{<"+ cdInstance.toString() + "> a usdl-core-cb:ClassificationDimension}", fc.getModel());
+				{	// doesn't exist in Fuseki... problem
+					if(cdInstanceCountInFuseki == 0)
+					{
+						writeMessageToBrokerPolicyReport("Error - Broker Policy instance is referring to a classification dimension that does not exist in Fuseki (" + cdInstance.toString() + ").");
+						throw new BrokerPolicyException("Broker Policy instance is referring to a classification dimension that does not exist in Fuseki (" + cdInstance.toString() + ").");
+					}
+				}
+			}
+			else
+			{	// no
+				// throw exception, classification dimension should be here 
+				writeMessageToBrokerPolicyReport("Error - Broker Policy instance is referring to a classification dimension that does not exist in the BP (" + cdInstance.toString() + ").");
+				throw new BrokerPolicyException("Broker Policy instance is referring to a classification dimension that does not exist in the BP (" + cdInstance.toString() + ").");
+			}
+		}
 		// check that SM instance is connected to fc:rootConcept via the usdl-core-cb:hasClassificationDimension
 		/*Integer rcHasClassificationDimensionCount = countQuery("{<"+ smInstance.toString() + "> usdl-core-cb:hasClassificationDimension <" + FC + "rootConcept>}");
 		if(rcHasClassificationDimensionCount == 0)
@@ -1678,16 +1739,36 @@ public class PolicyCompletenessCompliance {
 		}
 		writeMessageToBrokerPolicyReport("Entity Involvement instance is associated with the intermediary instance of the class BusinessRole via the object property withBusinessRole.");
 
-		// check that single Business Entity instance exists for the Cloud Platform
-		Integer beInstanceCount = countQuery("{?var a gr:BusinessEntity}");
-		if(beInstanceCount == 0 || beInstanceCount > 1)
-		{	// more than one instances of business entity, throw exception
-			writeMessageToBrokerPolicyReport("Error - Not exactly one instance of Business Entity was found in the Broker Policy.");
-			throw new BrokerPolicyException("Not exactly one instance of Business Entity was found in the Broker Policy.");
+		RDFNode beInstance = oneVarOneSolutionQuery("{<"+ eiInstance.toString() + "> usdl-core:ofBusinessEntity ?var}");
+		if(beInstance == null)
+		{
+			writeMessageToBrokerPolicyReport("Error - Entity Involvement instance does not declare a ofBusinessEntity relation.");
+			throw new BrokerPolicyException("Entity Involvement instance does not declare a ofBusinessEntity relation.");
 		}
-		writeMessageToBrokerPolicyReport("Exactly one instance of Business Entity was found in the Broker Policy.");
+		writeMessageToBrokerPolicyReport("Entity Involvement instance declares a ofBusinessEntity relation with " + beInstance.toString() + ".");
 
-		RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
+		// check that single Business Entity instance exists for the Cloud Platform
+		Integer beInstanceCount = countQuery("{<"+ beInstance.toString() + "> a gr:BusinessEntity}");
+		if(beInstanceCount == 0)
+		{	
+			if(this.hasSuccessorOf(smInstance.toString()))
+			{	// a successor, look in Fuseki
+				Integer beInstanceCountInFuseki = countQuery("{<"+ beInstance.toString() + "> a gr:BusinessEntity}", fc.getModel());
+				if(beInstanceCountInFuseki == 0)
+				{
+					writeMessageToBrokerPolicyReport("Error - Business Entity instance was not found in the Fuseki.");
+					throw new BrokerPolicyException("Business Entity instance was not found in the Fuseki.");
+				}
+			}
+			else
+			{	// root BP, problem...
+				writeMessageToBrokerPolicyReport("Error - Business Entity instance was not found in the Broker Policy.");
+				throw new BrokerPolicyException("Business Entity instance was not found in the Broker Policy.");
+			}
+		}
+		writeMessageToBrokerPolicyReport("Business Entity instance was found.");
+
+		/*RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
 		if(beInstance == null)
 		{
 			writeMessageToBrokerPolicyReport("Error - Business Entity instance for the Cloud Platform does not exist in the Broker Policy.");
@@ -1702,7 +1783,7 @@ public class PolicyCompletenessCompliance {
 			writeMessageToBrokerPolicyReport("Error - Entity Involvement instance is not associated with the Business Entity instance via the ofBusinessEntity relation.");
 			throw new BrokerPolicyException("Entity Involvement instance is not associated with the Business Entity instance via the ofBusinessEntity relation.");
 		}
-		writeMessageToBrokerPolicyReport("Entity Involvement instance is associated with the Business Entity instance via the ofBusinessEntity relation.");
+		writeMessageToBrokerPolicyReport("Entity Involvement instance is associated with the Business Entity instance via the ofBusinessEntity relation.");*/
 		
 		// if BP data are in InputStream, reset it to reuse it
 		for(int i=0;i<bpFileData.length;i++)
@@ -2023,45 +2104,71 @@ public class PolicyCompletenessCompliance {
 		// Only one should not declare a gr:lesser which should be the maximum of all
 		for(String qualitativeQV:bp.getQualitativeValueMapWithInstances().keySet())
 		{
-			boolean maximumFound = false;
-			for(QualitativeValueInstance qualitativeQVInstance:((QualitativeValue)bp.getQualitativeValueMapWithInstances().get(qualitativeQV)).getInstanceMap().values())
-			{
-				RDFNode lesser = this.getLesser(qualitativeQVInstance.getUri());
-				if(lesser == null)
-				{	// this should be the maximum
-					if(maximumFound)
-					{
-						writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQV + " declares two maximum values.");
-						throw new BrokerPolicyException("Qualitative value " + qualitativeQV + " declares two maximum values.");						
-					}
-					maximumFound = true;
-				}
-				else
+			if(this.isOrderedQualitativeValueClass(qualitativeQV))
+			{	// ordered QVs
+				boolean maximumFound = false;
+				for(QualitativeValueInstance qualitativeQVInstance:((QualitativeValue)bp.getQualitativeValueMapWithInstances().get(qualitativeQV)).getInstanceMap().values())
 				{
-					// lesser should be of qualitativeQV type 
-					RDFNode lesserType = oneVarOneSolutionQuery("{<" + lesser.toString() + "> a ?var}");
-					if(!lesserType.toString().equals(qualitativeQV))
-					{
-						writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is not of the same type.");
-						throw new BrokerPolicyException("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is not of the same type.");						
+					RDFNode lesser = this.getLesser(qualitativeQVInstance.getUri());
+					if(lesser == null)
+					{	// this should be the maximum
+						if(maximumFound)
+						{
+							writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQV + " declares two maximum values.");
+							throw new BrokerPolicyException("Qualitative value " + qualitativeQV + " declares two maximum values.");						
+						}
+						maximumFound = true;
 					}
-					
-					// this lesser should not be lesser to more than one QVs
-					int numOfLessers = countQuery("{?anyValue gr:lesser <" + lesser.toString() + ">}");
-					if(numOfLessers > 1)
+					else
 					{
-						writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is also declared as lesser by another QV.");
-						throw new BrokerPolicyException("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is also declared as lesser by another QV.");						
+						// lesser should be of qualitativeQV type 
+						RDFNode lesserType = oneVarOneSolutionQuery("{<" + lesser.toString() + "> a ?var}");
+						if(!lesserType.toString().equals(qualitativeQV))
+						{
+							writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is not of the same type.");
+							throw new BrokerPolicyException("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is not of the same type.");						
+						}
+						
+						// this lesser should not be lesser to more than one QVs
+						int numOfLessers = countQuery("{?anyValue gr:lesser <" + lesser.toString() + ">}");
+						if(numOfLessers > 1)
+						{
+							writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is also declared as lesser by another QV.");
+							throw new BrokerPolicyException("Qualitative value " + qualitativeQVInstance.getUri() + " declares a lesser which is also declared as lesser by another QV.");						
+						}
 					}
 				}
-			}
-			
-			if(maximumFound == false)
-			{
-				writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQV + " does not declare a maximum value.");
-				throw new BrokerPolicyException("Qualitative value " + qualitativeQV + " does not declare a maximum value.");						
+				
+				if(maximumFound == false)
+				{
+					writeMessageToBrokerPolicyReport("Qualitative value " + qualitativeQV + " does not declare a maximum value.");
+					throw new BrokerPolicyException("Qualitative value " + qualitativeQV + " does not declare a maximum value.");						
+				}
 			}
 		}
+	}
+
+	private RDFNode getNonEqual(String qualitativeQVInstance) 
+	{
+		RDFNode nonEqual = oneVarOneSolutionQuery("{<" + qualitativeQVInstance + "> gr:nonEqual ?var}");
+		return nonEqual;
+	}
+
+	/*
+	 * If any number of gr:lesser are found then this is an ordered QV list
+	 */
+	private boolean isOrderedQualitativeValueClass(String qualitativeQV)
+	{
+		for(QualitativeValueInstance qualitativeQVInstance:((QualitativeValue)bp.getQualitativeValueMapWithInstances().get(qualitativeQV)).getInstanceMap().values())
+		{
+			RDFNode lesser = this.getLesser(qualitativeQVInstance.getUri());
+			if(lesser != null)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private RDFNode getLesser(String qualitativeQVInstance)
@@ -2164,7 +2271,7 @@ public class PolicyCompletenessCompliance {
 			}
 			
 			// For any k >= 1, validFrom(BP k ) must be greater or equal than the current date
-			if(this.dateIsBeforeNow(validFrom))
+			if(this.dateIsBeforeNowIgnoringTime(validFrom))
 			{
 				writeMessageToBrokerPolicyReport(bpInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
 				throw new BrokerPolicyException(bpInstance + " declares a validFrom property (" + validFrom + ") which is before current date.");
@@ -2483,6 +2590,20 @@ public class PolicyCompletenessCompliance {
 
 	private boolean dateIsBeforeNow(Date date) {
 		return date.before(new Date());
+	}
+
+	// including date equality
+	private boolean dateIsBeforeNowIgnoringTime(Date date) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date nowWithoutTime = null;
+		
+		try {
+			nowWithoutTime = sdf.parse(sdf.format(new Date()));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		return date.before(nowWithoutTime);
 	}
 
 	private Date getValidFrom(RDFNode instance) 
@@ -3031,8 +3152,7 @@ public class PolicyCompletenessCompliance {
 			}
 			writeMessageToCompletenessReport("Entity Involvement instance is associated via the withBusinessRole relation with the provider instance of the class BusinessRoles.");		
 			
-			// check that instance of Business Entity exists
-			RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
+			/*RDFNode beInstance = oneVarOneSolutionQuery("{?var a gr:BusinessEntity}");
 			if(beInstance == null)
 			{
 				writeMessageToCompletenessReport("Error - No Business Entity instance was found in the Service Description.");
@@ -3047,7 +3167,7 @@ public class PolicyCompletenessCompliance {
 				writeMessageToCompletenessReport("Error - Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 				throw new CompletenessException("Entity Involvement instance is not associated via the ofBusinessEnity relation with the Business Entity instance.");
 			}
-			writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");		
+			writeMessageToCompletenessReport("Entity Involvement instance is associated via the ofBusinessEnity relation with the Business Entity instance.");*/		
 			
 			writeMessageToCompletenessReport("----------------");
 			writeMessageToCompletenessReport("Service Section:");
@@ -3068,6 +3188,34 @@ public class PolicyCompletenessCompliance {
 				RDFNode node = oneVarOneSolutionQuery("{?var rdf:type usdl-core:Service}");
 				si_uri = node.toString();
 			}
+			
+			// check that instance of Business Entity exists
+			RDFNode beInstance = oneVarOneSolutionQuery("{<" + eiInstance.toString() + "> usdl-core:ofBusinessEntity ?var}");
+			if(beInstance == null)
+			{
+				writeMessageToCompletenessReport("Error - Entity Involvement instance does not declare a ofBusinessEnity relation.");
+				throw new CompletenessException("Entity Involvement instance does not declare a ofBusinessEnity relation.");
+			}
+			
+			Integer beInstanceCount = countQuery("{<" + beInstance.toString() + "> a gr:BusinessEntity}");
+			if(beInstanceCount == 0)
+			{	
+				if(this.hasSuccessorOf(si_uri))
+				{	// a successor, look in Fuseki
+					Integer beInstanceCountInFuseki = countQuery("{<"+ beInstance.toString() + "> a gr:BusinessEntity}", fc.getModel());
+					if(beInstanceCountInFuseki == 0)
+					{
+						writeMessageToBrokerPolicyReport("Error - Business Entity instance was not found in the Fuseki.");
+						throw new CompletenessException("Business Entity instance was not found in the Fuseki.");
+					}
+				}
+				else
+				{	// root SD, problem...
+					writeMessageToBrokerPolicyReport("Error - Business Entity instance was not found in the Service Description.");
+					throw new CompletenessException("Business Entity instance was not found in the Service Description.");
+				}
+			}
+			writeMessageToBrokerPolicyReport("Business Entity instance was found.");
 			
 			// check that Service Individual instance is associated via a hasEntityInvolvement relation with the Entity Involvement instance
 			Integer heiAssociationsCount = countQuery("{<" + si_uri + "> usdl-core:hasEntityInvolvement <" + eiInstance.toString() + ">}");
@@ -3491,8 +3639,13 @@ public class PolicyCompletenessCompliance {
 			Integer cdCount = countQuery("{<" + cdsNodes[i].toString() + "> rdf:type <" + USDL_CORE_CB + "ClassificationDimension>}");
 			if(cdCount == 0)
 			{
-				writeMessageToCompletenessReport("Error - Classification dimension " + cdsNodes[i].toString() + " does not exist.");
-				throw new CompletenessException("Classification dimension " + cdsNodes[i].toString() + " does not exist.");
+				// not found in BP or SD, find in triple store
+				Integer cdCountInFuseki = countQuery("{<" + cdsNodes[i].toString() + "> rdf:type <" + USDL_CORE_CB + "ClassificationDimension>}", fc.getModel());
+				if(cdCountInFuseki == 0)
+				{
+					writeMessageToCompletenessReport("Error - Classification dimension " + cdsNodes[i].toString() + " does not exist.");
+					throw new CompletenessException("Classification dimension " + cdsNodes[i].toString() + " does not exist.");
+				}
 			}
 			writeMessageToCompletenessReport("Found classification dimension " + cdsNodes[i].toString() + ".");
 		}
@@ -4416,6 +4569,26 @@ public class PolicyCompletenessCompliance {
 		return num;
 	}
 
+	private Integer countQuery(String subQuery, Model model) {
+		QueryExecution qexec = returnQueryExecObject("SELECT (COUNT(*) as ?count) WHERE "
+				+ subQuery, model);
+		Integer num = null;
+		try {
+			ResultSet countResultSet = qexec.execSelect();
+
+			while (countResultSet.hasNext()) {
+				QuerySolution soln = countResultSet.nextSolution();
+				RDFNode countNode = soln.get("?count");
+
+				num = countNode.asLiteral().getInt();
+			}
+		} finally {
+			qexec.close();
+		}
+
+		return num;
+	}
+
 	private RDFNode oneVarOneSolutionQuery(String subQuery) {
 		QueryExecution qexec = returnQueryExecObject("SELECT ?var WHERE "
 				+ subQuery);
@@ -4476,6 +4649,31 @@ public class PolicyCompletenessCompliance {
 		return qexec;
 	}
 	
+	private QueryExecution returnQueryExecObject(String coreQuery, Model model) {
+		StringBuffer queryStr = new StringBuffer();
+		// Establish Prefixes
+
+		queryStr.append("PREFIX owl: <http://www.w3.org/2002/07/owl#>");
+		queryStr.append("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>");
+		queryStr.append("PREFIX xml: <http://www.w3.org/XML/1998/namespace>");
+		queryStr.append("PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>");
+		queryStr.append("PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>");
+		queryStr.append("PREFIX usdl-core: <http://www.linked-usdl.org/ns/usdl-core#>");
+		queryStr.append("PREFIX usdl-sla: <http://www.linked-usdl.org/ns/usdl-sla#>");
+		queryStr.append("PREFIX usdl-core-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker#>");
+		queryStr.append("PREFIX usdl-sla-cb: <http://www.linked-usdl.org/ns/usdl-core/cloud-broker-sla#>");
+		//queryStr.append("PREFIX brokerpolicy: <http://www.broker-cloud.eu/d043567/linked-usdl-ontologies/SAP-HANA-Cloud-Apps-Broker/2014/01/brokerpolicy#>");
+		//queryStr.append("PREFIX cas: <http://www.broker-cloud.eu/service-descriptions/CAS/broker#>");
+		queryStr.append("PREFIX gr: <http://purl.org/goodrelations/v1#>");
+		//queryStr.append("PREFIX fc: <http://www.broker-cloud.eu/service-descriptions/CAS/categories#>");
+
+		queryStr.append(coreQuery);
+
+		Query query = QueryFactory.create(queryStr.toString());
+		QueryExecution qexec = QueryExecutionFactory.create(query, model);
+
+		return qexec;
+	}
 	// Write a String message to a TeeOutputStream
 	private void writeMessageToTee(TeeOutputStream teeos, String message)
 	{
