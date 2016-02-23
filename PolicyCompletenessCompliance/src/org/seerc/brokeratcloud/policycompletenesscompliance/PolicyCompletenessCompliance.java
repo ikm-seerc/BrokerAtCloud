@@ -1040,14 +1040,14 @@ public class PolicyCompletenessCompliance {
 					}
 				
 					/*
-					For any k > 1, deprecationRecommendationTimePoint(SD k ) >
+					For any k > 1, deprecationRecommendationTimePoint(SD k ) >=
 					validFrom(SD k ) (i.e. the deprecation recommendation time point for an SD
-					should be greater than the date validFrom date of the successor SD).
+					should be greater or equal than the validFrom date of the successor SD).
 					 */
-					if(!deprecationRecommendationTimePoint.after(validFrom))
+					if(deprecationRecommendationTimePoint.before(validFrom))
 					{
-						writeMessageToComplianceReport(sdInstance + " declares a deprecationRecommendationTimePoint property (" + deprecationRecommendationTimePoint + ") which is not after its validFrom property (" + validFrom + ").");
-						throw new ComplianceException(sdInstance + " declares a deprecationRecommendationTimePoint property (" + deprecationRecommendationTimePoint + ") which is not after its validFrom property (" + validFrom + ").");
+						writeMessageToComplianceReport(sdInstance + " declares a deprecationRecommendationTimePoint property (" + deprecationRecommendationTimePoint + ") which is before its validFrom property (" + validFrom + ").");
+						throw new ComplianceException(sdInstance + " declares a deprecationRecommendationTimePoint property (" + deprecationRecommendationTimePoint + ") which is before its validFrom property (" + validFrom + ").");
 					}
 					
 					/*
